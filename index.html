@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وجباتي - Wajabaty</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --accent-pink: #ff3b5c;
+            --accent-green: #2ed573;
+            --accent-yellow: #ffa502;
+            --border-color: rgba(255,255,255,0.08);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+
+        /* Top Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 5px 0;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, var(--accent-pink), #ff6b81);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(255, 59, 92, 0.3);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .live-status {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--accent-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Dynamic Banner */
+        .promo-banner {
+            background: linear-gradient(135deg, var(--accent-pink), #ff5277);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 20px rgba(255, 59, 92, 0.35);
+            display: block;
+        }
+
+        .promo-banner h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .promo-banner p {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        /* شريط صور المطاعم المتحرك تحت البنر */
+        .restaurants-ticker {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .ticker-track {
+            display: inline-flex;
+            gap: 10px;
+            animation: scrollTicker 15s linear infinite;
+        }
+
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        .ticker-item {
+            width: 90px;
+            height: 55px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #252525;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .ticker-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes scrollTicker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Search Bar & Button */
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 14px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-btn {
+            background-color: var(--accent-pink);
+            color: white;
+            border: none;
+            padding: 0 18px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .search-btn:active {
+            opacity: 0.8;
+        }
+
+        /* Filter Pills */
+        .filters-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .filters-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .filter-pill.active-region {
+            background: var(--accent-pink);
+            color: white;
+            border-color: var(--accent-pink);
+            font-weight: bold;
+        }
+
+        .filter-pill.active-restaurant {
+            background: var(--text-color);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        .filter-pill.active-category {
+            background: var(--accent-green);
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Meals Grid */
+        .meals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .meal-card {
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .meal-img-container {
+            position: relative;
+            width: 100%;
+            height: 130px;
+            background: #252525;
+        }
+
+        .meal-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .region-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .meal-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .meal-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .meal-restaurant {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .meal-delivery {
+            font-size: 11px;
+            color: var(--accent-yellow);
+            margin-bottom: 8px;
+        }
+
+        .meal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .meal-price {
+            color: var(--accent-green);
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .add-btn {
+            background-color: var(--accent-pink);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Floating Cart Bar */
+        .floating-cart {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 456px;
+            background: linear-gradient(135deg, var(--accent-green), #26af5f);
+            color: black;
+            padding: 14px 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 15px;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-card h3 {
+            color: var(--accent-yellow);
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #252525;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            background: #252525;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .gps-btn {
+            background: #333;
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .modal-btn {
+            background: var(--accent-pink);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .close-modal-btn {
+            background: #333;
+            color: white;
+            margin-top: 8px;
+        }
+
+        .admin-section {
+            background: var(--card-bg);
+            border: 1px dashed var(--accent-pink);
+            border-radius: 14px;
+            padding: 15px;
+            margin-top: 25px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- البنر المتحرك الافتراضي -->
+    <div id="promo-banner" class="promo-banner">
+        <h3 id="banner-title">🍔 وجباتي بلا حدود</h3>
+        <p id="banner-desc">اطلب من مطاعم الكرخ والرصافة بسرعة ودقة عالية</p>
+    </div>
+
+    <!-- شريط صور المطاعم المتحرك -->
+    <div class="restaurants-ticker">
+        <div class="ticker-track">
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=300" alt="مطعم 1"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=300" alt="مطعم 2"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=300" alt="مطعم 3"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300" alt="مطعم 4"></div>
+            <!-- تكرار للحركة المستمرة السلسة -->
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=300" alt="مطعم 1"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=300" alt="مطعم 2"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=300" alt="مطعم 3"></div>
+            <div class="ticker-item"><img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300" alt="مطعم 4"></div>
+        </div>
+    </div>
+
+    <!-- الهيدر العلوي (انقر 5 مرات على شعار Wj لفتح لوحة الأدمن) -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-badge" onclick="handleLogoTap()">Wj</div>
+            <div class="logo-text">وجباتي</div>
+        </div>
+        <div class="live-status">
+            <span>●</span> مباشر
+        </div>
+    </div>
+
+    <!-- شريط البحث المخصص مع زر البحث -->
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث عن اسم المطعم أو الوجبة..." onkeyup="filterMeals()">
+        <button class="search-btn" onclick="filterMeals()">بحث</button>
+    </div>
+
+    <!-- فلاتر المناطق -->
+    <div class="filters-scroll">
+        <div class="filter-pill active-region" onclick="setRegion('all', this)">كل بغداد / All Baghdad</div>
+        <div class="filter-pill" onclick="setRegion('الكرخ', this)">الكرخ / Karkh</div>
+        <div class="filter-pill" onclick="setRegion('الرصافة', this)">الرصافة / Rusafa</div>
+    </div>
+
+    <!-- فلاتر المطاعم -->
+    <div class="filters-scroll">
+        <div class="filter-pill active-restaurant" onclick="setRestaurant('all', this)">كل المطاعم / All Restaurants</div>
+        <div class="filter-pill" onclick="setRestaurant('جيكي بركر', this)">جيكي بركر / Geeky Burger</div>
+        <div class="filter-pill" onclick="setRestaurant('دجاج الباشا الشهير', this)">دجاج الباشا الشهير / Al-Pasha</div>
+        <div class="filter-pill" onclick="setRestaurant('بوراك', this)">بوراك / Burak</div>
+        <div class="filter-pill" onclick="setRestaurant('بوكس برجر', this)">بوكس برجر / Box Burger</div>
+    </div>
+
+    <!-- فلاتر الأصناف ثنائية اللغة (عربي / إنجليزي) -->
+    <div class="filters-scroll">
+        <div class="filter-pill active-category" onclick="setCategory('all', this)">كل الأصناف / All Categories</div>
+        <div class="filter-pill" onclick="setCategory('burger', this)">برجر / Burger</div>
+        <div class="filter-pill" onclick="setCategory('eastern', this)">شرقي ومشويات / Eastern & Grills</div>
+        <div class="filter-pill" onclick="setCategory('pizza', this)">بيتزا وسريع / Pizza & Fast Food</div>
+    </div>
+
+    <!-- شبكة الوجبات -->
+    <div class="meals-grid" id="mealsContainer">
+        <div class="meal-card" data-region="الكرخ" data-restaurant="جيكي بركر" data-category="burger">
+            <div class="meal-img-container">
+                <span class="region-badge">الكرخ</span>
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500" alt="برجر" class="meal-img">
+            </div>
+            <div class="meal-body">
+                <div>
+                    <div class="meal-title">برجر دجاج مقرمش</div>
+                    <div class="meal-restaurant">جيكي بركر • (#2)</div>
+                    <div class="meal-delivery">توصيل: 1,000 د.ع</div>
+                </div>
+                <div class="meal-footer">
+                    <div class="meal-price">2,500 د.ع</div>
+                    <button class="add-btn" onclick="addToCart('برجر دجاج مقرمش', 2500, 'جيكي بركر', 1000)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card" data-region="الكرخ" data-restaurant="جيكي بركر" data-category="burger">
+            <div class="meal-img-container">
+                <span class="region-badge">الكرخ</span>
+                <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=500" alt="برجر" class="meal-img">
+            </div>
+            <div class="meal-body">
+                <div>
+                    <div class="meal-title">برجر لحم كلاسيك</div>
+                    <div class="meal-restaurant">جيكي بركر • (#1)</div>
+                    <div class="meal-delivery">توصيل: 1,000 د.ع</div>
+                </div>
+                <div class="meal-footer">
+                    <div class="meal-price">2,500 د.ع</div>
+                    <button class="add-btn" onclick="addToCart('برجر لحم كلاسيك', 2500, 'جيكي بركر', 1000)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card" data-region="الرصافة" data-restaurant="دجاج الباشا الشهير" data-category="eastern">
+            <div class="meal-img-container">
+                <span class="region-badge">الرصافة</span>
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500" alt="دجاج" class="meal-img">
+            </div>
+            <div class="meal-body">
+                <div>
+                    <div class="meal-title">دجاج مشوي عائلي</div>
+                    <div class="meal-restaurant">دجاج الباشا الشهير • (#3)</div>
+                    <div class="meal-delivery">توصيل: 2,000 د.ع</div>
+                </div>
+                <div class="meal-footer">
+                    <div class="meal-price">12,000 د.ع</div>
+                    <button class="add-btn" onclick="addToCart('دجاج مشوي عائلي', 12000, 'دجاج الباشا الشهير', 2000)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="meal-card" data-region="الكرخ" data-restaurant="بوكس برجر" data-category="pizza">
+            <div class="meal-img-container">
+                <span class="region-badge">الكرخ</span>
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" alt="بيتزا" class="meal-img">
+            </div>
+            <div class="meal-body">
+                <div>
+                    <div class="meal-title">بيتزا مارغريتا كبير</div>
+                    <div class="meal-restaurant">بوكس برجر • (#4)</div>
+                    <div class="meal-delivery">توصيل: 1,500 د.ع</div>
+                </div>
+                <div class="meal-footer">
+                    <div class="meal-price">10,000 د.ع</div>
+                    <button class="add-btn" onclick="addToCart('بيتزا مارغريتا كبير', 10000, 'بوكس برجر', 1500)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم الأدمن المخفية -->
+    <div class="admin-section" id="adminSection">
+        <h3>👑 إدارة البنر الذكي (محمي)</h3>
+        <div class="form-group">
+            <label>عنوان البنر:</label>
+            <input type="text" id="adminTitle" placeholder="عنوان جديد...">
+        </div>
+        <div class="form-group">
+            <label>وصف البنر:</label>
+            <input type="text" id="adminDesc" placeholder="وصف جديد...">
+        </div>
+        <div class="form-group">
+            <label>مدة العرض:</label>
+            <select id="adminDuration">
+                <option value="1">ساعة واحدة</option>
+                <option value="24">24 ساعة</option>
+            </select>
+        </div>
+        <button class="modal-btn" onclick="updateBanner()">حفظ ونشر البنر</button>
+        <button class="modal-btn close-modal-btn" onclick="lockAdmin()">إغلاق اللوحة</button>
+    </div>
+
+    <!-- زر السلة العائم -->
+    <div class="floating-cart" id="floatingCart" style="display: none;" onclick="openCartModal()">
+        <span>🛒 سلة المشتريات (<span id="cartCount">0</span>)</span>
+        <span><span id="cartTotal">0</span> د.ع</span>
+    </div>
+
+    <!-- نافذة تفاصيل السلة -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-card">
+            <h3>🛒 سلة الطلبات</h3>
+            <div id="cartItemsList" style="margin-bottom: 15px; max-height: 220px; overflow-y: auto;"></div>
+            <div style="font-weight: bold; margin-bottom: 5px; text-align: left;">المجموع الفرعي: <span id="modalCartSubtotal">0</span> د.ع</div>
+            <div style="font-weight: bold; margin-bottom: 15px; text-align: left; color: var(--accent-yellow);">إجمالي التوصيل: <span id="modalDeliveryTotal">0</span> د.ع</div>
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 15px; text-align: left; color: var(--accent-green);">المجموع الكلي: <span id="modalCartTotal">0</span> د.ع</div>
+            <button class="modal-btn" onclick="proceedToCheckout()">إتمام الطلب وتحديد الموقع</button>
+            <button class="modal-btn close-modal-btn" onclick="closeCartModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة إتمام الطلب والبيانات والموقع الدقيق -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-card">
+            <h3>📍 معلومات الزبون والتوصيل</h3>
+            <div class="form-group">
+                <label>اسم الزبون:</label>
+                <input type="text" id="clientName" placeholder="ادخل اسمك الكامل...">
+            </div>
+            <div class="form-group">
+                <label>رقم هاتف الزبون:</label>
+                <input type="tel" id="clientPhone" placeholder="07xxxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>الخصم المخصص لهذا الطلب (إن وجد بالدينار):</label>
+                <input type="number" id="clientDiscount" placeholder="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>العنوان / المكان (فحص مناطق التوصيل):</label>
+                <input type="text" id="clientAddress" placeholder="اكتب منطقتك هنا..." onkeyup="checkDeliveryArea(this.value)">
+                <div id="deliveryWarning" style="color: var(--accent-pink); font-size: 12px; margin-top: 5px; display: none; font-weight: bold;">⚠️ عذراً، لا يوجد توصيل لهذه المنطقة!</div>
+            </div>
+            <div class="form-group">
+                <label>الموقع الدقيق (GPS):</label>
+                <button class="gps-btn" onclick="getLocationGPS()">📍 اضغط لجلب موقعي الحالي بدقة</button>
+                <input type="text" id="clientGps" placeholder="لم يتم تحديد الموقع بعد" readonly style="margin-top: 5px; color: var(--accent-green); font-size: 11px;">
+            </div>
+            <button class="modal-btn" onclick="submitFinalOrder()">تأكيد وإرسال الطلب النهائي</button>
+            <button class="modal-btn close-modal-btn" onclick="closeCheckoutModal()">رجوع</button>
+        </div>
+    </div>
+
+    <!-- نافذة نجاح الطلب -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card" style="text-align: center;">
+            <h3 style="color: var(--accent-green);">✅ تم إرسال طلبك بنجاح!</h3>
+            <p id="successDetails" style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px;"></p>
+            <button class="modal-btn" onclick="finishOrder()">حسناً</button>
+        </div>
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('wj_cart')) || [];
+
+        function saveCart() {
+            localStorage.setItem('wj_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function addToCart(name, price, restaurant, deliveryFee) {
+            let existingItem = cart.find(item => item.name === name && item.restaurant === restaurant);
+            if (existingItem) {
+                existingItem.qty += 1;
+            } else {
+                cart.push({ name, price, restaurant, deliveryFee, qty: 1 });
+            }
+            saveCart();
+            alert(`تم إضافة (${name}) إلى السلة 🛒`);
+        }
+
+        function updateCartUI() {
+            const floatingCart = document.getElementById('floatingCart');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+
+            let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let totalDelivery = cart.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
+            let finalPrice = subtotal + totalDelivery;
+
+            cartCount.innerText = totalItems;
+            cartTotal.innerText = finalPrice.toLocaleString();
+
+            if (totalItems > 0) {
+                floatingCart.style.display = 'flex';
+            } else {
+                floatingCart.style.display = 'none';
+            }
+        }
+
+        function openCartModal() {
+            const list = document.getElementById('cartItemsList');
+            const modalSubtotal = document.getElementById('modalCartSubtotal');
+            const modalDelivery = document.getElementById('modalDeliveryTotal');
+            const modalTotal = document.getElementById('modalCartTotal');
+            list.innerHTML = '';
+
+            if (cart.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted);">السلة فارغة حالياً</p>';
+                modalSubtotal.innerText = '0';
+                modalDelivery.innerText = '0';
+                modalTotal.innerText = '0';
+                return;
+            }
+
+            let subtotal = 0;
+            let totalDelivery = 0;
+            cart.forEach((item, index) => {
+                let itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+                totalDelivery += (item.deliveryFee || 0);
+                list.innerHTML += `
+                    <div class="cart-item-row">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small style="color:var(--text-muted);">${item.restaurant} • ${item.price} د.ع</small>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button onclick="changeQty(${index}, -1)" style="background:#333; color:white; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer;">-</button>
+                            <span>${item.qty}</span>
+                            <button onclick="changeQty(${index}, 1)" style="background:#333; color:white; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer;">+</button>
+                            <button onclick="removeFromCart(${index})" style="background:var(--accent-pink); color:white; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; margin-right:4px;" title="حذف">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+            modalSubtotal.innerText = subtotal.toLocaleString();
+            modalDelivery.innerText = totalDelivery.toLocaleString();
+            modalTotal.innerText = (subtotal + totalDelivery).toLocaleString();
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            saveCart();
+            openCartModal();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            openCartModal();
+        }
+
+        function closeCartModal() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            closeCartModal();
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function checkDeliveryArea(val) {
+            const warning = document.getElementById('deliveryWarning');
+            const restrictedAreas = ["خارج بغداد", "المحافظات", "البصرة", "الموصل", "اربيل", "السليمانية", "الانبار"];
+            let isRestricted = restrictedAreas.some(area => val.includes(area));
+            if (isRestricted && val.trim() !== "") {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        let userGpsString = "لم يتم تحديد الموقع";
+        function getLocationGPS() {
+            if (navigator.geolocation) {
+                alert("جاري تحديد موقعك بدقة عبر الـ GPS...");
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        let lat = position.coords.latitude;
+                        let lon = position.coords.longitude;
+                        userGpsString = `خط العرض: ${lat.toFixed(5)}, خط الطول: ${lon.toFixed(5)}`;
+                        document.getElementById('clientGps').value = userGpsString;
+                        alert("✅ تم تحديد موقعك الجغرافي بنجاح!");
+                    },
+                    (error) => {
+                        alert("❌ تعذّر جلب الموقع، تأكد من تفعيل الـ GPS في هاتفك.");
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert("المتصفح لا يدعم تحديد الموقع الجغرافي.");
+            }
+        }
+
+        function submitFinalOrder() {
+            let name = document.getElementById('clientName').value;
+            let phone = document.getElementById('clientPhone').value;
+            let address = document.getElementById('clientAddress').value;
+            let discount = parseFloat(document.getElementById('clientDiscount').value) || 0;
+
+            if (!name || !phone || !address) {
+                alert("الرجاء ملء حقول الاسم، الهاتف، والعنوان!");
+                return;
+            }
+
+            const restrictedAreas = ["خارج بغداد", "المحافظات", "البصرة", "الموصل", "اربيل", "السليمانية", "الانبار"];
+            if (restrictedAreas.some(area => address.includes(area))) {
+                alert("عذراً، لا يوجد توصيل لهذه المنطقة!");
+                return;
+            }
+
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let totalDelivery = cart.reduce((sum, item) => sum + (item.deliveryFee || 0), 0);
+            let finalTotal = Math.max(0, (subtotal + totalDelivery) - discount);
+
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Baghdad' };
+            const dateTimeStr = new Intl.DateTimeFormat('ar-IQ', options).format(now);
+
+            let itemsSummary = cart.map(i => `${i.name} (×${i.qty})`).join(', ');
+
+            let details = `👤 اسم الزبون: ${name}<br>📞 الهاتف: ${phone}<br>🏠 العنوان: ${address}<br>📍 الموقع الدقيق: ${userGpsString}<br>🛒 الوجبات: ${itemsSummary}<br>🏷️ المجموع الفرعي: ${subtotal.toLocaleString()} د.ع<br>🛵 التوصيل: ${totalDelivery.toLocaleString()} د.ع<br>🎁 الخصم المخصص: ${discount.toLocaleString()} د.ع<br>💰 المجموع النهائي: ${finalTotal.toLocaleString()} د.ع<br>📅 الوقت والتاريخ: ${dateTimeStr}`;
+
+            document.getElementById('successDetails').innerHTML = details;
+            document.getElementById('checkoutModal').style.display = 'none';
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function finishOrder() {
+            cart = [];
+            saveCart();
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // الأدمن السري (5 نقرات على شعار Wj)
+        let logoClicks = 0, logoTimer = null;
+        function handleLogoTap() {
+            logoClicks++;
+            clearTimeout(logoTimer);
+            logoTimer = setTimeout(() => { logoClicks = 0; }, 1200);
+            if (logoClicks >= 5) {
+                logoClicks = 0;
+                let pass = prompt("أدخل كلمة سر لوحة التحكم:");
+                if (pass === "198722") {
+                    document.getElementById('adminSection').style.display = 'block';
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                } else if (pass !== null) { alert("❌ كلمة السر غير صحيحة!"); }
+            }
+        }
+
+        function lockAdmin() { document.getElementById('adminSection').style.display = 'none'; }
+
+        function checkBanner() {
+            const banner = document.getElementById('promo-banner');
+            const titleEl = document.getElementById('banner-title');
+            const descEl = document.getElementById('banner-desc');
+            const savedTitle = localStorage.getItem('wj_banner_title');
+            const savedDesc = localStorage.getItem('wj_banner_desc');
+            const expiry = localStorage.getItem('wj_banner_expiry');
+            const now = new Date().getTime();
+
+            if (savedTitle && expiry && now < parseInt(expiry)) {
+                titleEl.innerText = savedTitle;
+                descEl.innerText = savedDesc || '';
+                banner.style.display = 'block';
+            } else if (!expiry) {
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        function updateBanner() {
+            const title = document.getElementById('adminTitle').value;
+            const desc = document.getElementById('adminDesc').value;
+            const hours = parseInt(document.getElementById('adminDuration').value);
+            if (!title) { alert('ادخل العنوان'); return; }
+            localStorage.setItem('wj_banner_title', title);
+            localStorage.setItem('wj_banner_desc', desc);
+            localStorage.setItem('wj_banner_expiry', new Date().getTime() + (hours * 3600 * 1000));
+            alert('تم نشر البنر بنجاح!');
+            checkBanner();
+        }
+
+        let currentRegion = 'all', currentRestaurant = 'all', currentCategory = 'all';
+        function setRegion(r, el) { currentRegion = r; updatePills(el, 1); filterMeals(); }
+        function setRestaurant(rest, el) { currentRestaurant = rest; updatePills(el, 2); filterMeals(); }
+        function setCategory(cat, el) { currentCategory = cat; updatePills(el, 3); filterMeals(); }
+        
+        function updatePills(el, index) {
+            document.querySelectorAll(`.filters-scroll:nth-of-type(${index}) .filter-pill`).forEach(p => p.classList.remove('active-region', 'active-restaurant', 'active-category'));
+            if(index === 1) el.classList.add('active-region');
+            else if(index === 2) el.classList.add('active-restaurant');
+            else el.classList.add('active-category');
+        }
+
+        function filterMeals() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.meal-card').forEach(card => {
+                let match = (currentRegion === 'all' || card.dataset.region === currentRegion) &&
+                            (currentRestaurant === 'all' || card.dataset.restaurant === currentRestaurant) &&
+                            (currentCategory === 'all' || card.dataset.category === currentCategory) &&
+                            (card.querySelector('.meal-title').innerText.toLowerCase().includes(query) || card.dataset.restaurant.toLowerCase().includes(query));
+                card.style.display = match ? 'flex' : 'none';
+            });
+        }
+
+        window.onload = function() {
+            checkBanner();
+            updateCartUI();
+        };
+    </script>
+</body>
+</html>
