@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>وجباتي - Wajabaty VIP</title>
 <style>
 :root {
@@ -838,8 +841,8 @@ body {
 </div>
 
 <script>
-// الرابط السحابي الجديد الفعّال المربوط بشيتك
-const API_URL = 'https://script.google.com/macros/s/AKfycbzxpK-JvmI9PabDEi2oeORVnzLWQUF1RFtUmuB9cMXIA5LM93qWNKpsELy1R7aGxBP-3A/exec';
+// الرابط السحابي الجديد الفعّال المربوط بشيتك مباشرة
+const API_URL = 'https://script.google.com/macros/s/AKfycbxNIMONP1WQR00SfSH7kNp8fSdkqSxZXGgLEOSxBR7gbYoxHu2Q8f3z6IwkXGE7_diI/exec';
 const GENERIC_SALAD_KEYWORD = 'photo-1546069901-ba9599a7e63c';
 
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
@@ -1114,6 +1117,15 @@ function applyMealOverrides() {
 
 function loadPersistedData() {
   try {
+    const savedR = localStorage.getItem('wj_custom_rests');
+    if (savedR) {
+      const arr = JSON.parse(savedR);
+      arr.forEach(r => { if (!RESTS.includes(r)) RESTS.push(r); });
+    }
+    const savedPh = localStorage.getItem('wj_custom_rest_phones');
+    if (savedPh) {
+      REST_PHONES = { ...REST_PHONES, ...JSON.parse(savedPh) };
+    }
     const savedCart = localStorage.getItem('wj_cart');
     if (savedCart) cart = JSON.parse(savedCart);
     const savedCoupon = localStorage.getItem('wj_applied_coupon');
@@ -1132,8 +1144,10 @@ function money(num) {
 }
 
 function buildRestaurantsBar() {
-  const rests = ["الكل", ...new Set(allMeals.map(m => m.rest).filter(Boolean))];
+  const allR = [...RESTS, ...allMeals.map(m => m.rest).filter(Boolean)];
+  const rests = ["الكل", ...new Set(allR)];
   const rBar = document.getElementById("restaurantsBar");
+  if (!rBar) return;
   rBar.innerHTML = rests.map(r => `
     <div class="pill ${r === selectedRest ? 'active-white' : ''}" onclick="setRestaurant('${r}', this)">
       ${r === 'الكل' ? 'كل المطاعم' : r}
@@ -1143,6 +1157,7 @@ function buildRestaurantsBar() {
 
 function buildCategoriesBar() {
   const cBar = document.getElementById("categoriesBar");
+  if (!cBar) return;
   let pool = (selectedRest === "الكل") ? allMeals : allMeals.filter(m => m.rest === selectedRest);
   const cats = ["الكل", ...new Set(pool.map(m => m.cat).filter(Boolean))];
   cBar.innerHTML = cats.map(c => `
@@ -1195,7 +1210,7 @@ function renderMeals() {
   grid.innerHTML = filtered.map(m => `
     <div class="meal-card">
       <div class="card-img-wrap">
-        <img src="${m.img}" alt="${m.name}" loading="lazy" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
+        <img src="${resolveMealImage(m)}" alt="${m.name}" loading="lazy" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
         <span class="zone-badge">${m.zone || 'بغداد'}</span>
       </div>
       <div class="card-body">
@@ -1772,12 +1787,19 @@ function addNewRestaurant() {
   let cleanP = phone.replace(/\D/g, '');
   if (cleanP.startsWith('07')) cleanP = '964' + cleanP.slice(1);
 
-  if (!RESTS.includes(name)) RESTS.unshift(name);
+  if (!RESTS.includes(name)) RESTS.push(name);
   REST_PHONES[name] = cleanP;
+
+  try {
+    localStorage.setItem('wj_custom_rests', JSON.stringify(RESTS));
+    localStorage.setItem('wj_custom_rest_phones', JSON.stringify(REST_PHONES));
+  } catch(e) {}
 
   buildRestaurantsBar();
   populateAdminDropdowns();
   updateAdminStats();
+
+  sendToCloud({ action: "add_restaurant", name: name, phone: cleanP });
 
   document.getElementById("newRestName").value = "";
   document.getElementById("newRestPhone").value = "";
@@ -1872,6 +1894,11 @@ function addNewMealLocally() {
     return;
   }
 
+  if (!RESTS.includes(rest)) {
+    RESTS.push(rest);
+    try { localStorage.setItem('wj_custom_rests', JSON.stringify(RESTS)); } catch(e) {}
+  }
+
   const newMeal = {
     id: Date.now(),
     name,
@@ -1888,14 +1915,17 @@ function addNewMealLocally() {
   // حفظ في ذاكرة الهاتف لضمان عدم الاختفاء
   try {
     let localCustom = JSON.parse(localStorage.getItem('wj_custom_added_meals') || '[]');
+    localCustom = localCustom.filter(m => String(m.id) !== String(newMeal.id));
     localCustom.unshift(newMeal);
     localStorage.setItem('wj_custom_added_meals', JSON.stringify(localCustom));
   } catch(e) {}
 
-  // إرسال مباشر للشيت لتعميمها على جميع الأجهزة
+  // إرسال مباشر للشيت لتعميمها على جميع الأجهزة فوراً
   sendToCloud({ action: "add_meal", meal: newMeal });
 
   saveMealOverridesToStorage();
+  buildRestaurantsBar();
+  buildCategoriesBar();
   renderMeals();
   updateAdminStats();
   filterQuickMeals();
@@ -1920,7 +1950,7 @@ function filterQuickMeals() {
 
   box.innerHTML = filtered.map(m => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #292d38; gap:8px;">
-      <img src="${m.img}" style="width:42px; height:42px; border-radius:10px; object-fit:cover; border:1px solid #333;" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
+      <img src="${resolveMealImage(m)}" style="width:42px; height:42px; border-radius:10px; object-fit:cover; border:1px solid #333;" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
       <div style="flex:1; min-width:0;">
         <div style="font-weight:800; color:#fff; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
         <div style="color:var(--accent-orange); font-size:10px;">${m.rest} | <span style="color:var(--accent-green); font-weight:800;">${money(m.price)}</span></div>
