@@ -1972,6 +1972,54 @@ window.addEventListener("focus", syncQuietlyWithSheet);
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) syncQuietlyWithSheet();
 });
+  // ==========================================
+// 🚀 ربط فايربيس السحابي المباشر والسريع
+// ==========================================
+const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
+
+// 1. دالة حفظ وتحديث الوجبات فوراً في فايربيس
+sendToCloud = function() {
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals)
+  })
+  .then(() => console.log("✅ تم الحفظ في Firebase بنجاح"))
+  .catch(err => console.error("❌ خطأ بحفظ فايربيس:", err));
+};
+
+// 2. دالة جلب الوجبات وتحديثها تلقائياً عند كل الزبائن
+syncQuietlyWithSheet = async function() {
+  try {
+    const res = await fetch(FIREBASE_MEALS_URL);
+    const data = await res.json();
+    
+    let remoteMeals = [];
+    if (Array.isArray(data)) {
+      remoteMeals = data.filter(Boolean);
+    } else if (data && typeof data === "object") {
+      remoteMeals = Object.values(data);
+    }
+
+    if (remoteMeals.length > 0) {
+      allMeals = remoteMeals;
+      if (typeof renderMeals === "function") renderMeals();
+      if (typeof buildRestaurantsBar === "function") buildRestaurantsBar();
+      if (typeof buildCategoriesBar === "function") buildCategoriesBar();
+      if (typeof filterQuickMeals === "function") filterQuickMeals();
+      if (typeof updateAdminStats === "function") updateAdminStats();
+    } else if ((!data || remoteMeals.length === 0) && allMeals && allMeals.length > 0) {
+      // إذا كان فايربيس فارغاً بالبداية، يرفع وجبات التطبيق الحالية له تلقائياً
+      sendToCloud();
+    }
+  } catch (err) {
+    console.error("❌ خطأ بمزامنة فايربيس:", err);
+  }
+};
+
+// تشغيل الجلب فور فتح التطبيق
+syncQuietlyWithSheet();
+
 </script>
 </body>
 </html>
