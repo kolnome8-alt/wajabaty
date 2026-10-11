@@ -719,7 +719,47 @@ body {
       <select id="newMealRest" class="form-input"></select>
       <select id="newMealCat" class="form-input"></select>
       <input type="number" id="newMealPrice" class="form-input" placeholder="السعر بالدينار (مثال: 5000)">
-      <input type="url" id="newMealImg" class="form-input" placeholder="رابط صورة الوجبة (اختياري)">
+            <input type="text" id="newMealImg" class="form-input" placeholder="رابط صورة الوجبة (أو اختر من المعرض)">
+            
+            <label style="display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(255,42,95,0.15); border:1px dashed #ff2a5f; color:#fff; padding:10px; border-radius:10px; margin:8px 0; font-size:13px; font-weight:bold; cursor:pointer;">
+              📷 اختيار صورة من المعرض
+              <input type="file" accept="image/*" style="display:none;" onchange="uploadAndCompressMealImg(this)">
+            </label>
+            <div id="mealImgUploadStatus" style="font-size:12px; text-align:center; margin-bottom:6px;"></div>
+
+            <script>
+            function uploadAndCompressMealImg(input) {
+              const file = input.files[0];
+              if (!file) return;
+              const status = document.getElementById('mealImgUploadStatus');
+              status.style.color = '#ff9800';
+              status.innerHTML = 'جاري ضغط وتجهيز الصورة...';
+              
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                  const canvas = document.createElement('canvas');
+                  let w = img.width, h = img.height;
+                  const maxDim = 500;
+                  if (w > maxDim || h > maxDim) {
+                    if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                    else { w = Math.round((w * maxDim) / h); h = maxDim; }
+                  }
+                  canvas.width = w;
+                  canvas.height = h;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, w, h);
+                  const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+                  document.getElementById('newMealImg').value = compressedData;
+                  status.innerHTML = '<span style="color:#00e676; font-weight:bold;">✓ تم اختيار وتجهيز الصورة بنجاح!</span>';
+                };
+                img.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+            </script>
+
       <select id="newMealZone" class="form-input">
         <option value="الكرخ">الكرخ</option>
         <option value="الرصافة">الرصافة</option>
