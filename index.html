@@ -1,526 +1,537 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>وجباتي - Wajabaty VIP</title>
+  <style>
+    :root {
+      --bg-main: #0b0c10;
+      --bg-card: #14161d;
+      --bg-elevated: #1e212b;
+      --primary: #ff2a5f;
+      --primary-glow: rgba(255, 42, 95, 0.4);
+      --accent-orange: #ff9800;
+      --accent-green: #00e676;
+      --text-main: #ffffff;
+      --text-muted: #8c93a8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>وجباتي - Wajabaty VIP</title>
-<style>
-:root {
-  --bg-main: #0b0c10;
-  --bg-card: #14161d;
-  --bg-elevated: #1e212b;
-  --primary: #ff2a5f;
-  --primary-glow: rgba(255, 42, 95, 0.4);
-  --accent-orange: #ff9800;
-  --accent-green: #00e676;
-  --text-main: #ffffff;
-  --text-muted: #8c93a8;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --radius-lg: 20px;
-  --radius-md: 14px;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding-bottom: 150px;
+      user-select: none;
+      overflow-x: hidden;
+    }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  padding-bottom: 150px;
-  user-select: none;
-  overflow-x: hidden;
-}
+    #toastBox {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(20, 22, 29, 0.95);
+      border: 1px solid var(--accent-green);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 800;
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #toastBox.show { transform: translateX(-50%) translateY(0); }
 
-#toastBox {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  background: rgba(20, 22, 29, 0.95);
-  border: 1px solid var(--accent-green);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 800;
-  z-index: 9999;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-#toastBox.show { transform: translateX(-50%) translateY(0); }
+    .banner-slider-container {
+      margin: 12px 14px;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      height: 160px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #14161d;
+    }
+    .banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
+    .banner-slide { min-width: 100%; position: relative; height: 100%; }
+    .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px 18px;
+    }
+    .banner-overlay h2 { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .banner-overlay p { font-size: 12px; color: #e0e0e0; font-weight: 700; }
+    .banner-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 5;
+    }
+    .banner-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transition: all 0.3s ease;
+    }
+    .banner-dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
 
-.banner-slider-container {
-  margin: 12px 14px;
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  height: 160px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  cursor: pointer;
-  border: 1px solid var(--border-color);
-}
-.banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
-.banner-slide { min-width: 100%; position: relative; height: 100%; }
-.banner-slide img { width: 100%; height: 100%; object-fit: cover; }
-.banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 16px 18px;
-}
-.banner-overlay h2 { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-.banner-overlay p { font-size: 12px; color: #e0e0e0; font-weight: 700; }
-.banner-dots {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 5;
-}
-.banner-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transition: all 0.3s ease;
-}
-.banner-dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
+    .control-header {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      padding: 6px 14px 12px; 
+      gap: 8px;
+    }
+    .brand-pill {
+      display: flex; 
+      align-items: center; 
+      gap: 7px;
+      background: var(--bg-card); 
+      padding: 8px 16px; 
+      border-radius: 16px;
+      border: 1px solid var(--border-color); 
+      font-weight: 900; 
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .brand-pill:active { transform: scale(0.95); }
+    .brand-badge {
+      background: var(--primary); 
+      color: white; 
+      border-radius: 8px;
+      padding: 2px 7px; 
+      font-size: 12px; 
+      font-weight: 900;
+    }
+    .header-actions { display: flex; gap: 8px; }
+    .btn-discount {
+      background: linear-gradient(135deg, #ff9800, #ffb300);
+      color: #111; 
+      border: none; 
+      padding: 8px 15px; 
+      border-radius: 14px;
+      font-size: 12px; 
+      font-weight: 900; 
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.25);
+    }
+    .btn-cart-top {
+      background: rgba(255, 42, 95, 0.15); 
+      color: var(--primary);
+      border: 1px solid var(--primary); 
+      padding: 8px 15px; 
+      border-radius: 14px;
+      font-size: 12px; 
+      font-weight: 900; 
+      cursor: pointer;
+    }
 
-.control-header {
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center;
-  padding: 6px 14px 12px; 
-  gap: 8px;
-}
-.brand-pill {
-  display: flex; 
-  align-items: center; 
-  gap: 7px;
-  background: var(--bg-card); 
-  padding: 8px 16px; 
-  border-radius: 16px;
-  border: 1px solid var(--border-color); 
-  font-weight: 900; 
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-.brand-pill:active { transform: scale(0.95); }
-.brand-badge {
-  background: var(--primary); 
-  color: white; 
-  border-radius: 8px;
-  padding: 2px 7px; 
-  font-size: 12px; 
-  font-weight: 900;
-}
-.header-actions { display: flex; gap: 8px; }
-.btn-discount {
-  background: linear-gradient(135deg, #ff9800, #ffb300);
-  color: #111; 
-  border: none; 
-  padding: 8px 15px; 
-  border-radius: 14px;
-  font-size: 12px; 
-  font-weight: 900; 
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.25);
-}
-.btn-cart-top {
-  background: rgba(255, 42, 95, 0.15); 
-  color: var(--primary);
-  border: 1px solid var(--primary); 
-  padding: 8px 15px; 
-  border-radius: 14px;
-  font-size: 12px; 
-  font-weight: 900; 
-  cursor: pointer;
-}
+    .search-wrapper { display: flex; gap: 8px; margin: 0 14px 12px; }
+    .search-input-box { flex: 1; position: relative; }
+    .search-input-box input {
+      width: 100%; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      padding: 12px 16px; 
+      border-radius: 16px; 
+      color: white; 
+      outline: none; 
+      font-size: 13px;
+    }
+    .btn-search {
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      padding: 0 20px; 
+      border-radius: 16px; 
+      font-weight: 900; 
+      cursor: pointer;
+    }
 
-.search-wrapper { display: flex; gap: 8px; margin: 0 14px 12px; }
-.search-input-box { flex: 1; position: relative; }
-.search-input-box input {
-  width: 100%; 
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  padding: 12px 16px; 
-  border-radius: 16px; 
-  color: white; 
-  outline: none; 
-  font-size: 13px;
-}
-.btn-search {
-  background: var(--primary); 
-  color: white; 
-  border: none;
-  padding: 0 20px; 
-  border-radius: 16px; 
-  font-weight: 900; 
-  cursor: pointer;
-}
+    .zones-bar { display: flex; gap: 8px; margin: 0 14px 10px; }
+    .zone-chip {
+      flex: 1; 
+      padding: 9px 4px; 
+      background: var(--bg-card);
+      border: 1px solid var(--border-color); 
+      border-radius: 14px;
+      color: var(--text-muted); 
+      font-size: 12px; 
+      font-weight: 800; 
+      text-align: center; 
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .zone-chip.active {
+      background: var(--primary); 
+      color: white; 
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
 
-.zones-bar { display: flex; gap: 8px; margin: 0 14px 10px; }
-.zone-chip {
-  flex: 1; 
-  padding: 9px 4px; 
-  background: var(--bg-card);
-  border: 1px solid var(--border-color); 
-  border-radius: 14px;
-  color: var(--text-muted); 
-  font-size: 12px; 
-  font-weight: 800; 
-  text-align: center; 
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.zone-chip.active {
-  background: var(--primary); 
-  color: white; 
-  border-color: var(--primary);
-  box-shadow: 0 4px 15px var(--primary-glow);
-}
+    .horizontal-pills {
+      display: flex; 
+      gap: 8px; 
+      overflow-x: auto; 
+      white-space: nowrap;
+      padding: 0 14px 10px; 
+      scrollbar-width: none; 
+      -webkit-overflow-scrolling: touch;
+    }
+    .horizontal-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      flex-shrink: 0; 
+      padding: 8px 16px; 
+      border-radius: 20px;
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      color: var(--text-muted); 
+      font-size: 12px; 
+      font-weight: 700; 
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .pill.active-white { background: #ffffff; color: #111; font-weight: 900; border-color: #fff; }
+    .pill.active-green { background: var(--accent-green); color: #111; font-weight: 900; border-color: var(--accent-green); }
 
-.horizontal-pills {
-  display: flex; 
-  gap: 8px; 
-  overflow-x: auto; 
-  white-space: nowrap;
-  padding: 0 14px 10px; 
-  scrollbar-width: none; 
-  -webkit-overflow-scrolling: touch;
-}
-.horizontal-pills::-webkit-scrollbar { display: none; }
-.pill {
-  flex-shrink: 0; 
-  padding: 8px 16px; 
-  border-radius: 20px;
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  color: var(--text-muted); 
-  font-size: 12px; 
-  font-weight: 700; 
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.pill.active-white { background: #ffffff; color: #111; font-weight: 900; border-color: #fff; }
-.pill.active-green { background: var(--accent-green); color: #111; font-weight: 900; border-color: var(--accent-green); }
+    .meals-grid {
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 12px;
+      padding: 4px 14px; 
+      min-height: 200px;
+    }
+    .meal-card {
+      background: var(--bg-card); 
+      border-radius: var(--radius-lg); 
+      overflow: hidden;
+      border: 1px solid var(--border-color); 
+      display: flex; 
+      flex-direction: column;
+      position: relative;
+    }
+    .card-img-wrap { width: 100%; height: 125px; position: relative; background: #1a1c24; }
+    .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .zone-badge {
+      position: absolute; 
+      top: 8px; 
+      right: 8px; 
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px); 
+      color: #fff; 
+      padding: 3px 8px;
+      border-radius: 8px; 
+      font-size: 10px; 
+      font-weight: 800;
+    }
+    .discount-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: linear-gradient(135deg, #ff2a5f, #ff9800);
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 900;
+      box-shadow: 0 2px 8px rgba(255, 42, 95, 0.4);
+      z-index: 2;
+    }
+    .card-body { padding: 11px 12px 14px; display: flex; flex-direction: column; flex: 1; }
+    .meal-name { font-size: 13px; font-weight: 800; margin-bottom: 3px; line-height: 1.35; }
+    .rest-name { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .del-tag { font-size: 10px; color: var(--accent-orange); margin-bottom: 8px; font-weight: 800; }
+    .card-footer {
+      margin-top: auto; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .meal-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
+    .add-btn {
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      width: 36px; 
+      height: 36px; 
+      border-radius: 12px; 
+      font-size: 22px;
+      font-weight: 900; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+    .add-btn:active { transform: scale(0.9); }
 
-.meals-grid {
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
-  gap: 12px;
-  padding: 4px 14px; 
-  min-height: 200px;
-}
-.meal-card {
-  background: var(--bg-card); 
-  border-radius: var(--radius-lg); 
-  overflow: hidden;
-  border: 1px solid var(--border-color); 
-  display: flex; 
-  flex-direction: column;
-}
-.card-img-wrap { width: 100%; height: 125px; position: relative; background: #1a1c24; }
-.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.zone-badge {
-  position: absolute; 
-  top: 8px; 
-  right: 8px; 
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px); 
-  color: #fff; 
-  padding: 3px 8px;
-  border-radius: 8px; 
-  font-size: 10px; 
-  font-weight: 800;
-}
-.card-body { padding: 11px 12px 14px; display: flex; flex-direction: column; flex: 1; }
-.meal-name { font-size: 13px; font-weight: 800; margin-bottom: 3px; line-height: 1.35; }
-.rest-name { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.del-tag { font-size: 10px; color: var(--accent-orange); margin-bottom: 8px; font-weight: 800; }
-.card-footer {
-  margin-top: auto; 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center;
-}
-.meal-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
-.add-btn {
-  background: var(--primary); 
-  color: white; 
-  border: none;
-  width: 36px; 
-  height: 36px; 
-  border-radius: 12px; 
-  font-size: 22px;
-  font-weight: 900; 
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  box-shadow: 0 4px 12px var(--primary-glow);
-}
-.add-btn:active { transform: scale(0.9); }
+    .float-cart-bar {
+      position: fixed; 
+      bottom: 75px; 
+      left: 14px; 
+      right: 14px;
+      background: rgba(22, 25, 34, 0.95); 
+      border: 1.5px solid var(--primary);
+      border-radius: 20px; 
+      padding: 11px 16px; 
+      display: none;
+      justify-content: space-between; 
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+    }
+    .float-cart-bar.show { display: flex; }
+    .cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
+    .btn-open-vip-cart {
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      padding: 9px 18px; 
+      border-radius: 14px; 
+      font-weight: 900; 
+      font-size: 13px; 
+      cursor: pointer;
+    }
 
-.float-cart-bar {
-  position: fixed; 
-  bottom: 75px; 
-  left: 14px; 
-  right: 14px;
-  background: rgba(22, 25, 34, 0.95); 
-  border: 1.5px solid var(--primary);
-  border-radius: 20px; 
-  padding: 11px 16px; 
-  display: none;
-  justify-content: space-between; 
-  align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
-  z-index: 1000;
-  backdrop-filter: blur(12px);
-}
-.float-cart-bar.show { display: flex; }
-.cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
-.btn-open-vip-cart {
-  background: var(--primary); 
-  color: white; 
-  border: none;
-  padding: 9px 18px; 
-  border-radius: 14px; 
-  font-weight: 900; 
-  font-size: 13px; 
-  cursor: pointer;
-}
+    .cart-drawer-backdrop {
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px); 
+      display: none; 
+      align-items: flex-end;
+      justify-content: center; 
+      z-index: 2500;
+    }
+    .cart-drawer-backdrop.show { display: flex; }
+    .cart-drawer-box {
+      background: #14161f; 
+      width: 100%; 
+      max-width: 520px;
+      border-radius: 26px 26px 0 0; 
+      border: 1.5px solid var(--border-color);
+      border-bottom: none; 
+      max-height: 88vh; 
+      display: flex; 
+      flex-direction: column;
+      animation: slideUp 0.25s ease-out; 
+      padding-bottom: 25px;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .drawer-header {
+      padding: 16px 18px 12px; 
+      display: flex; 
+      justify-content: space-between;
+      align-items: center; 
+      border-bottom: 1px solid var(--border-color);
+    }
+    .drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
+    .btn-close-drawer {
+      background: rgba(255,255,255,0.08); 
+      border: none; 
+      color: #fff;
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .drawer-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
 
-.cart-drawer-backdrop {
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(8px); 
-  display: none; 
-  align-items: flex-end;
-  justify-content: center; 
-  z-index: 2500;
-}
-.cart-drawer-backdrop.show { display: flex; }
-.cart-drawer-box {
-  background: #14161f; 
-  width: 100%; 
-  max-width: 520px;
-  border-radius: 26px 26px 0 0; 
-  border: 1.5px solid var(--border-color);
-  border-bottom: none; 
-  max-height: 88vh; 
-  display: flex; 
-  flex-direction: column;
-  animation: slideUp 0.25s ease-out; 
-  padding-bottom: 25px;
-}
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-.drawer-header {
-  padding: 16px 18px 12px; 
-  display: flex; 
-  justify-content: space-between;
-  align-items: center; 
-  border-bottom: 1px solid var(--border-color);
-}
-.drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
-.btn-close-drawer {
-  background: rgba(255,255,255,0.08); 
-  border: none; 
-  color: #fff;
-  width: 32px; 
-  height: 32px; 
-  border-radius: 50%; 
-  font-size: 16px;
-  cursor: pointer;
-}
-.drawer-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+    .cart-item-row {
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); 
+      padding: 10px 12px; 
+      margin-bottom: 10px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-title { font-size: 13px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-rest { font-size: 11px; color: var(--accent-orange); margin-top: 2px; }
+    .cart-item-price { font-size: 13px; font-weight: 900; color: var(--accent-green); margin-top: 3px; }
+    .cart-qty-ctrl { display: flex; align-items: center; gap: 8px; }
+    .btn-qty {
+      width: 28px; 
+      height: 28px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border-color);
+      background: var(--bg-elevated); 
+      color: #fff; 
+      font-size: 15px; 
+      font-weight: 900;
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    .qty-num { font-size: 14px; font-weight: 900; min-width: 18px; text-align: center; }
 
-.cart-item-row {
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md); 
-  padding: 10px 12px; 
-  margin-bottom: 10px;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  gap: 10px;
-}
-.cart-item-info { flex: 1; min-width: 0; }
-.cart-item-title { font-size: 13px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cart-item-rest { font-size: 11px; color: var(--accent-orange); margin-top: 2px; }
-.cart-item-price { font-size: 13px; font-weight: 900; color: var(--accent-green); margin-top: 3px; }
-.cart-qty-ctrl { display: flex; align-items: center; gap: 8px; }
-.btn-qty {
-  width: 28px; 
-  height: 28px; 
-  border-radius: 8px; 
-  border: 1px solid var(--border-color);
-  background: var(--bg-elevated); 
-  color: #fff; 
-  font-size: 15px; 
-  font-weight: 900;
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-}
-.qty-num { font-size: 14px; font-weight: 900; min-width: 18px; text-align: center; }
+    .form-input {
+      width: 100%; 
+      background: #191c25; 
+      border: 1px solid var(--border-color);
+      padding: 12px 14px; 
+      border-radius: 14px; 
+      color: white; 
+      margin-bottom: 9px; 
+      font-size: 13px; 
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--primary); }
+    .btn-gps-loc {
+      width: 100%; 
+      background: rgba(0, 230, 118, 0.12); 
+      color: var(--accent-green);
+      border: 1px dashed var(--accent-green); 
+      border-radius: 14px; 
+      padding: 12px;
+      font-size: 13px; 
+      font-weight: 800; 
+      cursor: pointer; 
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 12px;
+    }
+    .bill-summary-card {
+      background: #0f1015; 
+      border-radius: 14px; 
+      padding: 12px 14px;
+      border: 1px solid var(--border-color); 
+      font-size: 12px; 
+      margin-bottom: 14px;
+    }
+    .bill-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .bill-row.total {
+      border-top: 1px dashed rgba(255,255,255,0.15); 
+      padding-top: 8px; 
+      margin-top: 8px;
+      font-size: 15px; 
+      font-weight: 900; 
+      color: var(--accent-green);
+    }
 
-.form-input {
-  width: 100%; 
-  background: #191c25; 
-  border: 1px solid var(--border-color);
-  padding: 12px 14px; 
-  border-radius: 14px; 
-  color: white; 
-  margin-bottom: 9px; 
-  font-size: 13px; 
-  outline: none;
-}
-.form-input:focus { border-color: var(--primary); }
-.btn-gps-loc {
-  width: 100%; 
-  background: rgba(0, 230, 118, 0.12); 
-  color: var(--accent-green);
-  border: 1px dashed var(--accent-green); 
-  border-radius: 14px; 
-  padding: 12px;
-  font-size: 13px; 
-  font-weight: 800; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
-  margin-bottom: 12px;
-}
-.bill-summary-card {
-  background: #0f1015; 
-  border-radius: 14px; 
-  padding: 12px 14px;
-  border: 1px solid var(--border-color); 
-  font-size: 12px; 
-  margin-bottom: 14px;
-}
-.bill-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.bill-row.total {
-  border-top: 1px dashed rgba(255,255,255,0.15); 
-  padding-top: 8px; 
-  margin-top: 8px;
-  font-size: 15px; 
-  font-weight: 900; 
-  color: var(--accent-green);
-}
+    .btn-submit-order-wa {
+      width: 100%; 
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white; 
+      border: none; 
+      padding: 14px; 
+      border-radius: 16px;
+      font-weight: 900; 
+      font-size: 15px; 
+      cursor: pointer; 
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35); 
+    }
 
-.btn-submit-order-wa {
-  width: 100%; 
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white; 
-  border: none; 
-  padding: 14px; 
-  border-radius: 16px;
-  font-weight: 900; 
-  font-size: 15px; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35); 
-}
+    .modal-backdrop {
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px); 
+      display: none; 
+      align-items: center;
+      justify-content: center; 
+      z-index: 3000; 
+      padding: 14px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-box {
+      background: #161822; 
+      width: 100%; 
+      max-width: 440px;
+      border-radius: 24px; 
+      padding: 20px; 
+      border: 1.5px solid var(--border-color);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
 
-.modal-backdrop {
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(8px); 
-  display: none; 
-  align-items: center;
-  justify-content: center; 
-  z-index: 3000; 
-  padding: 14px;
-}
-.modal-backdrop.show { display: flex; }
-.modal-box {
-  background: #161822; 
-  width: 100%; 
-  max-width: 440px;
-  border-radius: 24px; 
-  padding: 20px; 
-  border: 1.5px solid var(--border-color);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.admin-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 15px;
-  background: var(--bg-main);
-  padding: 5px;
-  border-radius: 16px;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none;
-}
-.admin-tabs::-webkit-scrollbar { display: none; }
-.admin-tab-btn {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  padding: 8px 12px;
-  font-size: 11px;
-  font-weight: 800;
-  border-radius: 12px;
-  cursor: pointer;
-}
-.admin-tab-btn.active { background: var(--primary); color: #fff; }
-.admin-tab-content { display: none; }
-.admin-tab-content.active { display: block; }
-.admin-stat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.admin-stat-card {
-  background: var(--bg-elevated);
-  padding: 12px;
-  border-radius: 14px;
-  text-align: center;
-  border: 1px solid var(--border-color);
-}
-.admin-stat-num { font-size: 18px; font-weight: 900; color: var(--accent-green); }
-.admin-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-</style>
+    .admin-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      background: var(--bg-main);
+      padding: 5px;
+      border-radius: 16px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .admin-tab-btn.active { background: var(--primary); color: #fff; }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; }
+    .admin-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .admin-stat-card {
+      background: var(--bg-elevated);
+      padding: 12px;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+    .admin-stat-num { font-size: 18px; font-weight: 900; color: var(--accent-green); }
+    .admin-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  </style>
 </head>
 <body>
 
@@ -639,11 +650,12 @@ body {
 
     <div class="admin-tabs">
       <button class="admin-tab-btn active" onclick="switchAdminTab('syncTab', this)">📊 الحالة</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار والصور</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 المبيعات</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('restDiscountTab', this)">🔥 خصم المطاعم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('couponTab', this)">🏷️ الكود</button>
     </div>
@@ -661,10 +673,41 @@ body {
       </div>
       
       <button type="button" class="btn-discount" style="width:100%; padding:13px; font-size:13px; background:var(--accent-green); color:#111; font-weight:900;" onclick="manualSyncFromSheet()">
-        🔄 تحديث ومزامنة البيانات من Google Sheets فوراً
+        🔄 تحديث ومزامنة البيانات من السحابة فوراً
       </button>
 
       <div id="adminSyncStatus" style="font-size:12px; font-weight:800; text-align:center; min-height:18px; margin-top:8px;"></div>
+    </div>
+
+    <!-- كشف الحساب والمبيعات السحابي المركزي -->
+    <div id="ordersLogTab" class="admin-tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية الكشف حسب المطعم:</label>
+        <button type="button" onclick="syncOrdersFromCloud()" style="background:none; border:none; color:var(--accent-green); font-size:11px; font-weight:800; cursor:pointer;">🔄 تحديث الكشف</button>
+      </div>
+      <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
+
+      <div class="admin-stat-grid" style="margin-bottom:10px;">
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="filteredOrdersCount">0</div>
+          <div class="admin-stat-lbl">عدد طلبات المطعم</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
+          <div class="admin-stat-lbl">مجموع المبيعات</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-bottom:10px;">
+        <button type="button" class="btn-discount" style="flex:1; padding:10px; font-size:11px; background:var(--primary); color:#fff;" onclick="copyCurrentRestaurantReport()">
+          📋 نسخ كشف المطعم لمشاركته
+        </button>
+        <button type="button" onclick="clearOrdersLog()" style="background:#33151f; border:1px solid #ff4d6d; color:#ff4d6d; padding:0 12px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer;">
+          مسح السجل
+        </button>
+      </div>
+
+      <div id="ordersListContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
     <div id="deliveryTab" class="admin-tab-content">
@@ -719,75 +762,45 @@ body {
       <select id="newMealRest" class="form-input"></select>
       <select id="newMealCat" class="form-input"></select>
       <input type="number" id="newMealPrice" class="form-input" placeholder="السعر بالدينار (مثال: 5000)">
-            <input type="text" id="newMealImg" class="form-input" placeholder="رابط صورة الوجبة (أو اختر من المعرض)">
-            
-            <label style="display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(255,42,95,0.15); border:1px dashed #ff2a5f; color:#fff; padding:10px; border-radius:10px; margin:8px 0; font-size:13px; font-weight:bold; cursor:pointer;">
-              📷 اختيار صورة من المعرض
-              <input type="file" accept="image/*" style="display:none;" onchange="uploadAndCompressMealImg(this)">
-            </label>
-            <div id="mealImgUploadStatus" style="font-size:12px; text-align:center; margin-bottom:6px;"></div>
-
-            <script>
-            function uploadAndCompressMealImg(input) {
-              const file = input.files[0];
-              if (!file) return;
-              const status = document.getElementById('mealImgUploadStatus');
-              status.style.color = '#ff9800';
-              status.innerHTML = 'جاري ضغط وتجهيز الصورة...';
-              
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                  const canvas = document.createElement('canvas');
-                  let w = img.width, h = img.height;
-                  const maxDim = 500;
-                  if (w > maxDim || h > maxDim) {
-                    if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
-                    else { w = Math.round((w * maxDim) / h); h = maxDim; }
-                  }
-                  canvas.width = w;
-                  canvas.height = h;
-                  const ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, 0, 0, w, h);
-                  const compressedData = canvas.toDataURL('image/jpeg', 0.7);
-                  document.getElementById('newMealImg').value = compressedData;
-                  status.innerHTML = '<span style="color:#00e676; font-weight:bold;">✓ تم اختيار وتجهيز الصورة بنجاح!</span>';
-                };
-                img.src = e.target.result;
-              };
-              reader.readAsDataURL(file);
-            }
-            </script>
+      
+      <div style="margin-bottom:10px;">
+        <label style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--primary); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer;">
+          📷 اختيار صورة الوجبة من المعرض
+          <input type="file" id="mealFileInput" accept="image/*" style="display:none;" onchange="handleMealImageUpload(this)">
+        </label>
+        <div id="mealImgUploadStatus" style="font-size:11px; text-align:center; margin-top:5px; font-weight:700;"></div>
+        <div id="mealImgPreviewBox" style="display:none; text-align:center; margin-top:8px;">
+          <img id="mealImgPreview" src="" style="width:70px; height:70px; object-fit:cover; border-radius:12px; border:2px solid var(--accent-green); display:inline-block;">
+        </div>
+        <input type="hidden" id="newMealImg" value="">
+      </div>
 
       <select id="newMealZone" class="form-input">
         <option value="الكرخ">الكرخ</option>
         <option value="الرصافة">الرصافة</option>
       </select>
       <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="addNewMealLocally()">
-        ➕ إضافة الوجبة وحفظها بالشيت
+        ➕ إضافة الوجبة وحفظها بالسحابة
       </button>
     </div>
 
-    <div id="ordersLogTab" class="admin-tab-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية حسب المطعم:</label>
-        <button type="button" onclick="clearOrdersLog()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:800; cursor:pointer;">مسح السجل</button>
+    <div id="restDiscountTab" class="admin-tab-content">
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">تحديد نسبة خصم لمطعم معين (تظهر بشارة ملفتة وسعر مخفض):</p>
+      <select id="admDiscountRestSelect" class="form-input"></select>
+      <input type="number" id="admDiscountPercent" class="form-input" placeholder="نسبة الخصم % (مثال: 15)">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <label style="font-size:12px; font-weight:800;">الحالة:</label>
+        <select id="admDiscountStatus" class="form-input" style="margin-bottom:0; flex:1;">
+          <option value="1">مفعّل (يظهر للزبائن فوراً)</option>
+          <option value="0">معطّل (إيقاف الخصم)</option>
+        </select>
       </div>
-      <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
-
-      <div class="admin-stat-grid" style="margin-bottom:10px;">
-        <div class="admin-stat-card">
-          <div class="admin-stat-num" id="filteredOrdersCount">0</div>
-          <div class="admin-stat-lbl">عدد الطلبات</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
-          <div class="admin-stat-lbl">مجموع المبيعات</div>
-        </div>
-      </div>
-
-      <div id="ordersListContainer" style="max-height:240px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111; margin-bottom:14px;" onclick="saveRestaurantDiscount()">
+        💾 حفظ وتعميم خصم المطعم سحابياً
+      </button>
+      
+      <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">الخصومات المفعّلة حالياً بالمطاعم:</div>
+      <div id="activeRestDiscountsList" style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
     <div id="addRestTab" class="admin-tab-content">
@@ -804,7 +817,7 @@ body {
     </div>
 
     <div id="couponTab" class="admin-tab-content">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">التحكم بكود الخصم وتعميمه سحابياً على كل الأجهزة:</p>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">التحكم بكود الخصم العام وتعميمه سحابياً على كل الأجهزة:</p>
       <input type="text" id="admCouponCode" class="form-input" placeholder="رمز الكود (مثال: wa10)">
       <input type="number" id="admCouponAmount" class="form-input" placeholder="قيمة الخصم بالدينار (مثال: 500)">
       <input type="number" id="admCouponMin" class="form-input" placeholder="الحد الأدنى للطلب (مثال: 5000)">
@@ -825,9 +838,13 @@ body {
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxNIMONP1WQR00SfSH7kNp8fSdkqSxZXGgLEOSxBR7gbYoxHu2Q8f3z6IwkXGE7_diI/exec';
+const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
+const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
+const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
 
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
+let restDiscounts = {};
+let cloudOrders = [];
 
 let REST_PHONES = {
   "جيكي بركر": "9647771919118",
@@ -847,7 +864,6 @@ let REST_PHONES = {
   "ورق عنب بغداد": "9647848080127"
 };
 
-// الوجبات مثبتة دائمياً بالصور الحقيقية الأصلية (تظهر للكل فوراً وبدون أي مسح)
 const PERMANENT_CUSTOM_MEALS = [
   { id: 1791624139073, name: "ورق عنب بالاندومي   ١٠ حبات", rest: "ورق عنب بغداد", cat: "وجبات أخرى", price: 6500, img: "https://hotimg.com/f/NvtYWCup.jpg", phone: "9647848080127", zone: "الكرخ" },
   { id: 1791652345898, name: "ورق عنب 10 حبات", rest: "ورق عنب بغداد", cat: "وجبات أخرى", price: 6000, img: "https://hotimg.com/f/RdL78sWy.jpg", phone: "9647848080127", zone: "الكرخ" },
@@ -917,8 +933,12 @@ function getSmartFoodImage(name = '', cat = '') {
 }
 
 function resolveMealImage(m) {
-  if (m.img && typeof m.img === 'string' && m.img.trim().startsWith('http')) {
-    return m.img.trim();
+  if (!m) return IMGS[0];
+  if (m.img && typeof m.img === 'string') {
+    const trimmed = m.img.trim();
+    if (trimmed.startsWith('http') || trimmed.startsWith('data:image')) {
+      return trimmed;
+    }
   }
   if (rawImgMap[String(m.id)]) {
     return rawImgMap[String(m.id)];
@@ -941,7 +961,6 @@ function normalizeCategory(cat) {
   return cat;
 }
 
-// دمج الوجبات بالبداية لتكون حاضرة دائماً لكل الناس
 let allMeals = [
   ...PERMANENT_CUSTOM_MEALS,
   ...RAW_DATA.split(';').map(str => {
@@ -961,7 +980,7 @@ let allMeals = [
       zone: "الكرخ"
     };
   })
-];
+].filter(m => m && m.name);
 
 let cart = [];
 let selectedZone = "الكل";
@@ -991,7 +1010,7 @@ let defaultBanners = [
   },
   {
     title: "🏷️ خصومات فورية حصرية",
-    desc: "استخدم كود الخصم في السلة واحصل على تخفيض مباشر",
+    desc: "عروض خاصة لمطاعم محددة وكوبونات تخفيض مباشرة",
     img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=1200"
   }
 ];
@@ -999,6 +1018,24 @@ let defaultBanners = [
 let appBanners = [...defaultBanners];
 let currentSlideIndex = 0;
 let bannerInterval = null;
+
+function getMealDiscountPercent(m) {
+  if (!m || !m.rest) return 0;
+  const d = restDiscounts[m.rest];
+  if (d && d.active && Number(d.percent) > 0) {
+    return Number(d.percent);
+  }
+  return 0;
+}
+
+function getMealEffectivePrice(m) {
+  const original = Number(m.price) || 0;
+  const discPercent = getMealDiscountPercent(m);
+  if (discPercent > 0) {
+    return Math.round(original * (1 - (discPercent / 100)));
+  }
+  return original;
+}
 
 function showToast(msg) {
   const t = document.getElementById("toastBox");
@@ -1038,7 +1075,7 @@ function initBannerSlider() {
     if (!appBanners || appBanners.length === 0) return;
     const dots = document.querySelectorAll(".banner-dot");
     currentSlideIndex = (currentSlideIndex + 1) % appBanners.length;
-    track.style.transform = `translateX(${currentSlideIndex * 100}%)`;
+    if (track) track.style.transform = `translateX(${currentSlideIndex * 100}%)`;
     dots.forEach((d, idx) => {
       if (idx === currentSlideIndex) d.classList.add("active");
       else d.classList.remove("active");
@@ -1073,7 +1110,7 @@ function saveMealOverridesToStorage() {
   try {
     const overrides = JSON.parse(localStorage.getItem('wj_meals_overrides') || '{}');
     allMeals.forEach(m => {
-      overrides[m.id] = { price: m.price, img: m.img, name: m.name };
+      if (m && m.id) overrides[m.id] = { price: m.price, img: m.img, name: m.name };
     });
     localStorage.setItem('wj_meals_overrides', JSON.stringify(overrides));
   } catch(e) {}
@@ -1085,7 +1122,7 @@ function applyMealOverrides() {
     if (saved) {
       const overrides = JSON.parse(saved);
       allMeals.forEach(m => {
-        if (overrides[m.id]) {
+        if (m && overrides[m.id]) {
           if (overrides[m.id].price) m.price = overrides[m.id].price;
           if (overrides[m.id].img) m.img = overrides[m.id].img;
           if (overrides[m.id].name) m.name = overrides[m.id].name;
@@ -1097,6 +1134,7 @@ function applyMealOverrides() {
     if (customAdded) {
       const newItems = JSON.parse(customAdded);
       newItems.forEach(item => {
+        if (!item || !item.name) return;
         const existingIdx = allMeals.findIndex(m => String(m.id) === String(item.id));
         if (existingIdx !== -1) {
           allMeals[existingIdx] = { ...allMeals[existingIdx], ...item };
@@ -1118,19 +1156,28 @@ function loadPersistedData() {
       arr.forEach(r => { if (!RESTS.includes(r)) RESTS.push(r); });
     }
     const savedPh = localStorage.getItem('wj_custom_rest_phones');
-    if (savedPh) {
-      REST_PHONES = { ...REST_PHONES, ...JSON.parse(savedPh) };
-    }
+    if (savedPh) REST_PHONES = { ...REST_PHONES, ...JSON.parse(savedPh) };
+    
     const savedCart = localStorage.getItem('wj_cart');
     if (savedCart) cart = JSON.parse(savedCart);
+    
     const savedCoupon = localStorage.getItem('wj_applied_coupon');
     if (savedCoupon) appliedCouponCode = savedCoupon;
+    
     const savedConfig = localStorage.getItem('wj_coupon_config');
     if (savedConfig) couponConfig = JSON.parse(savedConfig);
+    
     const savedBanners = localStorage.getItem('wj_app_banners');
     if (savedBanners) appBanners = JSON.parse(savedBanners);
+    
     const savedDelivery = localStorage.getItem('wj_delivery_fee');
     if (savedDelivery) orderDeliveryFee = Number(savedDelivery) || 1000;
+
+    const savedDiscounts = localStorage.getItem('wj_rest_discounts');
+    if (savedDiscounts) restDiscounts = JSON.parse(savedDiscounts);
+
+    const savedOrders = localStorage.getItem('wj_orders_history');
+    if (savedOrders) cloudOrders = JSON.parse(savedOrders);
   } catch(e) {}
 }
 
@@ -1139,7 +1186,7 @@ function money(num) {
 }
 
 function buildRestaurantsBar() {
-  const allR = [...RESTS, ...allMeals.map(m => m.rest).filter(Boolean)];
+  const allR = [...RESTS, ...allMeals.map(m => m ? m.rest : '').filter(Boolean)];
   const rests = ["الكل", ...new Set(allR)];
   const rBar = document.getElementById("restaurantsBar");
   if (!rBar) return;
@@ -1153,8 +1200,8 @@ function buildRestaurantsBar() {
 function buildCategoriesBar() {
   const cBar = document.getElementById("categoriesBar");
   if (!cBar) return;
-  let pool = (selectedRest === "الكل") ? allMeals : allMeals.filter(m => m.rest === selectedRest);
-  const cats = ["الكل", ...new Set(pool.map(m => m.cat).filter(Boolean))];
+  let pool = (selectedRest === "الكل") ? allMeals : allMeals.filter(m => m && m.rest === selectedRest);
+  const cats = ["الكل", ...new Set(pool.map(m => m ? m.cat : '').filter(Boolean))];
   cBar.innerHTML = cats.map(c => `
     <div class="pill ${c === selectedCat ? 'active-green' : ''}" onclick="setCategory('${c}', this)">
       ${c === 'الكل' ? 'كل الأصناف' : c}
@@ -1186,14 +1233,16 @@ function setCategory(cat, el) {
 }
 
 function renderMeals() {
-  const query = document.getElementById("searchInput").value.trim().toLowerCase();
+  const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
   const grid = document.getElementById("mealsGrid");
+  if (!grid) return;
 
-  const filtered = allMeals.filter(m => {
+  const validMeals = allMeals.filter(m => m && m.name);
+  const filtered = validMeals.filter(m => {
     const matchZone = selectedZone === "الكل" || m.zone === selectedZone;
     const matchRest = selectedRest === "الكل" || m.rest === selectedRest;
     const matchCat = selectedCat === "الكل" || m.cat === selectedCat;
-    const matchQuery = !query || m.name.toLowerCase().includes(query) || m.rest.toLowerCase().includes(query);
+    const matchQuery = !query || m.name.toLowerCase().includes(query) || (m.rest && m.rest.toLowerCase().includes(query));
     return matchZone && matchRest && matchCat && matchQuery;
   });
 
@@ -1202,33 +1251,55 @@ function renderMeals() {
     return;
   }
 
-  grid.innerHTML = filtered.map(m => `
-    <div class="meal-card">
-      <div class="card-img-wrap">
-        <img src="${resolveMealImage(m)}" alt="${m.name}" loading="lazy" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
-        <span class="zone-badge">${m.zone || 'بغداد'}</span>
-      </div>
-      <div class="card-body">
-        <div class="meal-name">${m.name}</div>
-        <div class="rest-name">${m.rest}</div>
-        <div class="del-tag">🛵 توصيل موحد لكامل الطلب: ${money(orderDeliveryFee)}</div>
-        <div class="card-footer">
-          <div class="meal-price">${money(m.price)}</div>
-          <button class="add-btn" onclick="addToCart('${m.id}')">+</button>
+  grid.innerHTML = filtered.map(m => {
+    const discPercent = getMealDiscountPercent(m);
+    const effectivePrice = getMealEffectivePrice(m);
+
+    return `
+      <div class="meal-card">
+        ${discPercent > 0 ? `<span class="discount-badge">خصم ${discPercent}% 🔥</span>` : ''}
+        <div class="card-img-wrap">
+          <img src="${resolveMealImage(m)}" alt="${m.name}" loading="lazy" onerror="this.src='${getSmartFoodImage(m.name, m.cat)}'">
+          <span class="zone-badge">${m.zone || 'بغداد'}</span>
+        </div>
+        <div class="card-body">
+          <div class="meal-name">${m.name}</div>
+          <div class="rest-name">${m.rest}</div>
+          <div class="del-tag">🛵 توصيل موحد: ${money(orderDeliveryFee)}</div>
+          <div class="card-footer">
+            <div style="display:flex; flex-direction:column;">
+              ${discPercent > 0 ? `
+                <span style="font-size:10px; color:var(--text-muted); text-decoration:line-through;">${money(m.price)}</span>
+                <span class="meal-price">${money(effectivePrice)}</span>
+              ` : `
+                <span class="meal-price">${money(m.price)}</span>
+              `}
+            </div>
+            <button class="add-btn" onclick="addToCart('${m.id}')">+</button>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function addToCart(mealId) {
-  const meal = allMeals.find(item => String(item.id) === String(mealId));
+  const meal = allMeals.find(item => item && String(item.id) === String(mealId));
   if (!meal) return;
+  const effectivePrice = getMealEffectivePrice(meal);
+  const discPercent = getMealDiscountPercent(meal);
+
   const existing = cart.find(item => String(item.id) === String(mealId));
   if (existing) {
     existing.qty += 1;
   } else {
-    cart.push({ ...meal, qty: 1 });
+    cart.push({
+      ...meal,
+      price: effectivePrice,
+      originalPrice: meal.price,
+      discPercent: discPercent,
+      qty: 1
+    });
   }
   saveCartToStorage();
   updateCartUI();
@@ -1255,13 +1326,18 @@ function updateCartUI() {
   const currentDiscount = isDisc ? couponConfig.amount : 0;
   const totalWithDel = subtotal > 0 ? Math.max(0, subtotal + orderDeliveryFee - currentDiscount) : 0;
 
-  document.getElementById("cartCountTop").innerText = totalCount;
-  document.getElementById("cartTotalItems").innerText = totalCount;
-  document.getElementById("cartTotalSum").innerText = money(totalWithDel);
+  const cTop = document.getElementById("cartCountTop");
+  const cItems = document.getElementById("cartTotalItems");
+  const cSum = document.getElementById("cartTotalSum");
+  if (cTop) cTop.innerText = totalCount;
+  if (cItems) cItems.innerText = totalCount;
+  if (cSum) cSum.innerText = money(totalWithDel);
 
   const bar = document.getElementById("floatCartBar");
-  if (totalCount > 0) bar.classList.add("show");
-  else bar.classList.remove("show");
+  if (bar) {
+    if (totalCount > 0) bar.classList.add("show");
+    else bar.classList.remove("show");
+  }
 }
 
 function renderCartDrawerContent() {
@@ -1271,40 +1347,48 @@ function renderCartDrawerContent() {
   const currentDiscount = isDisc ? couponConfig.amount : 0;
   const grandTotal = Math.max(0, subtotal + orderDeliveryFee - currentDiscount);
 
-  box.innerHTML = cart.map(item => `
-    <div class="cart-item-row">
-      <div class="cart-item-info">
-        <div class="cart-item-title">${item.name}</div>
-        <div class="cart-item-rest">🏪 ${item.rest}</div>
-        <div class="cart-item-price">${money(item.price * item.qty)}</div>
+  if (box) {
+    box.innerHTML = cart.map(item => `
+      <div class="cart-item-row">
+        <div class="cart-item-info">
+          <div class="cart-item-title">${item.name}</div>
+          <div class="cart-item-rest">🏪 ${item.rest}</div>
+          <div class="cart-item-price">
+            ${money(item.price * item.qty)}
+            ${item.discPercent > 0 ? `<span style="font-size:10px; color:var(--primary); font-weight:800; margin-right:4px;">(خصم ${item.discPercent}%)</span>` : ''}
+          </div>
+        </div>
+        <div class="cart-qty-ctrl">
+          <button type="button" class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
+          <span class="qty-num">${item.qty}</span>
+          <button type="button" class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+        </div>
       </div>
-      <div class="cart-qty-ctrl">
-        <button type="button" class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
-        <span class="qty-num">${item.qty}</span>
-        <button type="button" class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
 
-  document.getElementById("billSummaryCard").innerHTML = `
-    <div class="bill-row">
-      <span>مجموع المواد:</span>
-      <strong>${money(subtotal)}</strong>
-    </div>
-    <div class="bill-row" style="color:var(--accent-orange);">
-      <span>أجور التوصيل (موحدة لكامل الطلب):</span>
-      <strong>${money(orderDeliveryFee)}</strong>
-    </div>
-    ${currentDiscount > 0 ? `
-    <div class="bill-row" style="color:var(--accent-green); font-weight:800;">
-      <span>🎁 كود خصم (${appliedCouponCode}):</span>
-      <strong>-${money(currentDiscount)}</strong>
-    </div>` : ''}
-    <div class="bill-row total">
-      <span>المجموع الكلي المطلوب:</span>
-      <strong>${money(grandTotal)}</strong>
-    </div>
-  `;
+  const billCard = document.getElementById("billSummaryCard");
+  if (billCard) {
+    billCard.innerHTML = `
+      <div class="bill-row">
+        <span>مجموع المواد:</span>
+        <strong>${money(subtotal)}</strong>
+      </div>
+      <div class="bill-row" style="color:var(--accent-orange);">
+        <span>أجور التوصيل (موحدة للطلب):</span>
+        <strong>${money(orderDeliveryFee)}</strong>
+      </div>
+      ${currentDiscount > 0 ? `
+      <div class="bill-row" style="color:var(--accent-green); font-weight:800;">
+        <span>🎁 كود خصم (${appliedCouponCode}):</span>
+        <strong>-${money(currentDiscount)}</strong>
+      </div>` : ''}
+      <div class="bill-row total">
+        <span>المجموع الكلي المطلوب:</span>
+        <strong>${money(grandTotal)}</strong>
+      </div>
+    `;
+  }
 }
 
 function openCartDrawer() {
@@ -1412,7 +1496,7 @@ function applyCheckoutCoupon() {
   } else {
     appliedDiscount = 0;
     appliedCouponCode = "";
-    try { localStorage.removeItem('wj_applied_coupon'); } catch(e) {}
+    try { localStorage.setItem('wj_applied_coupon'); } catch(e) {}
     msgBox.style.color = "var(--primary)";
     msgBox.innerText = "كود الخصم غير صحيح.";
     renderCartDrawerContent();
@@ -1420,6 +1504,9 @@ function applyCheckoutCoupon() {
   }
 }
 
+// ==========================================
+// 🚀 إرسال وتسجيل الطلب سحابياً في Firebase
+// ==========================================
 async function submitFullOrder() {
   saveCustomerData();
   const name = document.getElementById("custName").value.trim();
@@ -1432,7 +1519,7 @@ async function submitFullOrder() {
   }
 
   const btn = document.getElementById("submitBtn");
-  btn.innerText = "جاري فتح الواتساب...";
+  btn.innerText = "جاري تسجيل الطلب سحابياً...";
   btn.disabled = true;
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -1443,39 +1530,46 @@ async function submitFullOrder() {
 
   const restName = cart[0].rest || "صاج البديع";
   const targetPhone = cart[0].phone || REST_PHONES[restName] || "9647708111561";
+  const orderId = "#WJ-" + Math.floor(1000 + Math.random() * 9000);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-IQ') + ' ' + now.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
 
   const orderPayload = {
-    action: "order",
-    order_id: "#WJ-" + Math.floor(1000 + Math.random() * 9000),
+    id: orderId,
+    timestamp: Date.now(),
+    date: dateStr,
+    customer: name,
     phone: phone,
-    customerName: name,
     address: address,
     location_url: currentGpsLocation || "لم يتم التحديد",
     restaurant: restName,
     items: itemsText,
+    itemsDetailed: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    subtotal: subtotal,
+    deliveryFee: orderDeliveryFee,
     coupon: appliedCouponCode || "بدون",
     discount: currentDiscount,
     total: grandTotal
   };
 
+  // حفظ سحابي فوري في Firebase Orders
+  try {
+    fetch(FIREBASE_ORDERS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload)
+    }).catch(e => console.error("Firebase order save error:", e));
+  } catch(e) {}
+
+  // حفظ نسخة احتياطية محلية
   try {
     let savedOrders = JSON.parse(localStorage.getItem('wj_orders_history') || '[]');
-    savedOrders.unshift({
-      id: orderPayload.order_id,
-      date: new Date().toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' }),
-      customer: name,
-      phone: phone,
-      address: address,
-      restaurant: restName,
-      items: itemsText,
-      total: grandTotal
-    });
+    savedOrders.unshift(orderPayload);
     localStorage.setItem('wj_orders_history', JSON.stringify(savedOrders.slice(0, 100)));
   } catch(e) {}
 
-  sendToCloud(orderPayload);
-
   let waMsg = `*طلب جديد من تطبيق وجباتي 🍔*\n\n` +
+    `رقم الطلب: *${orderId}*\n` +
     `المطعم: *${restName}*\n` +
     `الزبون: *${name}*\n` +
     `الهاتف: *${phone}*\n` +
@@ -1487,7 +1581,8 @@ async function submitFullOrder() {
 
   waMsg += `\n*تفاصيل المواد المطلوبة:*\n`;
   cart.forEach((item, idx) => {
-    waMsg += `${idx + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}\n`;
+    const discInfo = item.discPercent > 0 ? ` (خصم ${item.discPercent}% 🔥)` : '';
+    waMsg += `${idx + 1}. ${item.name} × ${item.qty} = ${money(item.price * item.qty)}${discInfo}\n`;
   });
 
   waMsg += `\nمجموع المواد: ${money(subtotal)}\n` +
@@ -1519,63 +1614,26 @@ async function submitFullOrder() {
   window.location.assign(finalWaUrl);
 }
 
-function sendToCloud(payload) {
-  try {
-    fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    setTimeout(syncQuietlyWithSheet, 1500);
-  } catch(e) {
-    console.warn("Cloud push warning:", e);
-  }
-}
-
-async function syncQuietlyWithSheet() {
-  try {
-    const res = await fetch(API_URL + '?action=all&_t=' + Date.now(), { cache: 'no-store' });
-    const data = await res.json();
-    if (data && data.success) {
-      if (data.coupon) {
-        const isLive = String(data.coupon.status || '').trim() === 'شغال';
-        couponConfig = {
-          code: isLive ? String(data.coupon.code || '').trim().toLowerCase() : '',
-          amount: Number(data.coupon.amount) || 0,
-          minOrder: Number(data.coupon.minOrder) || 0,
-          active: isLive
-        };
-        try { localStorage.setItem('wj_coupon_config', JSON.stringify(couponConfig)); } catch(e){}
-        refreshCouponUI();
-        populateAdminCouponInputs();
-      }
-
-      if (data.delivery_fee) {
-        orderDeliveryFee = Number(data.delivery_fee) || 1000;
-        try { localStorage.setItem('wj_delivery_fee', orderDeliveryFee); } catch(e){}
-        populateAdminDeliveryInput();
-      }
-
-      if (Array.isArray(data.banners) && data.banners.length > 0) {
-        appBanners = data.banners;
-        try { localStorage.setItem('wj_app_banners', JSON.stringify(appBanners)); } catch(e){}
-        renderBanners();
-        initBannerSlider();
-        populateAdminBannerInputs();
-      }
-
-      buildRestaurantsBar();
-      buildCategoriesBar();
-      renderMeals();
-      updateCartUI();
-      updateAdminStats();
-    }
-  } catch(e) {}
-}
-
 function refreshCouponUI() {
   const modalBox = document.getElementById("couponModalContent");
+  if (!modalBox) return;
+
+  let activeRestsHtml = '';
+  const activeDiscounts = Object.keys(restDiscounts).filter(r => restDiscounts[r].active && restDiscounts[r].percent > 0);
+  if (activeDiscounts.length > 0) {
+    activeRestsHtml = `
+      <div style="margin-top:14px; border-top:1px dashed rgba(255,255,255,0.15); padding-top:10px; text-align:right;">
+        <div style="font-size:12px; font-weight:900; color:var(--accent-orange); margin-bottom:6px;">🔥 مطاعم عليها تخفيضات مباشرة:</div>
+        ${activeDiscounts.map(r => `
+          <div style="font-size:12px; color:#fff; margin-bottom:4px; display:flex; justify-content:space-between;">
+            <span>🏪 ${r}</span>
+            <span style="color:var(--accent-green); font-weight:900;">خصم ${restDiscounts[r].percent}%</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   if (couponConfig.active && couponConfig.code) {
     modalBox.innerHTML = `
       <div style="font-size:12px; color:var(--text-muted);">كود الخصم الحصري لزبائن وجباتي:</div>
@@ -1585,13 +1643,14 @@ function refreshCouponUI() {
       <div style="font-size:13px; font-weight:800; color:#fff;">
         خصم <span style="color:var(--accent-green);">${money(couponConfig.amount)}</span> فوري عند الطلب بـ ${money(couponConfig.minOrder)} فأكثر
       </div>
+      ${activeRestsHtml}
     `;
   } else {
-    modalBox.innerHTML = '<div style="color:var(--text-muted); font-size:13px;">⚪ لا توجد أكواد خصم نشطة حالياً.</div>';
+    modalBox.innerHTML = `<div style="color:var(--text-muted); font-size:13px;">⚪ لا توجد أكواد خصم نشطة حالياً.</div>${activeRestsHtml}`;
   }
 }
 
-function openDiscountsModal() { document.getElementById("discountsModal").classList.add("show"); }
+function openDiscountsModal() { refreshCouponUI(); document.getElementById("discountsModal").classList.add("show"); }
 function closeDiscountsModal() { document.getElementById("discountsModal").classList.remove("show"); }
 function closeIfOutsideDiscounts(e) { if (e.target.id === 'discountsModal') closeDiscountsModal(); }
 
@@ -1622,8 +1681,9 @@ function openAdminPanel() {
   populateAdminCouponInputs();
   populateAdminBannerInputs();
   populateAdminDeliveryInput();
+  renderActiveDiscountsList();
   filterQuickMeals();
-  renderOrdersLog();
+  syncOrdersFromCloud();
   document.getElementById("adminPanelModal").classList.add("show");
 }
 function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
@@ -1642,31 +1702,158 @@ function switchAdminTab(tabId, btn) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById(tabId).classList.add('active');
-  if (tabId === 'ordersLogTab') renderOrdersLog();
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+  if (tabId === 'ordersLogTab') syncOrdersFromCloud();
+  if (tabId === 'restDiscountTab') renderActiveDiscountsList();
 }
 
 function updateAdminStats() {
   const mCount = document.getElementById("statMealsCount");
   const rCount = document.getElementById("statRestsCount");
-  if (mCount) mCount.innerText = allMeals.length;
-  if (rCount) rCount.innerText = new Set(allMeals.map(m => m.rest)).size;
+  if (mCount) mCount.innerText = allMeals.filter(m => m && m.name).length;
+  if (rCount) rCount.innerText = new Set(allMeals.map(m => m ? m.rest : '').filter(Boolean)).size;
 }
 
 function populateAdminDropdowns() {
   const restSel = document.getElementById("newMealRest");
   const catSel = document.getElementById("newMealCat");
   const orderRestFilter = document.getElementById("ordersRestFilter");
+  const discRestSel = document.getElementById("admDiscountRestSelect");
 
-  const currentRests = ["الكل", ...new Set([...RESTS, ...allMeals.map(m => m.rest).filter(Boolean)])];
+  const currentRests = ["الكل", ...new Set([...RESTS, ...allMeals.map(m => m ? m.rest : '').filter(Boolean)])];
 
   if (restSel) restSel.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
+  if (discRestSel) discRestSel.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
   if (catSel) catSel.innerHTML = CATS.map(c => `<option value="${c}">${c}</option>`).join('');
   if (orderRestFilter) {
     const currentVal = orderRestFilter.value || "الكل";
-    orderRestFilter.innerHTML = currentRests.map(r => `<option value="${r}">${r === 'الكل' ? 'كل المطاعم' : r}</option>`).join('');
+    orderRestFilter.innerHTML = currentRests.map(r => `<option value="${r}">${r === 'الكل' ? 'كل المطاعم (كشف عام)' : r}</option>`).join('');
     orderRestFilter.value = currentVal;
   }
+}
+
+// ==========================================
+// 📷 اختيار وضغط وتجهيز الصورة من المعرض
+// ==========================================
+function handleMealImageUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status = document.getElementById("mealImgUploadStatus");
+  const previewBox = document.getElementById("mealImgPreviewBox");
+  const previewImg = document.getElementById("mealImgPreview");
+
+  if (status) {
+    status.style.color = "var(--accent-orange)";
+    status.innerText = "⏳ جاري ضغط وتجهيز الصورة...";
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      let w = img.width;
+      let h = img.height;
+      const maxDim = 450;
+
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const compressedData = canvas.toDataURL("image/jpeg", 0.65);
+      document.getElementById("newMealImg").value = compressedData;
+
+      if (previewImg && previewBox) {
+        previewImg.src = compressedData;
+        previewBox.style.display = "block";
+      }
+
+      if (status) {
+        status.style.color = "var(--accent-green)";
+        status.innerHTML = "✅ تم تجهيز الصورة بنجاح من المعرض!";
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ==========================================
+// 🏷️ إدارة وحفظ خصم المطاعم
+// ==========================================
+function saveRestaurantDiscount() {
+  const rest = document.getElementById("admDiscountRestSelect").value;
+  const percent = Number(document.getElementById("admDiscountPercent").value) || 0;
+  const active = document.getElementById("admDiscountStatus").value === "1";
+
+  if (!rest) {
+    alert("يرجى اختيار المطعم!");
+    return;
+  }
+
+  if (active && (percent <= 0 || percent > 90)) {
+    alert("يرجى إدخال نسبة خصم صحيحة بين 1% و 90%!");
+    return;
+  }
+
+  restDiscounts[rest] = { percent: percent, active: active };
+  try { localStorage.setItem('wj_rest_discounts', JSON.stringify(restDiscounts)); } catch(e) {}
+
+  sendDiscountsToCloud();
+  renderActiveDiscountsList();
+  renderMeals();
+  updateCartUI();
+  showToast(`🔥 تم حفظ خصم مطعم: ${rest}`);
+}
+
+function removeRestDiscount(rest) {
+  if (restDiscounts[rest]) {
+    delete restDiscounts[rest];
+    try { localStorage.setItem('wj_rest_discounts', JSON.stringify(restDiscounts)); } catch(e) {}
+    sendDiscountsToCloud();
+    renderActiveDiscountsList();
+    renderMeals();
+    updateCartUI();
+    showToast(`🗑️ تم إلغاء خصم: ${rest}`);
+  }
+}
+
+function renderActiveDiscountsList() {
+  const box = document.getElementById("activeRestDiscountsList");
+  if (!box) return;
+  const keys = Object.keys(restDiscounts);
+  if (keys.length === 0) {
+    box.innerHTML = '<div style="color:var(--text-muted); font-size:11px; text-align:center; padding:8px;">لا توجد خصومات مخصصة للمطاعم حالياً</div>';
+    return;
+  }
+
+  box.innerHTML = keys.map(r => {
+    const item = restDiscounts[r];
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #292d38; font-size:11px;">
+        <div>
+          <strong style="color:#fff;">${r}</strong>: 
+          <span style="color:${item.active ? 'var(--accent-green)' : 'var(--text-muted)'}; font-weight:800;">
+            ${item.active ? `خصم ${item.percent}% (مفعّل)` : 'متوقف'}
+          </span>
+        </div>
+        <button type="button" onclick="removeRestDiscount('${r}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:4px 8px; border-radius:8px; font-weight:800; cursor:pointer;">إلغاء</button>
+      </div>
+    `;
+  }).join('');
 }
 
 function populateAdminDeliveryInput() {
@@ -1683,9 +1870,6 @@ function saveDeliveryFee() {
 
   orderDeliveryFee = newFee;
   try { localStorage.setItem('wj_delivery_fee', orderDeliveryFee); } catch(e) {}
-
-  sendToCloud({ action: "update_delivery", delivery_fee: orderDeliveryFee });
-
   renderMeals();
   updateCartUI();
   renderCartDrawerContent();
@@ -1734,9 +1918,6 @@ function saveAdminBanners() {
   ];
 
   try { localStorage.setItem('wj_app_banners', JSON.stringify(appBanners)); } catch(e) {}
-
-  sendToCloud({ action: "update_banners", banners: appBanners });
-
   renderBanners();
   initBannerSlider();
   showToast("📢 تم تعميم البنر في كل الأجهزة");
@@ -1766,11 +1947,34 @@ function addNewRestaurant() {
   populateAdminDropdowns();
   updateAdminStats();
 
-  sendToCloud({ action: "add_restaurant", name: name, phone: cleanP });
-
   document.getElementById("newRestName").value = "";
   document.getElementById("newRestPhone").value = "";
   showToast(`🏪 أضيف مطعم: ${name}`);
+}
+
+// ==========================================
+// 📋 كشف الحساب والمبيعات السحابي المركزي
+// ==========================================
+async function syncOrdersFromCloud() {
+  const box = document.getElementById("ordersListContainer");
+  if (box && cloudOrders.length === 0) {
+    box.innerHTML = '<div style="color:var(--accent-orange); text-align:center; padding:15px; font-size:12px;">⏳ جاري جلب أحدث الطلبات من السحابة...</div>';
+  }
+
+  try {
+    const res = await fetch(FIREBASE_ORDERS_URL + "?_t=" + Date.now(), { cache: "no-store" });
+    const data = await res.json();
+    if (data && typeof data === "object") {
+      cloudOrders = Object.values(data).filter(Boolean);
+      // ترتيب تنازلي حسب الوقت الأحدث أولاً
+      cloudOrders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      try { localStorage.setItem('wj_orders_history', JSON.stringify(cloudOrders)); } catch(e) {}
+    }
+  } catch(e) {
+    console.error("Cloud orders fetch error:", e);
+  }
+
+  renderOrdersLog();
 }
 
 function renderOrdersLog() {
@@ -1779,10 +1983,7 @@ function renderOrdersLog() {
   const countEl = document.getElementById("filteredOrdersCount");
   const totalEl = document.getElementById("filteredOrdersTotal");
 
-  let orders = [];
-  try { orders = JSON.parse(localStorage.getItem('wj_orders_history') || '[]'); } catch(e) {}
-
-  const filtered = orders.filter(o => filter === "الكل" || o.restaurant === filter);
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || o.restaurant === filter));
   const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
 
   if (countEl) countEl.innerText = filtered.length;
@@ -1791,32 +1992,74 @@ function renderOrdersLog() {
   if (!box) return;
 
   if (filtered.length === 0) {
-    box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px; font-size:12px;">لا توجد طلبات مسجلة حتى الآن</div>';
+    box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px; font-size:12px;">لا توجد طلبات مسجلة لهذا المطعم حتى الآن</div>';
     return;
   }
 
   box.innerHTML = filtered.map(o => `
-    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:10px; margin-bottom:8px; font-size:11px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <span style="font-weight:900; color:var(--primary);">${o.id}</span>
-        <span style="color:var(--text-muted);">${o.date}</span>
+    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:12px; margin-bottom:10px; font-size:11px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-weight:900; color:var(--primary); font-size:12px;">${o.id || '#WJ'}</span>
+        <span style="color:var(--text-muted); font-size:10px;">${o.date || ''}</span>
       </div>
-      <div style="color:#fff; font-weight:800; margin-bottom:2px;">🏪 المطعم: ${o.restaurant}</div>
-      <div style="color:var(--accent-orange); margin-bottom:2px;">👤 الزبون: ${o.customer} (${o.phone})</div>
-      <div style="color:var(--text-muted); margin-bottom:4px; font-size:10px;">📦 المواد: ${o.items}</div>
-      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #292d38; padding-top:4px;">
-        <span style="color:var(--text-muted);">المبلغ المطلوب:</span>
-        <span style="color:var(--accent-green); font-weight:900; font-size:12px;">${money(o.total)}</span>
+      <div style="color:#fff; font-weight:800; margin-bottom:3px;">🏪 المطعم: <span style="color:var(--accent-orange);">${o.restaurant || 'غير محدد'}</span></div>
+      <div style="color:var(--text-main); margin-bottom:3px;">
+        👤 الزبون: <strong>${o.customer || ''}</strong> 
+        <a href="tel:${o.phone}" style="color:var(--accent-green); text-decoration:none; margin-right:4px;">📞 ${o.phone || ''}</a>
+      </div>
+      <div style="color:var(--text-muted); margin-bottom:4px;">📍 العنوان: ${o.address || ''}</div>
+      ${o.location_url && o.location_url.startsWith('http') ? `<div style="margin-bottom:5px;"><a href="${o.location_url}" target="_blank" style="color:var(--accent-green); text-decoration:underline; font-weight:800;">🗺️ فتح موقع الخريطة الدقيق</a></div>` : ''}
+      <div style="background:#101218; padding:6px 8px; border-radius:8px; margin-bottom:6px; color:#ddd; font-size:11px; line-height:1.4;">
+        📦 المواد: ${o.items || ''}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #292d38; padding-top:6px;">
+        <span style="color:var(--text-muted);">المبلغ المطلوب من الزبون:</span>
+        <span style="color:var(--accent-green); font-weight:900; font-size:13px;">${money(o.total)}</span>
       </div>
     </div>
   `).join('');
 }
 
+// نسخ كشف حساب للمطعم مباشرة لإرساله عبر واتساب
+function copyCurrentRestaurantReport() {
+  const filter = (document.getElementById("ordersRestFilter")?.value || "الكل");
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || o.restaurant === filter));
+  
+  if (filtered.length === 0) {
+    alert("لا توجد طلبات لنسخها!");
+    return;
+  }
+
+  const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+  let reportText = `📋 *كشف حساب مبيعات تطبيق وجباتي*\n` +
+    `🏪 المطعم: *${filter}*\n` +
+    `🔢 إجمالي عدد الطلبات: *${filtered.length}*\n` +
+    `💰 المجموع الكلي للمبيعات: *${money(sum)}*\n\n` +
+    `--------------------------\n`;
+
+  filtered.forEach((o, idx) => {
+    reportText += `${idx + 1}. طلب ${o.id} (${o.date})\n   👤 ${o.customer} - ${o.phone}\n   📦 ${o.items}\n   💵 المبلغ: ${money(o.total)}\n\n`;
+  });
+
+  navigator.clipboard.writeText(reportText).then(() => {
+    showToast("📋 تم نسخ الكشف! يمكنك لصقه بواتساب المطعم");
+  }).catch(() => {
+    alert(reportText);
+  });
+}
+
 function clearOrdersLog() {
-  if (confirm("هل تريد مسح سجل الطلبات بالكامل؟")) {
+  if (confirm("هل تريد مسح سجل الطلبات بالكامل من السحابة؟")) {
+    cloudOrders = [];
     localStorage.removeItem('wj_orders_history');
-    renderOrdersLog();
-    showToast("🗑️ تم مسح سجل الطلبات");
+    fetch(FIREBASE_ORDERS_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    }).then(() => {
+      renderOrdersLog();
+      showToast("🗑️ تم مسح سجل الطلبات بنجاح");
+    });
   }
 }
 
@@ -1831,17 +2074,14 @@ function populateAdminCouponInputs() {
   if (cStatus) cStatus.value = couponConfig.active ? "شغال" : "متوقف";
 }
 
-async function saveAdminCoupon() {
+function saveAdminCoupon() {
   const code = (document.getElementById("admCouponCode").value || "wa10").trim().toLowerCase();
   const amt = Number(document.getElementById("admCouponAmount").value) || 500;
   const minO = Number(document.getElementById("admCouponMin").value) || 5000;
   const stat = document.getElementById("admCouponStatus").value;
 
   couponConfig = { code, amount: amt, minOrder: minO, active: (stat === "شغال") };
-
   try { localStorage.setItem('wj_coupon_config', JSON.stringify(couponConfig)); } catch(e) {}
-
-  sendToCloud({ action: "update_coupon", code, amount: amt, minOrder: minO, status: stat });
 
   refreshCouponUI();
   updateCartUI();
@@ -1886,8 +2126,8 @@ function addNewMealLocally() {
     localStorage.setItem('wj_custom_added_meals', JSON.stringify(localCustom));
   } catch(e) {}
 
-  sendToCloud({ action: "add_meal", meal: newMeal });
   saveMealOverridesToStorage();
+  sendMealsToCloud();
 
   selectedZone = "الكل";
   selectedRest = "الكل";
@@ -1902,17 +2142,22 @@ function addNewMealLocally() {
   document.getElementById("newMealName").value = "";
   document.getElementById("newMealPrice").value = "";
   document.getElementById("newMealImg").value = "";
+  const previewBox = document.getElementById("mealImgPreviewBox");
+  if (previewBox) previewBox.style.display = "none";
+  const status = document.getElementById("mealImgUploadStatus");
+  if (status) status.innerText = "";
+  
   closeAdminPanel();
-
-  showToast(`🍔 أضيفت وثبتت سحابياً: ${name}`);
+  showToast(`🍔 أضيفت بالصورة وثبتت سحابياً: ${name}`);
 }
 
 function filterQuickMeals() {
-  const q = (document.getElementById("quickSearchMeal").value || "").toLowerCase().trim();
+  const q = (document.getElementById("quickSearchMeal")?.value || "").toLowerCase().trim();
   const box = document.getElementById("quickMealsList");
   if (!box) return;
 
-  const filtered = allMeals.filter(m => !q || m.name.toLowerCase().includes(q) || m.rest.toLowerCase().includes(q)).slice(0, 30);
+  const validMeals = allMeals.filter(m => m && m.name);
+  const filtered = validMeals.filter(m => !q || m.name.toLowerCase().includes(q) || (m.rest && m.rest.toLowerCase().includes(q))).slice(0, 30);
 
   if (filtered.length === 0) {
     box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px; font-size:12px;">لا توجد وجبات مطابقة</div>';
@@ -1936,16 +2181,14 @@ function filterQuickMeals() {
 }
 
 function promptEditMealPrice(mealId) {
-  const item = allMeals.find(m => String(m.id) === String(mealId));
+  const item = allMeals.find(m => m && String(m.id) === String(mealId));
   if (!item) return;
 
   const newP = prompt(`أدخل السعر الجديد لوجبة (${item.name}) بالدينار:`, item.price);
   if (newP !== null && !isNaN(newP) && Number(newP) > 0) {
     item.price = Number(newP);
     saveMealOverridesToStorage();
-
-    sendToCloud({ action: "update_meal", meal_id: item.id, price: item.price });
-
+    sendMealsToCloud();
     renderMeals();
     updateCartUI();
     filterQuickMeals();
@@ -1954,16 +2197,14 @@ function promptEditMealPrice(mealId) {
 }
 
 function promptEditMealImg(mealId) {
-  const item = allMeals.find(m => String(m.id) === String(mealId));
+  const item = allMeals.find(m => m && String(m.id) === String(mealId));
   if (!item) return;
 
   const newImg = prompt(`ضع رابط الصورة الجديد لوجبة (${item.name}):`, item.img);
   if (newImg !== null && newImg.trim() !== "") {
     item.img = newImg.trim();
     saveMealOverridesToStorage();
-
-    sendToCloud({ action: "update_meal", meal_id: item.id, img: item.img });
-
+    sendMealsToCloud();
     renderMeals();
     filterQuickMeals();
     showToast(`🖼️ تم تعديل صورة: ${item.name}`);
@@ -1971,14 +2212,12 @@ function promptEditMealImg(mealId) {
 }
 
 function deleteMeal(mealId) {
-  const item = allMeals.find(m => String(m.id) === String(mealId));
+  const item = allMeals.find(m => m && String(m.id) === String(mealId));
   if (!item) return;
 
   if (confirm(`هل أنت متأكد من حذف وجبة (${item.name})؟`)) {
-    allMeals = allMeals.filter(m => String(m.id) !== String(mealId));
-
-    sendToCloud({ action: "delete_meal", meal_id: mealId });
-
+    allMeals = allMeals.filter(m => m && String(m.id) !== String(mealId));
+    sendMealsToCloud();
     buildRestaurantsBar();
     buildCategoriesBar();
     renderMeals();
@@ -1988,17 +2227,79 @@ function deleteMeal(mealId) {
   }
 }
 
+// ==========================================
+// 🚀 ربط Firebase السحابي الفوري
+// ==========================================
+function sendMealsToCloud() {
+  const cleanList = allMeals.filter(m => m && m.name);
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cleanList)
+  })
+  .then(() => console.log("✅ تم تحديث الوجبات في Firebase"))
+  .catch(err => console.error("❌ خطأ بحفظ وجبات فايربيس:", err));
+}
+
+function sendDiscountsToCloud() {
+  fetch(FIREBASE_DISCOUNTS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(restDiscounts)
+  })
+  .then(() => console.log("✅ تم تحديث خصومات المطاعم في Firebase"))
+  .catch(err => console.error("❌ خطأ بحفظ الخصومات:", err));
+}
+
+async function syncQuietlyWithSheet() {
+  try {
+    const resMeals = await fetch(FIREBASE_MEALS_URL + "?_t=" + Date.now(), { cache: "no-store" });
+    const dataMeals = await resMeals.json();
+
+    let remoteMeals = [];
+    if (Array.isArray(dataMeals)) {
+      remoteMeals = dataMeals.filter(m => m && typeof m === "object" && m.name);
+    } else if (dataMeals && typeof dataMeals === "object") {
+      remoteMeals = Object.values(dataMeals).filter(m => m && typeof m === "object" && m.name);
+    }
+
+    if (remoteMeals.length > 0) {
+      allMeals = remoteMeals;
+      renderMeals();
+      buildRestaurantsBar();
+      buildCategoriesBar();
+      filterQuickMeals();
+      updateAdminStats();
+    } else if ((!dataMeals || remoteMeals.length === 0) && allMeals && allMeals.length > 0) {
+      sendMealsToCloud();
+    }
+
+    const resDisc = await fetch(FIREBASE_DISCOUNTS_URL + "?_t=" + Date.now(), { cache: "no-store" });
+    const dataDisc = await resDisc.json();
+    if (dataDisc && typeof dataDisc === "object") {
+      restDiscounts = dataDisc;
+      try { localStorage.setItem('wj_rest_discounts', JSON.stringify(restDiscounts)); } catch(e) {}
+      renderMeals();
+      updateCartUI();
+    }
+  } catch (err) {
+    console.error("❌ خطأ بمزامنة السحابة:", err);
+  }
+}
+
 async function manualSyncFromSheet() {
   const status = document.getElementById("adminSyncStatus");
   status.style.color = "var(--accent-orange)";
-  status.innerText = "⏳ جاري جلب وتحديث البيانات من Google Sheets...";
+  status.innerText = "⏳ جاري المزامنة السحابية الفورية...";
   await syncQuietlyWithSheet();
+  await syncOrdersFromCloud();
   status.style.color = "var(--accent-green)";
-  status.innerText = "✅ تم تحديث جميع الوجبات والأسعار والبنرات بنجاح!";
-  showToast("🔄 تمت المزامنة السحابية بنجاح");
-  setTimeout(() => { if (status) status.innerText = ""; }, 4000);
+  status.innerText = "✅ تمت المزامنة وجلب أحدث البيانات والطلبات بنجاح!";
+  showToast("🔄 تمت المزامنة بنجاح");
+  setTimeout(() => { if (status) status.innerText = ""; }, 3500);
 }
 
+// التشغيل والتهيئة الأولية
 loadPersistedData();
 applyMealOverrides();
 renderBanners();
@@ -2011,52 +2312,18 @@ restoreCustomerData();
 updateCartUI();
 
 syncQuietlyWithSheet();
+syncOrdersFromCloud();
 setInterval(syncQuietlyWithSheet, 20000);
-window.addEventListener("focus", syncQuietlyWithSheet);
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) syncQuietlyWithSheet();
+window.addEventListener("focus", () => {
+  syncQuietlyWithSheet();
+  syncOrdersFromCloud();
 });
-  // ==========================================
-// 🚀 ربط فايربيس السحابي المباشر والسريع
-// ==========================================
-const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
-
-// 1. دالة حفظ وتحديث الوجبات فوراً في فايربيس
-sendToCloud = function() {
-  fetch(FIREBASE_MEALS_URL, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(allMeals)
-  })
-  .then(() => console.log("✅ تم الحفظ في Firebase بنجاح"))
-  .catch(err => console.error("❌ خطأ بحفظ فايربيس:", err));
-};
-// دالة جلب الوجبات وتحديثها تلقائياً عند كل الزبائن .2 //
-syncQuietlyWithSheet = async function() {
-  try {
-    const res = await fetch(FIREBASE_MEALS_URL, { cache: "no-store" });
-    const data = await res.json();
-    
-    let remoteMeals = [];
-    if (Array.isArray(data)) {
-      remoteMeals = data.filter(Boolean);
-    } else if (data && typeof data === "object") {
-      remoteMeals = Object.values(data);
-    }
-
-    if (remoteMeals.length > 0) {
-      allMeals = remoteMeals;
-      if (typeof renderMeals === "function") renderMeals();
-      if (typeof buildRestaurantsBar === "function") buildRestaurantsBar();
-      if (typeof buildCategoriesBar === "function") buildCategoriesBar();
-      if (typeof filterQuickMeals === "function") filterQuickMeals();
-      if (typeof updateAdminStats === "function") updateAdminStats();
-    } else if ((!data || remoteMeals.length === 0) && allMeals && allMeals.length > 0) {
-      sendToCloud();
-    }
-  } catch (err) {
-    console.error("❌ خطأ بمزامنة فايربيس:", err);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    syncQuietlyWithSheet();
+    syncOrdersFromCloud();
   }
-};
-
-syncQuietlyWithSheet();
+});
+</script>
+</body>
+</html>
