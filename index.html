@@ -1987,11 +1987,10 @@ sendToCloud = function() {
   .then(() => console.log("✅ تم الحفظ في Firebase بنجاح"))
   .catch(err => console.error("❌ خطأ بحفظ فايربيس:", err));
 };
-
-// 2. دالة جلب الوجبات وتحديثها تلقائياً عند كل الزبائن
+// دالة جلب الوجبات وتحديثها تلقائياً عند كل الزبائن .2 //
 syncQuietlyWithSheet = async function() {
   try {
-    const res = await fetch(FIREBASE_MEALS_URL);
+    const res = await fetch(FIREBASE_MEALS_URL, { cache: "no-store" });
     const data = await res.json();
     
     let remoteMeals = [];
@@ -2009,7 +2008,6 @@ syncQuietlyWithSheet = async function() {
       if (typeof filterQuickMeals === "function") filterQuickMeals();
       if (typeof updateAdminStats === "function") updateAdminStats();
     } else if ((!data || remoteMeals.length === 0) && allMeals && allMeals.length > 0) {
-      // إذا كان فايربيس فارغاً بالبداية، يرفع وجبات التطبيق الحالية له تلقائياً
       sendToCloud();
     }
   } catch (err) {
@@ -2017,9 +2015,4 @@ syncQuietlyWithSheet = async function() {
   }
 };
 
-// تشغيل الجلب فور فتح التطبيق
 syncQuietlyWithSheet();
-
-</script>
-</body>
-</html>
