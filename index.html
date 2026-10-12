@@ -618,7 +618,6 @@
 
 <div id="toastBox">✨ تم التحديث بنجاح</div>
 
-<!-- شريط الإشعار الحي المباشر للزبائن -->
 <div id="liveAlertBar" class="live-alert-bar" style="display:none;" onclick="handleLiveAlertClick()">
   <div class="live-alert-content">
     <div class="live-alert-badge">🔔 عرض خاص</div>
@@ -1089,7 +1088,6 @@ const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.fir
 const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
 const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
 
-// حماية الكود: تركه فارغاً حتى لا يعترضه GitHub، ويقرأ دائماً من جهازك بأمان
 const DEFAULT_GEMINI_API_KEY = "";
 
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
@@ -1227,14 +1225,15 @@ function normalizeCategory(cat) {
   const c = String(cat).trim().toLowerCase();
   if (c === 'burger' || c.includes('برجر') || c.includes('بركر')) return 'برجر';
   if (c === 'pizza' || c.includes('بيتزا') || c.includes('فطائر')) return 'بيتزا وفطائر';
-  if (c === 'crispy' || c.includes('مقرمش') || c.includes('كنتاكي')) return 'دجاج ومقرمش';
+  if (c === 'crispy' || c.includes('مقرمش') || c.includes('كنتاكي') || c.includes('ستربس')) return 'دجاج ومقرمش';
   if (c === 'rizo' || c.includes('ريزو')) return 'ريزو';
   if (c === 'shawarma' || c.includes('شاورما') || c.includes('صاج')) return 'شاورما وصاج';
   if (c === 'falafel' || c.includes('فلافل')) return 'فلافل';
-  if (c === 'eastern' || c.includes('مشاوي') || c.includes('شرقي')) return 'مشويات وشرقي';
-  if (c === 'drinks' || c.includes('مشروب')) return 'مشروبات';
-  if (c.includes('مقبلات')) return 'مقبلات وسناك';
-  return cat;
+  if (c === 'eastern' || c.includes('مشاوي') || c.includes('شرقي') || c.includes('كباب')) return 'مشويات وشرقي';
+  if (c === 'drinks' || c.includes('مشروب') || c.includes('عصير')) return 'مشروبات';
+  if (c.includes('مقبلات') || c.includes('سلط')) return 'مقبلات وسناك';
+  if (CATS.includes(cat)) return cat;
+  return 'وجبات أخرى';
 }
 
 let allMeals = [
@@ -1753,9 +1752,6 @@ function getExactGpsLocation() {
   );
 }
 
-// ==========================================
-// 🚀 إرسال وتسجيل الطلب سحابياً في Firebase
-// ==========================================
 async function submitFullOrder() {
   saveCustomerData();
   const name = document.getElementById("custName").value.trim();
@@ -1896,9 +1892,6 @@ function openDiscountsModal() { refreshCouponUI(); document.getElementById("disc
 function closeDiscountsModal() { document.getElementById("discountsModal").classList.remove("show"); }
 function closeIfOutsideDiscounts(e) { if (e.target.id === 'discountsModal') closeDiscountsModal(); }
 
-// ==========================================
-// 🔔 الإشعار الحي والروابط المباشرة (Deep Linking)
-// ==========================================
 function updateLiveAlertUI() {
   const bar = document.getElementById("liveAlertBar");
   if (!bar) return;
@@ -1950,7 +1943,7 @@ function checkUrlDeepLink() {
 }
 
 // ==========================================
-// 📷 ماسح المنيو بالذكاء الاصطناعي (AI Menu Scanner) بنماذج Gemini 2.5 الحديثة
+// 📷 ماسح المنيو بالذكاء الاصطناعي (AI Menu Scanner) بالنماذج المعتمدة من Google
 // ==========================================
 function saveGeminiApiKey() {
   const key = document.getElementById("geminiApiKey")?.value.trim() || "";
@@ -2053,8 +2046,8 @@ async function runAiMenuScan() {
 2. الإخراج يجب أن يكون JSON Array نقي فقط وبدون أي مقدمات أو علامات markdown code blocks:
 [{"name": "برجر لحم", "cat": "برجر", "price": 3000}]`;
 
-  // تجربة النماذج الحديثة المعتمدة لدى Google
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
+  // النماذج المعتمدة رسمياً والحديثة من Google
+  const modelsToTry = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"];
   let textResponse = "";
   let lastError = null;
 
@@ -2081,10 +2074,10 @@ async function runAiMenuScan() {
         throw new Error(data.error?.message || "تعذر الاستجابة من النموذج");
       }
 
-      textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      if (textResponse) {
+      textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (textResponse && textResponse.trim() !== "") {
         lastError = null;
-        break; // نجح الاستخراج
+        break;
       }
     } catch (err) {
       lastError = err;
@@ -2193,9 +2186,6 @@ function saveAllAiMealsToCloud() {
   closeAdminPanel();
 }
 
-// ==========================================
-// 🔐 التحقق والرموز السرية
-// ==========================================
 const SUPER_ADMIN_PIN = "198722";
 let lastAdminTapTime = 0;
 
@@ -3066,7 +3056,7 @@ function sendMealsToCloud() {
 }
 
 function sendDiscountsToCloud() {
-  fetch(FIREBASE_DISCOUNTS_URL, {
+  fetch(FIREBASE_DIScounts_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(restDiscounts)
