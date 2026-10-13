@@ -871,6 +871,13 @@
         <input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" oninput="saveCustomerData()" required>
         <input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" oninput="saveCustomerData()" required>
         <input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" oninput="saveCustomerData()" required>
+        
+        <!-- اختيار منطقة التوصيل لحساب أجور المطعم المحددة -->
+        <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك (لحساب كلفة التوصيل الدقيقة):</label>
+        <select id="custZoneSelect" class="form-input" onchange="saveCustomerData(); updateCartUI(); renderCartDrawerContent();">
+          <option value="الكرخ">جانب الكرخ</option>
+          <option value="الرصافة">جانب الرصافة</option>
+        </select>
       </div>
 
       <button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">
@@ -912,7 +919,7 @@
   </div>
 </div>
 
-<!-- لوحة تحكم المطعم المستقلة (لقفل الوجبات وكشف الحساب) -->
+<!-- لوحة تحكم المطعم المستقلة -->
 <div class="modal-backdrop" id="restPortalModal" onclick="closeIfOutsideRestPortal(event)">
   <div class="modal-box" style="max-width:460px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
@@ -966,6 +973,7 @@
 
     <div class="admin-tabs">
       <button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو AI</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل والمناطق</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 عجلة الحظ</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 إشعار وتنبيه</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
@@ -973,7 +981,6 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار وقفل الوجبات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
@@ -1021,6 +1028,38 @@
         <div id="aiExtractedList" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
         <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAllAiMealsToCloud()">
           🚀 حفظ كل الوجبات المستخرجة بالسحابة فوراً
+        </button>
+      </div>
+    </div>
+
+    <!-- 🛵 التوصيل والتحكم بكل مطعم ومناطقه -->
+    <div id="deliveryTab" class="admin-tab-content">
+      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
+        <span style="font-weight:900; color:var(--accent-orange); font-size:13px;">1. السعر الافتراضي العام (لأي مطعم غير مخصص):</span>
+        <input type="number" id="admDeliveryFee" class="form-input" placeholder="المبلغ بالدينار (مثال: 1000)" style="font-size:15px; font-weight:900; color:var(--accent-green); margin-top:8px;">
+        <button type="button" class="btn-discount" style="width:100%; padding:10px; font-weight:900; background:#333; color:#fff;" onclick="saveDeliveryFee()">
+          💾 حفظ السعر الافتراضي العام
+        </button>
+      </div>
+
+      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
+        <span style="font-weight:900; color:var(--accent-green); font-size:13px;">2. تخصيص سعر التوصيل لكل مطعم حسب المنطقة:</span>
+        <label style="font-size:11px; color:#fff; display:block; margin:8px 0 4px; font-weight:800;">اختر المطعم للتحكم بأجور توصيله:</label>
+        <select id="admRestDelivSelect" class="form-input" onchange="loadSelectedRestDelivery()"></select>
+
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">توصيل الكرخ (د.ع):</label>
+            <input type="number" id="admRestKarkhFee" class="form-input" placeholder="مثال: 1500" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">توصيل الرصافة (د.ع):</label>
+            <input type="number" id="admRestRusafaFee" class="form-input" placeholder="مثال: 2500" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+          </div>
+        </div>
+
+        <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #ff5722, #ff9800); color:#fff;" onclick="saveRestaurantSpecificDelivery()">
+          🚀 حفظ وتثبيت أجور توصيل هذا المطعم سحابياً
         </button>
       </div>
     </div>
@@ -1147,7 +1186,7 @@
         </select>
       </div>
 
-      <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111; margin-bottom:14px;" onclick="saveRestaurantDiscount()">
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveRestaurantDiscount()">
         💾 حفظ وتعميم خصم المطعم سحابياً
       </button>
       
@@ -1186,7 +1225,7 @@
       <div id="ordersListContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
-    <!-- ✏️ إدارة الوجبات والأسعار وقفل الحاجات (متوفرة / نفدت الكمية) -->
+    <!-- ✏️ إدارة الوجبات والأسعار وقفل الحاجات -->
     <div id="editMealsTab" class="admin-tab-content">
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">قفل أي وجبة تنفد بالمطعم، أو تعديل السعر وسعر التوفير:</p>
       <input type="text" id="quickSearchMeal" class="form-input" placeholder="ابحث باسم الوجبة أو المطعم..." oninput="filterQuickMeals()">
@@ -1197,17 +1236,6 @@
     <div id="restPinsTab" class="admin-tab-content">
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">الرموز السرية لكل مطعم للدخول للوحة الخاصة به وقفل وجباته:</p>
       <div id="restPinsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
-    </div>
-
-    <!-- 🛵 التوصيل -->
-    <div id="deliveryTab" class="admin-tab-content">
-      <div style="background:var(--bg-card); padding:14px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
-        <span style="font-weight:900; color:var(--accent-orange); font-size:13px;">🛵 أجور التوصيل الموحدة:</span>
-        <input type="number" id="admDeliveryFee" class="form-input" style="font-size:15px; font-weight:900; color:var(--accent-green); margin-top:8px;">
-        <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveDeliveryFee()">
-          💾 حفظ وتعميم أجور التوصيل سحابياً
-        </button>
-      </div>
     </div>
 
     <!-- 📢 البنر الإعلاني -->
@@ -1252,10 +1280,10 @@
 
     <!-- 🏪 إضافة مطعم جديد -->
     <div id="addRestTab" class="admin-tab-content">
-      <input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد">
-      <input type="tel" id="newRestPhone" class="form-input" placeholder="رقم واتساب المطعم">
+      <input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد (عربي أو English)">
+      <input type="tel" id="newRestPhone" class="form-input" placeholder="رقم واتساب المطعم (مثال: 07701234567)">
       <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="addNewRestaurant()">
-        ➕ إضافة المطعم واعتماده فوراً
+        ➕ إضافة المطعم وحفظه سحابياً للأبد
       </button>
     </div>
 
@@ -1270,6 +1298,10 @@ const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.fir
 const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
 const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
 const FIREBASE_WHEEL_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wheel_config.json";
+const FIREBASE_RESTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/restaurants.json";
+const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_phones.json";
+const FIREBASE_PINS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_pins.json";
+const FIREBASE_DELIVERY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_delivery_fees.json";
 
 const DEFAULT_GEMINI_API_KEY = "";
 
@@ -1286,6 +1318,9 @@ let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
 let restDiscounts = {};
 let cloudOrders = [];
 
+// أجور التوصيل المخصصة لكل مطعم حسب المنطقة (الكرخ / الرصافة)
+let restDeliveryFees = {};
+
 let generalDiscountConfig = {
   active: true,
   tier1: { min: 3000, discount: 500 },
@@ -1296,7 +1331,6 @@ let currentFlashAlert = null;
 let currentMenuBase64 = "";
 let tempAiExtractedMeals = [];
 
-// إعدادات عجلة الحظ
 let wheelConfig = {
   active: true,
   restaurant: "مطعم سندريلا",
@@ -1330,7 +1364,8 @@ const DEFAULT_REST_PINS = {
 let REST_PINS = { ...DEFAULT_REST_PINS };
 let currentPortalRest = "";
 
-let RESTS = ["مطعم سندريلا", "Riz", "اهل الكرم", "بوراك", "بوكس بركر", "جكن عمو ناجي", "جيكي بركر", "دجاج الباشا الشهير", "زعتر وزيتون", "شاورما ابو العبد", "فلافل لبنان", "صاج البديع", "ورق عنب بغداد"];
+const BASE_RESTS = ["مطعم سندريلا", "Riz", "اهل الكرم", "بوراك", "بوكس بركر", "جكن عمو ناجي", "جيكي بركر", "دجاج الباشا الشهير", "زعتر وزيتون", "شاورما ابو العبد", "فلافل لبنان", "صاج البديع", "ورق عنب بغداد"];
+let RESTS = [...BASE_RESTS];
 
 let REST_PHONES = {
   "مطعم سندريلا": "9647708111561",
@@ -1345,7 +1380,6 @@ let REST_PHONES = {
   "صاج البديع": "9647708111561"
 };
 
-// وجبات أولية بنظام التوفير وقفل الحاجات
 let allMeals = [
   {
     id: 9001,
@@ -1427,6 +1461,22 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
+// دالة حساب أجور التوصيل بدقة حسب المطعم والمنطقة المختارة
+function getDeliveryFeeForRestaurant(restName, targetZone = null) {
+  const zone = targetZone || document.getElementById("custZoneSelect")?.value || (selectedZone !== "الكل" ? selectedZone : "الكرخ");
+  
+  if (restName && restDeliveryFees) {
+    // البحث دون التأثر بحالة الحروف الكبيرة أو الصغيرة
+    const matchedKey = Object.keys(restDeliveryFees).find(k => k.toLowerCase().trim() === restName.toLowerCase().trim());
+    if (matchedKey && restDeliveryFees[matchedKey]) {
+      const config = restDeliveryFees[matchedKey];
+      if (zone === "الرصافة" && config.rusafa) return Number(config.rusafa);
+      if (zone === "الكرخ" && config.karkh) return Number(config.karkh);
+    }
+  }
+  return orderDeliveryFee;
+}
+
 function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dotsBox = document.getElementById("bannerDots");
@@ -1480,11 +1530,18 @@ function calculateCartDiscount(subtotal, targetRest) {
 
 function buildRestaurantsBar() {
   const allR = [...RESTS, ...allMeals.map(m => m.rest).filter(Boolean)];
-  const rests = ["الكل", ...new Set(allR)];
+  const uniqueRests = [];
+  allR.forEach(r => {
+    if (r && !uniqueRests.some(item => item.toLowerCase().trim() === r.toLowerCase().trim())) {
+      uniqueRests.push(r.trim());
+    }
+  });
+
+  const rests = ["الكل", ...uniqueRests];
   const rBar = document.getElementById("restaurantsBar");
   if (!rBar) return;
   rBar.innerHTML = rests.map(r => `
-    <div class="pill ${r === selectedRest ? 'active-white' : ''}" onclick="setRestaurant('${r}', this)">
+    <div class="pill ${r.toLowerCase() === selectedRest.toLowerCase() ? 'active-white' : ''}" onclick="setRestaurant('${r.replace(/'/g, "\\'")}', this)">
       ${r === 'الكل' ? 'كل المطاعم' : r}
     </div>
   `).join('');
@@ -1493,10 +1550,10 @@ function buildRestaurantsBar() {
 function buildCategoriesBar() {
   const cBar = document.getElementById("categoriesBar");
   if (!cBar) return;
-  let pool = (selectedRest === "الكل") ? allMeals : allMeals.filter(m => m.rest === selectedRest);
+  let pool = (selectedRest === "الكل") ? allMeals : allMeals.filter(m => m.rest && m.rest.toLowerCase().trim() === selectedRest.toLowerCase().trim());
   const cats = ["الكل", ...new Set(pool.map(m => m.cat).filter(Boolean))];
   cBar.innerHTML = cats.map(c => `
-    <div class="pill ${c === selectedCat ? 'active-green' : ''}" onclick="setCategory('${c}', this)">
+    <div class="pill ${c === selectedCat ? 'active-green' : ''}" onclick="setCategory('${c.replace(/'/g, "\\'")}', this)">
       ${c === 'الكل' ? 'كل الأصناف' : c}
     </div>
   `).join('');
@@ -1506,7 +1563,11 @@ function setZone(zone, el) {
   selectedZone = zone;
   document.querySelectorAll('.zone-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+  const custZ = document.getElementById("custZoneSelect");
+  if (custZ && zone !== "الكل") custZ.value = zone;
   renderMeals();
+  updateCartUI();
+  renderCartDrawerContent();
 }
 
 function setRestaurant(rest, el = null) {
@@ -1525,7 +1586,6 @@ function setCategory(cat, el) {
   renderMeals();
 }
 
-// عرض الوجبات مع فحص القفل والتوفر (قفل حاجة)
 function renderMeals() {
   const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
   const grid = document.getElementById("mealsGrid");
@@ -1534,7 +1594,7 @@ function renderMeals() {
   const validMeals = allMeals.filter(m => m && m.name);
   const filtered = validMeals.filter(m => {
     const matchZone = selectedZone === "الكل" || m.zone === selectedZone;
-    const matchRest = selectedRest === "الكل" || m.rest === selectedRest;
+    const matchRest = selectedRest === "الكل" || (m.rest && m.rest.toLowerCase().trim() === selectedRest.toLowerCase().trim());
     const matchCat = selectedCat === "الكل" || m.cat === selectedCat;
     const matchCuisines = selectedCuisinesFilters.length === 0 || selectedCuisinesFilters.includes(m.cat);
 
@@ -1555,6 +1615,7 @@ function renderMeals() {
   grid.innerHTML = filtered.map(m => {
     const isAvailable = (m.available !== false);
     const hasSaving = (m.savingPrice && Number(m.savingPrice) > 0 && Number(m.savingPrice) < Number(m.price));
+    const thisRestDelivFee = getDeliveryFeeForRestaurant(m.rest);
 
     return `
       <div class="meal-card-talabaty ${!isAvailable ? 'out-of-stock' : ''}">
@@ -1568,7 +1629,7 @@ function renderMeals() {
         <div class="talabaty-info-box">
           <div class="talabaty-title">${m.name}</div>
           <div class="talabaty-desc">${m.desc || 'وجبة طازجة وشهية مُعدّة بعناية بأفضل المكونات'}</div>
-          <div class="talabaty-rest-tag">🏪 ${m.rest} • ${m.cat || 'وجبات عامة'}</div>
+          <div class="talabaty-rest-tag">🏪 ${m.rest} • 🛵 التوصيل: ${money(thisRestDelivFee)}</div>
           <div class="talabaty-pricing">
             ${hasSaving ? `
               <span class="talabaty-main-price">${money(m.savingPrice)}</span>
@@ -1631,9 +1692,7 @@ function applyCuisinesFilter() {
   else showToast("عرض كل الوجبات");
 }
 
-// ==========================================
-// 🎡 عجلة الحظ
-// ==========================================
+// عجلة الحظ
 const WHEEL_COLORS = ["#ff2a5f", "#ff9800", "#00e676", "#00b0ff", "#9c27b0", "#ffc107", "#4caf50", "#00bcd4"];
 
 function updateWheelVisibilityUI() {
@@ -1758,7 +1817,7 @@ function spinWheel() {
   requestAnimationFrame(animate);
 }
 
-// السلة والدفع ودمج هدية عجلة الحظ
+// السلة وحساب التوصيل الدقيق
 function addToCart(mealId) {
   const meal = allMeals.find(item => item && String(item.id) === String(mealId));
   if (!meal) return;
@@ -1790,9 +1849,10 @@ function updateCartUI() {
   const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
   const primaryRest = cart[0]?.rest || "";
+  const dynamicDelivery = getDeliveryFeeForRestaurant(primaryRest);
   
   const { discountAmount } = calculateCartDiscount(subtotal, primaryRest);
-  const grandTotal = subtotal > 0 ? Math.max(0, subtotal + orderDeliveryFee - discountAmount) : 0;
+  const grandTotal = subtotal > 0 ? Math.max(0, subtotal + dynamicDelivery - discountAmount) : 0;
 
   document.getElementById("cartCountTop").innerText = totalCount;
   document.getElementById("cartTotalItems").innerText = totalCount;
@@ -1809,8 +1869,11 @@ function renderCartDrawerContent() {
   const box = document.getElementById("drawerItemsList");
   const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
   const primaryRest = cart[0]?.rest || "";
+  const dynamicDelivery = getDeliveryFeeForRestaurant(primaryRest);
+  const targetZone = document.getElementById("custZoneSelect")?.value || "الكرخ";
+  
   const { discountAmount, discountLabel } = calculateCartDiscount(subtotal, primaryRest);
-  const grandTotal = Math.max(0, subtotal + orderDeliveryFee - discountAmount);
+  const grandTotal = Math.max(0, subtotal + dynamicDelivery - discountAmount);
 
   if (box) {
     box.innerHTML = cart.map(item => `
@@ -1833,7 +1896,10 @@ function renderCartDrawerContent() {
   if (billCard) {
     billCard.innerHTML = `
       <div class="bill-row"><span>مجموع المواد:</span><strong>${money(subtotal)}</strong></div>
-      <div class="bill-row" style="color:var(--accent-orange);"><span>أجور التوصيل الموحدة:</span><strong>${money(orderDeliveryFee)}</strong></div>
+      <div class="bill-row" style="color:var(--accent-orange);">
+        <span>أجور التوصيل إلى (${targetZone}):</span>
+        <strong>${money(dynamicDelivery)}</strong>
+      </div>
       ${discountAmount > 0 ? `<div class="bill-row" style="color:var(--accent-green); font-weight:800;"><span>${discountLabel}:</span><strong>-${money(discountAmount)}</strong></div>` : ''}
       ${userWonPrize ? `<div class="bill-row" style="color:var(--accent-green); font-weight:800;"><span>🎁 هدية عجلة الحظ:</span><strong>${userWonPrize.item} (مجاناً)</strong></div>` : ''}
       <div class="bill-row total"><span>المجموع الكلي:</span><strong>${money(grandTotal)}</strong></div>
@@ -1885,6 +1951,7 @@ async function submitFullOrder() {
   const name = document.getElementById("custName").value.trim();
   const phone = document.getElementById("custPhone").value.trim();
   const address = document.getElementById("custAddress").value.trim();
+  const targetZone = document.getElementById("custZoneSelect").value;
 
   if (!name || !phone || !address) {
     alert("يرجى ملء جميع الحقول المطلوبة!");
@@ -1893,9 +1960,10 @@ async function submitFullOrder() {
 
   const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
   const restName = cart[0].rest || "مطعم سندريلا";
+  const dynamicDelivery = getDeliveryFeeForRestaurant(restName, targetZone);
   const { discountAmount, discountLabel } = calculateCartDiscount(subtotal, restName);
   const targetPhone = cart[0].phone || REST_PHONES[restName] || "9647708111561";
-  const grandTotal = Math.max(0, subtotal + orderDeliveryFee - discountAmount);
+  const grandTotal = Math.max(0, subtotal + dynamicDelivery - discountAmount);
   const orderId = "#WJ-" + Math.floor(1000 + Math.random() * 9000);
 
   const orderPayload = {
@@ -1904,11 +1972,12 @@ async function submitFullOrder() {
     customer: name,
     phone: phone,
     address: address,
+    zone: targetZone,
     location_url: currentGpsLocation || "لم يتم التحديد",
     restaurant: restName,
     items: cart.map(i => `${i.name} (${i.qty}x)`).join(" + "),
     subtotal: subtotal,
-    deliveryFee: orderDeliveryFee,
+    deliveryFee: dynamicDelivery,
     discount: discountAmount,
     wheelPrize: userWonPrize ? userWonPrize.item : "بدون هدية",
     total: grandTotal
@@ -1919,7 +1988,7 @@ async function submitFullOrder() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderPayload)
-    }).catch(e => console.error(e));
+    });
   } catch(e) {}
 
   let waMsg = `*طلب جديد من تطبيق وجباتي 🍔*\n\n` +
@@ -1927,6 +1996,7 @@ async function submitFullOrder() {
     `المطعم: *${restName}*\n` +
     `الزبون: *${name}*\n` +
     `الهاتف: *${phone}*\n` +
+    `المنطقة: *${targetZone}*\n` +
     `العنوان: *${address}*\n`;
 
   if (currentGpsLocation) waMsg += `📍 الموقع الدقيق: ${currentGpsLocation}\n`;
@@ -1939,7 +2009,7 @@ async function submitFullOrder() {
   if (discountAmount > 0) waMsg += `\n${discountLabel}: -${money(discountAmount)}\n`;
   if (userWonPrize) waMsg += `🎁 *هدية عجلة الحظ الرابحة:* ${userWonPrize.item} (مجاناً من ${userWonPrize.rest})\n`;
 
-  waMsg += `\nأجور التوصيل الموحدة: ${money(orderDeliveryFee)}\n*المجموع الكلي المطلوب: ${money(grandTotal)}*`;
+  waMsg += `\nأجور التوصيل إلى (${targetZone}): ${money(dynamicDelivery)}\n*المجموع الكلي المطلوب: ${money(grandTotal)}*`;
 
   let cleanPhone = String(targetPhone).replace(/\D/g, '');
   if (cleanPhone.startsWith('07')) cleanPhone = '964' + cleanPhone.slice(1);
@@ -1952,33 +2022,41 @@ async function submitFullOrder() {
 }
 
 // ==========================================
-// 🔒 قفل وتوفر الوجبات (قفل حاجة مال مطاعم)
+// 🛵 إدارة أجور التوصيل المخصصة للمطاعم
 // ==========================================
-function toggleMealAvailability(mealId, isFromPortal = false) {
-  const item = allMeals.find(m => m && String(m.id) === String(mealId));
-  if (!item) return;
+function loadSelectedRestDelivery() {
+  const rest = document.getElementById("admRestDelivSelect").value;
+  const config = restDeliveryFees[rest] || { karkh: orderDeliveryFee, rusafa: orderDeliveryFee };
+  document.getElementById("admRestKarkhFee").value = config.karkh || orderDeliveryFee;
+  document.getElementById("admRestRusafaFee").value = config.rusafa || orderDeliveryFee;
+}
 
-  item.available = (item.available === false) ? true : false;
+function saveRestaurantSpecificDelivery() {
+  const rest = document.getElementById("admRestDelivSelect").value;
+  const karkh = Number(document.getElementById("admRestKarkhFee").value) || orderDeliveryFee;
+  const rusafa = Number(document.getElementById("admRestRusafaFee").value) || orderDeliveryFee;
 
-  fetch(FIREBASE_MEALS_URL, {
+  if (!rest) {
+    alert("يرجى اختيار المطعم أولاً!");
+    return;
+  }
+
+  restDeliveryFees[rest] = { karkh, rusafa };
+  localStorage.setItem('wj_rest_delivery_fees', JSON.stringify(restDeliveryFees));
+
+  fetch(FIREBASE_DELIVERY_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(allMeals.filter(m => m && m.name))
+    body: JSON.stringify(restDeliveryFees)
   });
 
   renderMeals();
-
-  if (isFromPortal) {
-    renderPortalMeals();
-    updatePortalStats();
-  } else {
-    filterQuickMeals();
-  }
-
-  showToast(item.available ? `✅ مفتوحة ومتوفرة: ${item.name}` : `🚫 تم قفل الوجبة (نفدت): ${item.name}`);
+  updateCartUI();
+  renderCartDrawerContent();
+  showToast(`🛵 تم تثبيت أجور توصيل (${rest}) للكرخ والرصافة!`);
 }
 
-// بوابات المطاعم المستقلة بالرمز السري
+// بوابات المطاعم
 function openRestPortal(restName) {
   currentPortalRest = restName;
   document.getElementById("portalRestTitle").innerText = restName;
@@ -2002,8 +2080,8 @@ function switchPortalTab(tabId, btn) {
 
 function updatePortalStats() {
   if (!currentPortalRest) return;
-  const myMeals = allMeals.filter(m => m && m.rest === currentPortalRest);
-  const myOrders = cloudOrders.filter(o => o && o.restaurant === currentPortalRest);
+  const myMeals = allMeals.filter(m => m && m.rest && m.rest.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
+  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
   const myTotal = myOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   document.getElementById("portalMealsCount").innerText = myMeals.length;
@@ -2016,7 +2094,7 @@ function renderPortalMeals() {
   const box = document.getElementById("portalMealsList");
   if (!box) return;
 
-  const myMeals = allMeals.filter(m => m && m.rest === currentPortalRest && (!q || m.name.toLowerCase().includes(q)));
+  const myMeals = allMeals.filter(m => m && m.rest && m.rest.toLowerCase().trim() === currentPortalRest.toLowerCase().trim() && (!q || m.name.toLowerCase().includes(q)));
 
   if (myMeals.length === 0) {
     box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:15px; font-size:12px;">لا توجد وجبات مسجلة</div>';
@@ -2046,7 +2124,7 @@ function renderPortalOrders() {
   const box = document.getElementById("portalOrdersList");
   if (!box) return;
 
-  const myOrders = cloudOrders.filter(o => o && o.restaurant === currentPortalRest);
+  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
   if (myOrders.length === 0) {
     box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px; font-size:12px;">لا توجد طلبات مسجلة لمطعمك</div>';
     return;
@@ -2058,7 +2136,7 @@ function renderPortalOrders() {
         <strong style="color:var(--primary);">${o.id || '#WJ'}</strong>
         <span style="color:var(--accent-green); font-weight:900;">${money(o.total)}</span>
       </div>
-      <div style="color:#fff;">👤 ${o.customer} (${o.phone})</div>
+      <div style="color:#fff;">👤 ${o.customer} - ${o.phone}</div>
       <div style="background:#101218; padding:5px 8px; border-radius:6px; color:#ddd; margin:4px 0;">📦 ${o.items}</div>
       ${o.wheelPrize && !o.wheelPrize.includes("بدون") ? `<div style="color:var(--accent-green); font-weight:800;">🎁 الهدية: ${o.wheelPrize}</div>` : ''}
     </div>
@@ -2067,12 +2145,10 @@ function renderPortalOrders() {
 
 function copyPortalRestaurantReport() {
   if (!currentPortalRest) return;
-  const myOrders = cloudOrders.filter(o => o && o.restaurant === currentPortalRest);
+  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
   if (myOrders.length === 0) { alert("لا توجد طلبات لنسخها!"); return; }
   const sum = myOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-  let reportText = `📋 *كشف مبيعات مطعم ${currentPortalRest}*\n` +
-    `🔢 عدد الطلبات: *${myOrders.length}*\n` +
-    `💰 إجمالي المبيعات: *${money(sum)}*\n\n`;
+  let reportText = `📋 *كشف مبيعات مطعم ${currentPortalRest}*\n🔢 عدد الطلبات: *${myOrders.length}*\n💰 إجمالي المبيعات: *${money(sum)}*\n\n`;
 
   myOrders.forEach((o, idx) => {
     reportText += `${idx + 1}. ${o.id} | ${o.customer} | ${money(o.total)}\n   📦 ${o.items}\n\n`;
@@ -2081,7 +2157,6 @@ function copyPortalRestaurantReport() {
   navigator.clipboard.writeText(reportText).then(() => showToast("📋 تم نسخ الكشف!"));
 }
 
-// التحقق ودخول الإدارة أو المطاعم
 const SUPER_ADMIN_PIN = "198722";
 let lastTap = 0;
 function handleAdminDoubleTap() {
@@ -2121,6 +2196,7 @@ function openAdminPanel() {
   renderWheelAdminUI();
   filterQuickMeals();
   syncOrdersFromCloud();
+  loadSelectedRestDelivery();
   document.getElementById("admDeliveryFee").value = orderDeliveryFee;
   const savedKey = localStorage.getItem('wj_gemini_api_key');
   if (savedKey) document.getElementById("geminiApiKey").value = savedKey;
@@ -2137,9 +2213,9 @@ function switchAdminTab(tabId, btn) {
   if (tabId === 'editMealsTab') filterQuickMeals();
   if (tabId === 'wheelAdminTab') renderWheelAdminUI();
   if (tabId === 'ordersLogTab') syncOrdersFromCloud();
+  if (tabId === 'deliveryTab') loadSelectedRestDelivery();
 }
 
-// الإشعار الحي
 function populateFlashAlertInputs() {
   const sel = document.getElementById("admAlertRestSelect");
   if (sel && currentFlashAlert?.rest) sel.value = currentFlashAlert.rest;
@@ -2199,7 +2275,6 @@ function handleLiveAlertClick() {
 }
 function dismissLiveAlert(e) { e.stopPropagation(); document.getElementById("liveAlertBar").style.display = "none"; }
 
-// الخصم العام
 function populateGeneralDiscountInputs() {
   document.getElementById("admTier1Min").value = generalDiscountConfig.tier1?.min || 3000;
   document.getElementById("admTier1Discount").value = generalDiscountConfig.tier1?.discount || 500;
@@ -2219,7 +2294,6 @@ function saveGeneralDiscountTiers() {
   showToast("🎁 تم حفظ الخصم العام سحابياً");
 }
 
-// خصم المطاعم
 function saveRestaurantDiscount() {
   const rest = document.getElementById("admDiscountRestSelect").value;
   const amount = Number(document.getElementById("admDiscountAmount").value) || 0;
@@ -2256,7 +2330,6 @@ function renderActiveDiscountsList() {
   `).join('');
 }
 
-// كشف الطلبات
 async function syncOrdersFromCloud() {
   try {
     const res = await fetch(FIREBASE_ORDERS_URL + "?_t=" + Date.now());
@@ -2272,7 +2345,7 @@ async function syncOrdersFromCloud() {
 function renderOrdersLog() {
   const filter = document.getElementById("ordersRestFilter")?.value || "الكل";
   const box = document.getElementById("ordersListContainer");
-  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || o.restaurant === filter));
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())));
   const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
 
   document.getElementById("filteredOrdersCount").innerText = filtered.length;
@@ -2293,7 +2366,7 @@ function renderOrdersLog() {
 
 function copyCurrentRestaurantReport() {
   const filter = document.getElementById("ordersRestFilter")?.value || "الكل";
-  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || o.restaurant === filter));
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())));
   if (filtered.length === 0) { alert("لا توجد طلبات!"); return; }
   const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
   let text = `📋 *كشف مبيعات ${filter}*\n🔢 الطلبات: ${filtered.length}\n💰 المجموع: ${money(sum)}\n\n`;
@@ -2310,7 +2383,6 @@ function clearOrdersLog() {
   }
 }
 
-// رموز المطاعم
 function renderRestPinsList() {
   const box = document.getElementById("restPinsList");
   if (!box) return;
@@ -2319,7 +2391,7 @@ function renderRestPinsList() {
   box.innerHTML = currentRests.map(r => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #292d38; font-size:12px;">
       <div><strong style="color:#fff;">${r}</strong><div style="color:var(--accent-orange); font-size:11px;">الرمز: <span style="color:#fff;">${REST_PINS[r] || '1100'}</span></div></div>
-      <button type="button" onclick="promptChangeRestPin('${r}')" style="background:#2a2e3a; color:#fff; border:1px solid #3a3f50; padding:5px 8px; border-radius:8px; font-weight:800; cursor:pointer;">تغيير ✏️</button>
+      <button type="button" onclick="promptChangeRestPin('${r.replace(/'/g, "\\'")}')" style="background:#2a2e3a; color:#fff; border:1px solid #3a3f50; padding:5px 8px; border-radius:8px; font-weight:800; cursor:pointer;">تغيير ✏️</button>
     </div>
   `).join('');
 }
@@ -2328,12 +2400,13 @@ function promptChangeRestPin(restName) {
   const newPin = prompt(`أدخل الرمز السري الجديد لمطعم (${restName}):`, REST_PINS[restName] || "1100");
   if (newPin && newPin.trim()) {
     REST_PINS[restName] = newPin.trim();
+    localStorage.setItem('wj_rest_pins', JSON.stringify(REST_PINS));
+    fetch(FIREBASE_PINS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PINS) });
     renderRestPinsList();
     showToast(`🔐 تم تحديث رمز: ${restName}`);
   }
 }
 
-// إدارة وتعديل الوجبات وقفل الحاجات
 function filterQuickMeals() {
   const q = (document.getElementById("quickSearchMeal")?.value || "").toLowerCase().trim();
   const box = document.getElementById("quickMealsList");
@@ -2367,6 +2440,7 @@ function promptEditMealSavingPrice(mealId) {
   const newSaving = prompt(`أدخل سعر التوفير المخفض لوجبة (${item.name}) بالدينار (اتركه فارغاً لإلغاء التوفير):`, item.savingPrice || "");
   if (newSaving !== null) {
     item.savingPrice = newSaving.trim() ? Number(newSaving) : null;
+    fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals.filter(m => m && m.name)) });
     renderMeals();
     filterQuickMeals();
     showToast(`🔥 تم تحديث سعر التوفير: ${item.name}`);
@@ -2379,17 +2453,17 @@ function promptEditMealPrice(mealId) {
   const newP = prompt(`أدخل السعر الأصلي لوجبة (${item.name}) بالدينار:`, item.price);
   if (newP !== null && !isNaN(newP) && Number(newP) > 0) {
     item.price = Number(newP);
+    fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals.filter(m => m && m.name)) });
     renderMeals();
     filterQuickMeals();
     showToast(`💰 تم تعديل السعر: ${item.name}`);
   }
 }
 
-// إضافة وجبة يدوياً
 function addNewMealLocally() {
   const name = document.getElementById("newMealName").value.trim();
   const desc = document.getElementById("newMealDesc").value.trim();
-  const rest = document.getElementById("newMealRest").value;
+  const rest = document.getElementById("newMealRest").value.trim();
   const cat = document.getElementById("newMealCatCustom").value.trim() || "وجبات التوفير";
   const price = Number(document.getElementById("newMealPrice").value);
   const savingPrice = Number(document.getElementById("newMealSavingPrice").value) || null;
@@ -2411,6 +2485,12 @@ function addNewMealLocally() {
     available: true
   });
 
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals.filter(m => m && m.name))
+  });
+
   buildCategoriesBar();
   renderMeals();
   closeAdminPanel();
@@ -2418,15 +2498,45 @@ function addNewMealLocally() {
 }
 
 function addNewRestaurant() {
-  const name = document.getElementById("newRestName").value.trim();
-  const phone = document.getElementById("newRestPhone").value.trim();
-  if (!name || !phone) return;
-  if (!RESTS.includes(name)) RESTS.push(name);
-  REST_PHONES[name] = phone;
+  const nameInput = document.getElementById("newRestName").value.trim();
+  const phoneInput = document.getElementById("newRestPhone").value.trim();
+
+  if (!nameInput) {
+    alert("يرجى كتابة اسم المطعم!");
+    return;
+  }
+
+  const alreadyExists = RESTS.some(r => r.toLowerCase().trim() === nameInput.toLowerCase().trim());
+  if (!alreadyExists) {
+    RESTS.push(nameInput);
+  }
+
+  if (phoneInput) {
+    let cleanP = phoneInput.replace(/\D/g, '');
+    if (cleanP.startsWith('07')) cleanP = '964' + cleanP.slice(1);
+    REST_PHONES[nameInput] = cleanP;
+  } else {
+    REST_PHONES[nameInput] = "9647708111561";
+  }
+
+  if (!REST_PINS[nameInput]) {
+    REST_PINS[nameInput] = String(1100 + Object.keys(REST_PINS).length + 1);
+  }
+
+  localStorage.setItem('wj_custom_rests', JSON.stringify(RESTS));
+  localStorage.setItem('wj_custom_rest_phones', JSON.stringify(REST_PHONES));
+  localStorage.setItem('wj_rest_pins', JSON.stringify(REST_PINS));
+
+  fetch(FIREBASE_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(RESTS) });
+  fetch(FIREBASE_PHONES_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PHONES) });
+  fetch(FIREBASE_PINS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PINS) });
+
   buildRestaurantsBar();
   populateAdminDropdowns();
+  document.getElementById("newRestName").value = "";
+  document.getElementById("newRestPhone").value = "";
   closeAdminPanel();
-  showToast(`أضيف مطعم: ${name}`);
+  showToast(`🏪 أضيف وحفظ سحابياً للأبد: ${nameInput}`);
 }
 
 function populateAdminDropdowns() {
@@ -2435,21 +2545,33 @@ function populateAdminDropdowns() {
   const rSelAlert = document.getElementById("admAlertRestSelect");
   const rSelDisc = document.getElementById("admDiscountRestSelect");
   const rSelFilter = document.getElementById("ordersRestFilter");
-  const currentRests = ["الكل", ...new Set([...RESTS, ...allMeals.map(m => m.rest).filter(Boolean)])];
+  const rSelDeliv = document.getElementById("admRestDelivSelect");
 
-  if (rSel) rSel.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
-  if (rSel2) rSel2.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
-  if (rSelAlert) rSelAlert.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
-  if (rSelDisc) rSelDisc.innerHTML = currentRests.filter(r => r !== 'الكل').map(r => `<option value="${r}">${r}</option>`).join('');
-  if (rSelFilter) rSelFilter.innerHTML = currentRests.map(r => `<option value="${r}">${r === 'الكل' ? 'كل المطاعم (كشف عام)' : r}</option>`).join('');
+  const uniqueRests = [];
+  RESTS.forEach(r => {
+    if (r && !uniqueRests.some(item => item.toLowerCase().trim() === r.toLowerCase().trim())) {
+      uniqueRests.push(r.trim());
+    }
+  });
+
+  const optionsHtml = uniqueRests.map(r => `<option value="${r}">${r}</option>`).join('');
+
+  if (rSel) rSel.innerHTML = optionsHtml;
+  if (rSel2) rSel2.innerHTML = optionsHtml;
+  if (rSelAlert) rSelAlert.innerHTML = optionsHtml;
+  if (rSelDisc) rSelDisc.innerHTML = optionsHtml;
+  if (rSelDeliv) rSelDeliv.innerHTML = optionsHtml;
+  if (rSelFilter) rSelFilter.innerHTML = `<option value="الكل">كل المطاعم (كشف عام)</option>` + optionsHtml;
+
   renderWheelAdminUI();
 }
 
-// لوحة إدارة عجلة الحظ
 function renderWheelAdminUI() {
   document.getElementById("admWheelActive").value = wheelConfig.active ? "1" : "0";
   const rSel = document.getElementById("admWheelRest");
-  if (rSel) rSel.innerHTML = RESTS.map(r => `<option value="${r}" ${r === wheelConfig.restaurant ? 'selected' : ''}>${r}</option>`).join('');
+  if (rSel) {
+    rSel.innerHTML = RESTS.map(r => `<option value="${r}" ${r.toLowerCase() === (wheelConfig.restaurant || '').toLowerCase() ? 'selected' : ''}>${r}</option>`).join('');
+  }
 
   const box = document.getElementById("admWheelItemsList");
   if (!box) return;
@@ -2501,7 +2623,9 @@ function saveDeliveryFee() {
   orderDeliveryFee = Number(document.getElementById("admDeliveryFee").value) || 1000;
   localStorage.setItem('wj_delivery_fee', orderDeliveryFee);
   updateCartUI();
-  showToast("تم تحديث أجور التوصيل");
+  renderCartDrawerContent();
+  renderMeals();
+  showToast("تم تحديث أجور التوصيل الافتراضية");
 }
 
 function saveAdminBanners() {
@@ -2537,6 +2661,28 @@ function refreshCouponUI() {
     `;
   }
   modalBox.innerHTML = genHtml || '<div style="color:var(--text-muted); font-size:12px;">لا توجد عروض نشطة حالياً.</div>';
+}
+
+function saveCustomerData() {
+  try {
+    localStorage.setItem('wj_cust_name', document.getElementById("custName")?.value || "");
+    localStorage.setItem('wj_cust_phone', document.getElementById("custPhone")?.value || "");
+    localStorage.setItem('wj_cust_address', document.getElementById("custAddress")?.value || "");
+    localStorage.setItem('wj_cust_zone', document.getElementById("custZoneSelect")?.value || "الكرخ");
+  } catch(e) {}
+}
+
+function restoreCustomerData() {
+  try {
+    const name = localStorage.getItem('wj_cust_name');
+    const phone = localStorage.getItem('wj_cust_phone');
+    const address = localStorage.getItem('wj_cust_address');
+    const zone = localStorage.getItem('wj_cust_zone');
+    if (name && document.getElementById("custName")) document.getElementById("custName").value = name;
+    if (phone && document.getElementById("custPhone")) document.getElementById("custPhone").value = phone;
+    if (address && document.getElementById("custAddress")) document.getElementById("custAddress").value = address;
+    if (zone && document.getElementById("custZoneSelect")) document.getElementById("custZoneSelect").value = zone;
+  } catch(e) {}
 }
 
 // ماسح المنيو
@@ -2674,6 +2820,13 @@ function saveAllAiMealsToCloud() {
   }));
 
   allMeals.unshift(...newMeals);
+
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals.filter(m => m && m.name))
+  });
+
   buildCategoriesBar();
   renderMeals();
   document.getElementById("aiScanResultsBox").style.display = "none";
@@ -2681,9 +2834,45 @@ function saveAllAiMealsToCloud() {
   showToast(`🎉 تمت إضافة وتعميم وجبات ${rest} بنجاح!`);
 }
 
-// المزامنة السحابية العامة
+// المزامنة السحابية الشاملة الآمنة
 async function syncQuietlyWithCloud() {
   try {
+    // 1. مزامنة المطاعم السحابية
+    const resRests = await fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now());
+    const dataRests = await resRests.json();
+    if (dataRests && Array.isArray(dataRests)) {
+      dataRests.forEach(r => {
+        if (r && !RESTS.some(x => x.toLowerCase().trim() === r.toLowerCase().trim())) {
+          RESTS.push(r.trim());
+        }
+      });
+      localStorage.setItem('wj_custom_rests', JSON.stringify(RESTS));
+      buildRestaurantsBar();
+    }
+
+    const resPhones = await fetch(FIREBASE_PHONES_URL + "?_t=" + Date.now());
+    const dataPhones = await resPhones.json();
+    if (dataPhones && typeof dataPhones === 'object') {
+      REST_PHONES = { ...REST_PHONES, ...dataPhones };
+      localStorage.setItem('wj_custom_rest_phones', JSON.stringify(REST_PHONES));
+    }
+
+    const resPins = await fetch(FIREBASE_PINS_URL + "?_t=" + Date.now());
+    const dataPins = await resPins.json();
+    if (dataPins && typeof dataPins === 'object') {
+      REST_PINS = { ...REST_PINS, ...dataPins };
+      localStorage.setItem('wj_rest_pins', JSON.stringify(REST_PINS));
+    }
+
+    // مزامنة أجور التوصيل المخصصة للمطاعم
+    const resDeliv = await fetch(FIREBASE_DELIVERY_URL + "?_t=" + Date.now());
+    const dataDeliv = await resDeliv.json();
+    if (dataDeliv && typeof dataDeliv === 'object') {
+      restDeliveryFees = dataDeliv;
+      localStorage.setItem('wj_rest_delivery_fees', JSON.stringify(restDeliveryFees));
+    }
+
+    // 2. مزامنة الوجبات
     const resM = await fetch(FIREBASE_MEALS_URL + "?_t=" + Date.now());
     const dataM = await resM.json();
     if (dataM && typeof dataM === 'object') {
@@ -2696,6 +2885,7 @@ async function syncQuietlyWithCloud() {
       }
     }
 
+    // 3. مزامنة عجلة الحظ
     const resW = await fetch(FIREBASE_WHEEL_URL + "?_t=" + Date.now());
     const dataW = await resW.json();
     if (dataW && typeof dataW === 'object') {
@@ -2704,6 +2894,7 @@ async function syncQuietlyWithCloud() {
       drawLuckyWheel();
     }
 
+    // 4. مزامنة الإشعارات والخصومات
     const resAlert = await fetch(FIREBASE_FLASH_ALERT_URL + "?_t=" + Date.now());
     const dataAlert = await resAlert.json();
     if (dataAlert && typeof dataAlert === 'object') {
@@ -2723,7 +2914,34 @@ async function syncQuietlyWithCloud() {
   } catch(e) {}
 }
 
+function loadInitialLocalData() {
+  try {
+    const savedR = localStorage.getItem('wj_custom_rests');
+    if (savedR) {
+      const arr = JSON.parse(savedR);
+      arr.forEach(r => {
+        if (r && !RESTS.some(x => x.toLowerCase().trim() === r.toLowerCase().trim())) {
+          RESTS.push(r.trim());
+        }
+      });
+    }
+    const savedPh = localStorage.getItem('wj_custom_rest_phones');
+    if (savedPh) REST_PHONES = { ...REST_PHONES, ...JSON.parse(savedPh) };
+
+    const savedPins = localStorage.getItem('wj_rest_pins');
+    if (savedPins) REST_PINS = { ...DEFAULT_REST_PINS, ...JSON.parse(savedPins) };
+
+    const savedWh = localStorage.getItem('wj_wheel_config');
+    if (savedWh) wheelConfig = JSON.parse(savedWh);
+
+    const savedDeliv = localStorage.getItem('wj_rest_delivery_fees');
+    if (savedDeliv) restDeliveryFees = JSON.parse(savedDeliv);
+  } catch(e) {}
+}
+
 // التشغيل والتهيئة
+loadInitialLocalData();
+restoreCustomerData();
 renderBanners();
 buildRestaurantsBar();
 buildCategoriesBar();
