@@ -2949,6 +2949,43 @@ async function syncQuietlyWithCloud() {
   } catch(e) {}
 }
 
+function saveCustomerData() {
+  try {
+    const customerData = {
+      name: document.getElementById("custName")?.value || "",
+      phone: document.getElementById("custPhone")?.value || "",
+      address: document.getElementById("custAddress")?.value || "",
+      zone: document.getElementById("custZoneSelect")?.value || "الكرخ"
+    };
+    localStorage.setItem("wj_customer_data", JSON.stringify(customerData));
+  } catch (e) {
+    console.warn("تعذر حفظ بيانات الزبون محلياً:", e);
+  }
+}
+
+function restoreCustomerData() {
+  try {
+    const saved = localStorage.getItem("wj_customer_data");
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    if (!data || typeof data !== "object") return;
+
+    const name = document.getElementById("custName");
+    const phone = document.getElementById("custPhone");
+    const address = document.getElementById("custAddress");
+    const zone = document.getElementById("custZoneSelect");
+
+    if (name && typeof data.name === "string") name.value = data.name;
+    if (phone && typeof data.phone === "string") phone.value = data.phone;
+    if (address && typeof data.address === "string") address.value = data.address;
+    if (zone && (data.zone === "الكرخ" || data.zone === "الرصافة")) {
+      zone.value = data.zone;
+    }
+  } catch (e) {
+    console.warn("تعذر استرجاع بيانات الزبون المحفوظة:", e);
+  }
+}
+
 function loadInitialLocalData() {
   try {
     const savedR = localStorage.getItem('wj_custom_rests');
