@@ -1362,7 +1362,6 @@
 
 <script>
 const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
-const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/banners.json";
 const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
 const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/general_discount.json";
 const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
@@ -1373,6 +1372,7 @@ const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.co
 const FIREBASE_PINS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_pins.json";
 const FIREBASE_DELIVERY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_delivery_fees.json";
 const FIREBASE_SUBS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_subscriptions.json";
+const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/app_banners.json";
 
 const DEFAULT_GEMINI_API_KEY = "";
 
@@ -1581,83 +1581,34 @@ function getDeliveryFeeForRestaurant(restName, targetZone = null) {
   return orderDeliveryFee;
 }
 
-function getBannerMediaHtml(b) {
-  const raw = String(b?.img || '').trim();
-  const safeUrl = raw.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  const streamable = raw.match(/^https?:\/\/(?:www\.)?streamable\.com\/(?:e\/)?([a-zA-Z0-9]+)/i);
-  if (streamable) {
-    const embedUrl = `https://streamable.com/e/${streamable[1]}?autoplay=1&muted=1`;
-    return `<iframe src="${embedUrl}" title="إعلان فيديو" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:0;object-fit:cover;"></iframe>`;
-  }
-  const isVideo = /\.(mp4|webm|ogg)(?:[?#].*)?$/i.test(raw);
-  return isVideo
-    ? `<video src="${safeUrl}" autoplay loop muted playsinline controls style="width:100%;height:100%;object-fit:cover;"></video>`
-    : `<img src="${safeUrl}" alt="${String(b?.title || 'إعلان').replace(/"/g, '&quot;')}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
-}
-
 function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dotsBox = document.getElementById("bannerDots");
   if (!track || !dotsBox) return;
-  const banners = Array.isArray(appBanners) && appBanners.length ? appBanners : [{title:"🍔 وجباتي VIP",desc:"أقوى المطاعم وأشهى عروض التوفير بتوصيل موحد وسريع",img:"https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200"}];
-  track.innerHTML = banners.map(b => `
+
+  track.innerHTML = appBanners.map(b => {
+    const mediaUrl = String(b.img || '').trim();
+    const streamableMatch = mediaUrl.match(/^https?:\/\/(?:www\.)?streamable\.com\/(?:e\/)?([A-Za-z0-9_-]+)/i);
+    const isStreamable = !!streamableMatch;
+    const isVideo = /\.(mp4|webm|ogg)(?:[?#].*)?$/i.test(mediaUrl);
+    const safeTitle = String(b.title || 'إعلان').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const mediaHtml = isStreamable
+      ? `<iframe src="https://streamable.com/e/${streamableMatch[1]}" title="${safeTitle}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>`
+      : isVideo
+        ? `<video src="${mediaUrl}" autoplay loop muted playsinline controls style="width:100%; height:100%; object-fit:cover;"></video>`
+        : `<img src="${mediaUrl}" alt="${safeTitle}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
+
+    return `
       <div class="banner-slide">
-        ${getBannerMediaHtml(b)}
-        <div class="banner-overlay"><h2>${b.title || ''}</h2><p>${b.desc || ''}</p></div>
-      </div>`).join('');
-  dotsBox.innerHTML = banners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
-}
-
-async function loadAdminBannersFromCloud() {
-  try {
-    const response = await fetch(FIREBASE_BANNERS_URL + "?t=" + Date.now(), {cache:"no-store"});
-    if (!response.ok) throw new Error("HTTP " + response.status);
-    const data = await response.json();
-    if (Array.isArray(data) && data.length && data[0] && typeof data[0] === "object") {
-      appBanners = data.slice(0, 1);
-      try { localStorage.setItem("wj_app_banners", JSON.stringify(appBanners)); } catch(e) {}
-      renderBanners();
-    }
-  } catch (e) {
-    // Keep current/default banner visible; cloud errors are not treated as successful saves.
-  }
-}
-
-function populateAdminBannerInputs() {
-  const b = appBanners[0] || {};
-  const title = document.getElementById("admB1Title");
-  const desc = document.getElementById("admB1Desc");
-  const img = document.getElementById("admB1Img");
-  if (title) title.value = b.title || "";
-  if (desc) desc.value = b.desc || "";
-  if (img) img.value = b.img || "";
-}
-
-async function saveAdminBanners() {
-  const title = (document.getElementById("admB1Title")?.value || "").trim();
-  const desc = (document.getElementById("admB1Desc")?.value || "").trim();
-  const img = (document.getElementById("admB1Img")?.value || "").trim();
-  if (!img) { alert("أدخل رابط صورة أو فيديو أولاً."); return; }
-  if (!/^https?:\/\//i.test(img)) { alert("الرابط يجب أن يبدأ بـ https:// أو http://"); return; }
-  const nextBanners = [{title:title || "🍔 وجباتي VIP", desc:desc || "أقوى المطاعم وأشهى العروض", img}];
-  const btn = document.querySelector('#bannerTab button[onclick="saveAdminBanners()"]');
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ جارٍ الحفظ السحابي..."; }
-  try {
-    const response = await fetch(FIREBASE_BANNERS_URL, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(nextBanners)});
-    if (!response.ok) throw new Error("HTTP " + response.status);
-    const verifyResponse = await fetch(FIREBASE_BANNERS_URL + "?verify=" + Date.now(), {cache:"no-store"});
-    if (!verifyResponse.ok) throw new Error("تعذرت قراءة تأكيد الحفظ");
-    const saved = await verifyResponse.json();
-    if (!Array.isArray(saved) || !saved.length || saved[0].img !== img) throw new Error("لم يتم تأكيد حفظ الرابط في Firebase");
-    appBanners = saved.slice(0, 1);
-    try { localStorage.setItem("wj_app_banners", JSON.stringify(appBanners)); } catch(e) {}
-    renderBanners();
-    alert("✅ تأكد حفظ البنر في Firebase. افتح التطبيق من جهاز آخر للتحقق من ظهوره.");
-  } catch (e) {
-    alert("❌ لم ينجح الحفظ السحابي. لم نعتبر التعديل محفوظاً. قد تكون صلاحيات Firebase تمنع الكتابة. التفاصيل: " + (e?.message || "خطأ اتصال"));
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = "💾 حفظ وتعميم عروض البنر والفيديو سحابياً"; }
-  }
+        ${mediaHtml}
+        <div class="banner-overlay">
+          <h2>${b.title}</h2>
+          <p>${b.desc}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+  dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
 }
 
 function calculateCartDiscount(subtotal, targetRest) {
@@ -2479,8 +2430,6 @@ function checkAdminPin() {
 }
 
 function openAdminPanel() {
-  populateAdminBannerInputs();
-  loadAdminBannersFromCloud().then(populateAdminBannerInputs);
   populateAdminDropdowns();
   populateFlashAlertInputs();
   populateGeneralDiscountInputs();
@@ -2505,7 +2454,6 @@ function switchAdminTab(tabId, btn) {
   document.querySelectorAll('#adminPanelModal .admin-tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(tabId).classList.add('active');
-  if (tabId === 'bannerTab') { populateAdminBannerInputs(); loadAdminBannersFromCloud().then(populateAdminBannerInputs); }
   if (tabId === 'editMealsTab') filterQuickMeals();
   if (tabId === 'wheelAdminTab') renderWheelAdminUI();
   if (tabId === 'ordersLogTab') syncOrdersFromCloud();
@@ -3008,6 +2956,85 @@ async function syncQuietlyWithCloud() {
   } catch(e) {}
 }
 
+function restoreCustomerData() {
+  try {
+    const saved = localStorage.getItem("wj_customer_data");
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    if (!data || typeof data !== "object") return;
+    const map = { name: "custName", phone: "custPhone", address: "custAddress" };
+    Object.keys(map).forEach(k => {
+      const el = document.getElementById(map[k]);
+      if (el && data[k] != null) el.value = data[k];
+    });
+    const zone = document.getElementById("custZoneSelect");
+    if (zone && data.zone) zone.value = data.zone;
+  } catch (e) { console.warn("تعذر استرجاع بيانات الزبون:", e); }
+}
+
+const defaultAdminBanners = [
+  { title: "🍔 وجباتي VIP", desc: "أقوى المطاعم وأشهى عروض التوفير", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" }
+];
+
+async function loadAdminBannersFromCloud() {
+  try {
+    const response = await fetch(FIREBASE_BANNERS_URL + "?_t=" + Date.now(), { cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+    let list = Array.isArray(data) ? data : (data && typeof data === "object" ? Object.values(data) : []);
+    list = list.filter(b => b && typeof b === "object" && b.img).slice(0, 1);
+    if (list.length) appBanners = list;
+    else {
+      try {
+        const local = JSON.parse(localStorage.getItem("wj_app_banners") || "null");
+        if (Array.isArray(local) && local.length) appBanners = local.filter(b => b && b.img).slice(0,1);
+      } catch(e) {}
+    }
+  } catch (e) {
+    try {
+      const local = JSON.parse(localStorage.getItem("wj_app_banners") || "null");
+      if (Array.isArray(local) && local.length) appBanners = local.filter(b => b && b.img).slice(0,1);
+    } catch(err) {}
+  }
+  if (!Array.isArray(appBanners) || !appBanners.length) appBanners = defaultAdminBanners.slice();
+  renderBanners();
+}
+
+function populateAdminBannerInputs() {
+  const b = appBanners[0] || defaultAdminBanners[0];
+  ["admB1Title", "admB1Desc", "admB1Img"].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.value = [b.title || "", b.desc || "", b.img || ""][i];
+  });
+}
+
+async function saveAdminBanners() {
+  const title = (document.getElementById("admB1Title")?.value || "").trim();
+  const desc = (document.getElementById("admB1Desc")?.value || "").trim();
+  const img = (document.getElementById("admB1Img")?.value || "").trim();
+  if (!img) { alert("أدخل رابط صورة أو فيديو أولاً."); return; }
+  if (!/^https?:\/\//i.test(img)) { alert("الرابط يجب أن يبدأ بـ https:// أو http://"); return; }
+  const nextBanners = [{ title: title || defaultAdminBanners[0].title, desc: desc || defaultAdminBanners[0].desc, img }];
+  const btn = document.querySelector('#bannerTab button[onclick="saveAdminBanners()"]');
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ جارٍ الحفظ السحابي..."; }
+  try {
+    const response = await fetch(FIREBASE_BANNERS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nextBanners) });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const saved = await response.json();
+    const confirmed = Array.isArray(saved) ? saved : (saved && typeof saved === "object" ? Object.values(saved) : []);
+    if (!confirmed.length || !confirmed[0] || confirmed[0].img !== img) throw new Error("لم يؤكد Firebase حفظ الرابط");
+    appBanners = nextBanners;
+    try { localStorage.setItem("wj_app_banners", JSON.stringify(appBanners)); } catch(e) {}
+    renderBanners();
+    alert("✅ تم تأكيد حفظ البنر في Firebase. افتح التطبيق من جهاز آخر للتحقق من ظهوره.");
+  } catch (e) {
+    console.error("Cloud banner save failed:", e);
+    alert("❌ فشل الحفظ السحابي. لم نعتبر الحفظ ناجحاً. تحقق من صلاحيات Firebase واتصال الإنترنت ثم أعد المحاولة.");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "💾 حفظ وتعميم عروض البنر والفيديو سحابياً"; }
+  }
+}
+
 function loadInitialLocalData() {
   try {
     const savedR = localStorage.getItem('wj_custom_rests');
@@ -3037,6 +3064,7 @@ loadInitialLocalData();
 restoreCustomerData();
 renderBanners();
 loadAdminBannersFromCloud();
+populateAdminBannerInputs();
 buildRestaurantsBar();
 buildCategoriesBar();
 renderMeals();
