@@ -122,7 +122,7 @@
     }
     .banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
     .banner-slide { min-width: 100%; position: relative; height: 100%; }
-    .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .banner-slide img, .banner-slide video { width: 100%; height: 100%; object-fit: cover; }
     .banner-overlay {
       position: absolute;
       inset: 0;
@@ -324,10 +324,10 @@
     }
     .meal-card-talabaty.out-of-stock {
       opacity: 0.65;
-      border-color: rgba(255, 42, 95, 0.3);
+      border-color: rgba(255, 42, 95, 0.35);
     }
     .meal-card-talabaty.out-of-stock .talabaty-img-box img {
-      filter: grayscale(0.85);
+      filter: grayscale(0.9);
     }
     .talabaty-img-box {
       width: 95px;
@@ -673,11 +673,11 @@
     .modal-box {
       background: #161822; 
       width: 100%; 
-      max-width: 440px;
+      max-width: 460px;
       border-radius: 24px; 
       padding: 20px; 
       border: 1.5px solid var(--border-color);
-      max-height: 90vh;
+      max-height: 92vh;
       overflow-y: auto;
     }
 
@@ -708,7 +708,7 @@
     .admin-tab-content { display: none; }
     .admin-tab-content.active { display: block; }
 
-    /* أزرار قفل الوجبات */
+    /* أزرار قفل وحذف الوجبات */
     .btn-stock-toggle {
       border: none;
       padding: 6px 10px;
@@ -728,17 +728,42 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .admin-stat-card {
       background: var(--bg-elevated);
-      padding: 12px;
+      padding: 10px;
       border-radius: 14px;
       text-align: center;
       border: 1px solid var(--border-color);
     }
-    .admin-stat-num { font-size: 18px; font-weight: 900; color: var(--accent-green); }
-    .admin-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .admin-stat-num { font-size: 16px; font-weight: 900; color: var(--accent-green); }
+    .admin-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 700; }
+
+    .period-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .period-btn {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 4px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .period-btn.active {
+      background: var(--accent-blue);
+      color: #111;
+      border-color: var(--accent-blue);
+      font-weight: 900;
+    }
   </style>
 </head>
 <body>
@@ -925,7 +950,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
       <div>
         <h3 style="margin:0; font-size:16px; color:#fff;">🏪 لوحة إدارة: <span id="portalRestTitle" style="color:var(--accent-orange);"></span></h3>
-        <span style="font-size:11px; color:var(--text-muted);">تحكم بوجباتك وقفل ما ينفد منها مباشرة</span>
+        <span style="font-size:11px; color:var(--text-muted);" id="portalSubStatusText">تحكم بوجباتك ومبيعاتك مباشرة</span>
       </div>
       <span style="font-size:22px; cursor:pointer; color:var(--text-muted);" onclick="closeRestPortal()">✕</span>
     </div>
@@ -937,7 +962,7 @@
       </div>
       <div class="admin-stat-card">
         <div class="admin-stat-num" id="portalOrdersTotal">0 د.ع</div>
-        <div class="admin-stat-lbl">إجمالي المبيعات</div>
+        <div class="admin-stat-lbl">مبيعات الفترة</div>
       </div>
     </div>
 
@@ -947,14 +972,21 @@
     </div>
 
     <div id="portalMealsTab" class="portal-tab-content" style="display:block;">
-      <input type="text" id="portalMealSearch" class="form-input" placeholder="ابحث عن وجبة لقفلها أو تفعيلها..." oninput="renderPortalMeals()">
+      <input type="text" id="portalMealSearch" class="form-input" placeholder="ابحث عن وجبة لقفلها أو تفعيلها أو حذفها..." oninput="renderPortalMeals()">
       <div id="portalMealsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
     <div id="portalOrdersTab" class="portal-tab-content" style="display:none;">
+      <div class="period-filter-bar">
+        <div class="period-btn active" onclick="setOrderPeriod('all', this, true)">الكل</div>
+        <div class="period-btn" onclick="setOrderPeriod('today', this, true)">اليوم</div>
+        <div class="period-btn" onclick="setOrderPeriod('yesterday', this, true)">البارحة</div>
+        <div class="period-btn" onclick="setOrderPeriod('week', this, true)">أسبوع</div>
+        <div class="period-btn" onclick="setOrderPeriod('month', this, true)">شهر</div>
+      </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:12px; color:var(--text-muted); font-weight:800;">سجل طلبات مطعمك:</span>
-        <button type="button" class="btn-discount" style="padding:6px 12px; font-size:11px;" onclick="copyPortalRestaurantReport()">📋 نسخ كشف الحساب لواتساب</button>
+        <span style="font-size:12px; color:var(--text-muted); font-weight:800;">سجل الطلبات المفلتر:</span>
+        <button type="button" class="btn-discount" style="padding:6px 12px; font-size:11px;" onclick="copyPortalRestaurantReport()">📋 نسخ الكشف للواتساب</button>
       </div>
       <div id="portalOrdersList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
@@ -972,16 +1004,17 @@
     </div>
 
     <div class="admin-tabs">
-      <button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو AI</button>
+      <button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('subsAdminTab', this)">💳 الاشتراكات</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل والمناطق</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 عجلة الحظ</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 إشعار وتنبيه</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('restDiscountTab', this)">🔥 خصم المطاعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار وقفل الوجبات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
     </div>
@@ -1032,6 +1065,73 @@
       </div>
     </div>
 
+    <!-- 💳 إدارة الاشتراكات الشهرية للمطاعم -->
+    <div id="subsAdminTab" class="admin-tab-content">
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">إدارة الاشتراكات الشهرية للمطاعم، وتحديد أرباحك وتواريخ الانتهاء:</p>
+      
+      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+        <label style="font-size:11px; color:#fff; display:block; margin-bottom:4px; font-weight:800;">اختر المطعم لتجديد اشتراكه:</label>
+        <select id="admSubRestSelect" class="form-input"></select>
+
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">مبلغ الاشتراك (د.ع):</label>
+            <input type="number" id="admSubAmount" class="form-input" placeholder="مثال: 50000" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">تاريخ انتهاء الاشتراك:</label>
+            <input type="date" id="admSubExpiry" class="form-input" style="margin-bottom:0;">
+          </div>
+        </div>
+
+        <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #00b0ff, #00e676); color:#111;" onclick="saveSubscription()">
+          💾 حفظ وتوثيق الاشتراك سحابياً
+        </button>
+      </div>
+
+      <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">حالة اشتراكات المطاعم الحالية:</div>
+      <div id="admSubsList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+
+    <!-- 📋 كشف الحساب والمبيعات المفلتر -->
+    <div id="ordersLogTab" class="admin-tab-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية الكشف حسب المطعم:</label>
+        <button type="button" onclick="syncOrdersFromCloud()" style="background:none; border:none; color:var(--accent-green); font-size:11px; font-weight:800; cursor:pointer;">🔄 تحديث الكشف</button>
+      </div>
+      <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
+
+      <div class="period-filter-bar">
+        <div class="period-btn active" onclick="setOrderPeriod('all', this, false)">الكل</div>
+        <div class="period-btn" onclick="setOrderPeriod('today', this, false)">اليوم</div>
+        <div class="period-btn" onclick="setOrderPeriod('yesterday', this, false)">البارحة</div>
+        <div class="period-btn" onclick="setOrderPeriod('week', this, false)">أسبوع</div>
+        <div class="period-btn" onclick="setOrderPeriod('month', this, false)">شهر</div>
+      </div>
+
+      <div class="admin-stat-grid" style="margin-bottom:10px;">
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="filteredOrdersCount">0</div>
+          <div class="admin-stat-lbl">طلبات الفترة</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
+          <div class="admin-stat-lbl">مبيعات الفترة</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-bottom:10px;">
+        <button type="button" class="btn-discount" style="flex:1; padding:10px; font-size:11px; background:var(--primary); color:#fff;" onclick="copyCurrentRestaurantReport()">
+          📋 نسخ الكشف المفلتر
+        </button>
+        <button type="button" onclick="clearOrdersLog()" style="background:#33151f; border:1px solid #ff4d6d; color:#ff4d6d; padding:0 12px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer;">
+          مسح السجل
+        </button>
+      </div>
+
+      <div id="ordersListContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+
     <!-- 🛵 التوصيل والتحكم بكل مطعم ومناطقه -->
     <div id="deliveryTab" class="admin-tab-content">
       <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
@@ -1059,7 +1159,7 @@
         </div>
 
         <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #ff5722, #ff9800); color:#fff;" onclick="saveRestaurantSpecificDelivery()">
-          🚀 حفظ وتثبيت أجور توصيل هذا المطعم سحابياً
+          🚀 حفظ وتثبيت أجور توصيل المطعم سحابياً
         </button>
       </div>
     </div>
@@ -1186,7 +1286,7 @@
         </select>
       </div>
 
-      <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveRestaurantDiscount()">
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111; margin-bottom:14px;" onclick="saveRestaurantDiscount()">
         💾 حفظ وتعميم خصم المطعم سحابياً
       </button>
       
@@ -1194,40 +1294,9 @@
       <div id="activeRestDiscountsList" style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
-    <!-- 📋 كشف الحساب والمبيعات -->
-    <div id="ordersLogTab" class="admin-tab-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية الكشف حسب المطعم:</label>
-        <button type="button" onclick="syncOrdersFromCloud()" style="background:none; border:none; color:var(--accent-green); font-size:11px; font-weight:800; cursor:pointer;">🔄 تحديث الكشف</button>
-      </div>
-      <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
-
-      <div class="admin-stat-grid" style="margin-bottom:10px;">
-        <div class="admin-stat-card">
-          <div class="admin-stat-num" id="filteredOrdersCount">0</div>
-          <div class="admin-stat-lbl">عدد طلبات المطعم</div>
-        </div>
-        <div class="admin-stat-card">
-          <div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
-          <div class="admin-stat-lbl">مجموع المبيعات</div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:6px; margin-bottom:10px;">
-        <button type="button" class="btn-discount" style="flex:1; padding:10px; font-size:11px; background:var(--primary); color:#fff;" onclick="copyCurrentRestaurantReport()">
-          📋 نسخ كشف المطعم لمشاركته
-        </button>
-        <button type="button" onclick="clearOrdersLog()" style="background:#33151f; border:1px solid #ff4d6d; color:#ff4d6d; padding:0 12px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer;">
-          مسح السجل
-        </button>
-      </div>
-
-      <div id="ordersListContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
-    </div>
-
     <!-- ✏️ إدارة الوجبات والأسعار وقفل الحاجات -->
     <div id="editMealsTab" class="admin-tab-content">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">قفل أي وجبة تنفد بالمطعم، أو تعديل السعر وسعر التوفير:</p>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">قفل أي وجبة تنفد بالمطعم، تعديل الأسعار، أو حذف الوجبات نهائياً:</p>
       <input type="text" id="quickSearchMeal" class="form-input" placeholder="ابحث باسم الوجبة أو المطعم..." oninput="filterQuickMeals()">
       <div id="quickMealsList" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
@@ -1238,19 +1307,19 @@
       <div id="restPinsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
-    <!-- 📢 البنر الإعلاني -->
+    <!-- 📢 البنر الإعلاني (يدعم الفيديوهات) -->
     <div id="bannerTab" class="admin-tab-content">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">التحكم في العروض الإعلانية في البنر العلوي:</p>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">التحكم في العروض في البنر العلوي (يدعم الصور وصيغ الفيديو MP4 كإعلانات للمطاعم):</p>
       
       <div style="background:var(--bg-card); padding:10px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:10px;">
         <span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🌟 العرض الأول:</span>
         <input type="text" id="admB1Title" class="form-input" style="margin-top:6px;" placeholder="عنوان العرض">
         <input type="text" id="admB1Desc" class="form-input" placeholder="تفاصيل العرض">
-        <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة العرض (اختياري)">
+        <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة أو فيديو مباشر (MP4)">
       </div>
 
       <button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAdminBanners()">
-        💾 حفظ وتعميم عروض البنر سحابياً
+        💾 حفظ وتعميم عروض البنر والفيديو سحابياً
       </button>
     </div>
 
@@ -1302,6 +1371,7 @@ const FIREBASE_RESTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com
 const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_phones.json";
 const FIREBASE_PINS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_pins.json";
 const FIREBASE_DELIVERY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_delivery_fees.json";
+const FIREBASE_SUBS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_subscriptions.json";
 
 const DEFAULT_GEMINI_API_KEY = "";
 
@@ -1317,9 +1387,10 @@ let selectedCuisinesFilters = [];
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
 let restDiscounts = {};
 let cloudOrders = [];
-
-// أجور التوصيل المخصصة لكل مطعم حسب المنطقة (الكرخ / الرصافة)
 let restDeliveryFees = {};
+let restSubscriptions = {}; // بيانات اشتراكات المطاعم
+
+let selectedOrderPeriod = 'all';
 
 let generalDiscountConfig = {
   active: true,
@@ -1406,32 +1477,6 @@ let allMeals = [
     phone: "9647708111561",
     zone: "الكرخ",
     available: true
-  },
-  {
-    id: 9003,
-    name: "ريزو توفير - 3 صغير",
-    desc: "رز أصفر، دجاج مقرمش وصلصة ريزو كلاسيك الشهية",
-    rest: "مطعم سندريلا",
-    cat: "وجبات التوفير",
-    price: 13500,
-    savingPrice: 6750,
-    img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600",
-    phone: "9647708111561",
-    zone: "الكرخ",
-    available: true
-  },
-  {
-    id: 9004,
-    name: "وجبة بيتزا التوفير",
-    desc: "2 قطع بيتزا دجاج حجم وسط بالجبنة الغنية",
-    rest: "مطعم سندريلا",
-    cat: "وجبات التوفير",
-    price: 12000,
-    savingPrice: 6000,
-    img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600",
-    phone: "9647708111561",
-    zone: "الكرخ",
-    available: true
   }
 ];
 
@@ -1466,7 +1511,6 @@ function getDeliveryFeeForRestaurant(restName, targetZone = null) {
   const zone = targetZone || document.getElementById("custZoneSelect")?.value || (selectedZone !== "الكل" ? selectedZone : "الكرخ");
   
   if (restName && restDeliveryFees) {
-    // البحث دون التأثر بحالة الحروف الكبيرة أو الصغيرة
     const matchedKey = Object.keys(restDeliveryFees).find(k => k.toLowerCase().trim() === restName.toLowerCase().trim());
     if (matchedKey && restDeliveryFees[matchedKey]) {
       const config = restDeliveryFees[matchedKey];
@@ -1477,20 +1521,28 @@ function getDeliveryFeeForRestaurant(restName, targetZone = null) {
   return orderDeliveryFee;
 }
 
+// دالة عرض البنرات تدعم الصور وفيديوهات MP4
 function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dotsBox = document.getElementById("bannerDots");
   if (!track || !dotsBox) return;
 
-  track.innerHTML = appBanners.map(b => `
-    <div class="banner-slide">
-      <img src="${b.img}" alt="${b.title}">
-      <div class="banner-overlay">
-        <h2>${b.title}</h2>
-        <p>${b.desc}</p>
+  track.innerHTML = appBanners.map(b => {
+    const isVideo = b.img && b.img.toLowerCase().includes('.mp4');
+    const mediaHtml = isVideo 
+      ? `<video src="${b.img}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>` 
+      : `<img src="${b.img}" alt="${b.title}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
+
+    return `
+      <div class="banner-slide">
+        ${mediaHtml}
+        <div class="banner-overlay">
+          <h2>${b.title}</h2>
+          <p>${b.desc}</p>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
 }
 
@@ -2021,9 +2073,7 @@ async function submitFullOrder() {
   window.location.assign(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waMsg)}`);
 }
 
-// ==========================================
 // 🛵 إدارة أجور التوصيل المخصصة للمطاعم
-// ==========================================
 function loadSelectedRestDelivery() {
   const rest = document.getElementById("admRestDelivSelect").value;
   const config = restDeliveryFees[rest] || { karkh: orderDeliveryFee, rusafa: orderDeliveryFee };
@@ -2036,10 +2086,7 @@ function saveRestaurantSpecificDelivery() {
   const karkh = Number(document.getElementById("admRestKarkhFee").value) || orderDeliveryFee;
   const rusafa = Number(document.getElementById("admRestRusafaFee").value) || orderDeliveryFee;
 
-  if (!rest) {
-    alert("يرجى اختيار المطعم أولاً!");
-    return;
-  }
+  if (!rest) { alert("يرجى اختيار المطعم أولاً!"); return; }
 
   restDeliveryFees[rest] = { karkh, rusafa };
   localStorage.setItem('wj_rest_delivery_fees', JSON.stringify(restDeliveryFees));
@@ -2056,13 +2103,118 @@ function saveRestaurantSpecificDelivery() {
   showToast(`🛵 تم تثبيت أجور توصيل (${rest}) للكرخ والرصافة!`);
 }
 
-// بوابات المطاعم
+// قفل وتوفر الوجبات (عام وللمطاعم)
+function toggleMealAvailability(mealId, isFromPortal = false) {
+  const item = allMeals.find(m => m && String(m.id) === String(mealId));
+  if (!item) return;
+
+  item.available = (item.available === false) ? true : false;
+
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals.filter(m => m && m.name))
+  });
+
+  renderMeals();
+
+  if (isFromPortal) {
+    renderPortalMeals();
+    updatePortalStats();
+  } else {
+    filterQuickMeals();
+  }
+
+  showToast(item.available ? `✅ مفتوحة ومتوفرة: ${item.name}` : `🚫 تم قفل الوجبة (نفدت): ${item.name}`);
+}
+
+function deleteMeal(mealId, isFromPortal = false) {
+  const item = allMeals.find(m => m && String(m.id) === String(mealId));
+  if (!item) return;
+
+  if (confirm(`هل أنت متأكد من حذف وجبة (${item.name}) بشكل نهائي؟`)) {
+    allMeals = allMeals.filter(m => m && String(m.id) !== String(mealId));
+    
+    fetch(FIREBASE_MEALS_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(allMeals.filter(m => m && m.name))
+    });
+
+    if (isFromPortal) {
+      renderPortalMeals();
+      updatePortalStats();
+    } else {
+      buildCategoriesBar();
+      renderMeals();
+      filterQuickMeals();
+    }
+    showToast(`🗑️ تم حذف: ${item.name}`);
+  }
+}
+
+// 💳 إدارة الاشتراكات
+function saveSubscription() {
+  const rest = document.getElementById("admSubRestSelect").value;
+  const amount = Number(document.getElementById("admSubAmount").value) || 0;
+  const expiry = document.getElementById("admSubExpiry").value;
+
+  if (!rest || amount <= 0 || !expiry) {
+    alert("يرجى اختيار المطعم وإدخال المبلغ وتاريخ الانتهاء بشكل صحيح!");
+    return;
+  }
+
+  restSubscriptions[rest] = { amount: amount, expires: expiry };
+  
+  fetch(FIREBASE_SUBS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(restSubscriptions)
+  });
+
+  renderSubsAdminUI();
+  showToast(`💳 تم توثيق اشتراك: ${rest}`);
+}
+
+function renderSubsAdminUI() {
+  const box = document.getElementById("admSubsList");
+  if (!box) return;
+  const keys = Object.keys(restSubscriptions);
+  
+  if (keys.length === 0) {
+    box.innerHTML = '<div style="color:var(--text-muted); font-size:11px; text-align:center;">لا توجد اشتراكات مسجلة حالياً</div>';
+    return;
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  box.innerHTML = keys.map(r => {
+    const sub = restSubscriptions[r];
+    const expDate = new Date(sub.expires);
+    const isExpired = expDate < today;
+    const statusText = isExpired ? 'منتهي 🔴' : 'فعال 🟢';
+    const statusColor = isExpired ? '#ff4d6d' : 'var(--accent-green)';
+
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #292d38; font-size:11px;">
+        <div>
+          <strong style="color:#fff; font-size:12px;">${r}</strong><br>
+          <span style="color:var(--text-muted);">المبلغ: ${money(sub.amount)}</span> | 
+          <span style="color:${statusColor}; font-weight:800;">${statusText} (حتى ${sub.expires})</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// بوابات المطاعم المستقلة
 function openRestPortal(restName) {
   currentPortalRest = restName;
   document.getElementById("portalRestTitle").innerText = restName;
   updatePortalStats();
   renderPortalMeals();
-  renderPortalOrders();
+  setOrderPeriod('all', document.querySelector('.period-btn'), true);
   document.getElementById("restPortalModal").classList.add("show");
 }
 function closeRestPortal() {
@@ -2113,10 +2265,40 @@ function renderPortalMeals() {
           <button type="button" class="btn-stock-toggle ${isAvail ? 'in-stock' : 'out-of-stock'}" onclick="toggleMealAvailability('${m.id}', true)">
             ${isAvail ? 'متوفرة ✅' : 'قفل (نفدت) ❌'}
           </button>
+          <button type="button" onclick="deleteMeal('${m.id}', true)" style="background:#4a1525; color:#ff4d6d; border:none; padding:6px 9px; border-radius:10px; font-weight:800; cursor:pointer;">حذف 🗑️</button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function isOrderInPeriod(timestamp, period) {
+  if (period === 'all') return true;
+  const orderDate = new Date(timestamp);
+  const now = new Date();
+  
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const orderDayStart = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate()).getTime();
+  
+  if (period === 'today') return orderDayStart === todayStart;
+  if (period === 'yesterday') return orderDayStart === todayStart - 86400000;
+  if (period === 'week') return orderDayStart >= todayStart - (86400000 * 7);
+  if (period === 'month') return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+  
+  return true;
+}
+
+function setOrderPeriod(period, btn, isPortal) {
+  selectedOrderPeriod = period;
+  const container = isPortal ? document.querySelector('#portalOrdersTab .period-filter-bar') : document.querySelector('#ordersLogTab .period-filter-bar');
+  container.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  if (isPortal) {
+    renderPortalOrders();
+  } else {
+    renderOrdersLog();
+  }
 }
 
 function renderPortalOrders() {
@@ -2124,9 +2306,10 @@ function renderPortalOrders() {
   const box = document.getElementById("portalOrdersList");
   if (!box) return;
 
-  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
+  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim() && isOrderInPeriod(o.timestamp, selectedOrderPeriod));
+  
   if (myOrders.length === 0) {
-    box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px; font-size:12px;">لا توجد طلبات مسجلة لمطعمك</div>';
+    box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px; font-size:12px;">لا توجد طلبات مسجلة لهذه الفترة</div>';
     return;
   }
 
@@ -2137,6 +2320,7 @@ function renderPortalOrders() {
         <span style="color:var(--accent-green); font-weight:900;">${money(o.total)}</span>
       </div>
       <div style="color:#fff;">👤 ${o.customer} - ${o.phone}</div>
+      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${o.date}</div>
       <div style="background:#101218; padding:5px 8px; border-radius:6px; color:#ddd; margin:4px 0;">📦 ${o.items}</div>
       ${o.wheelPrize && !o.wheelPrize.includes("بدون") ? `<div style="color:var(--accent-green); font-weight:800;">🎁 الهدية: ${o.wheelPrize}</div>` : ''}
     </div>
@@ -2145,16 +2329,19 @@ function renderPortalOrders() {
 
 function copyPortalRestaurantReport() {
   if (!currentPortalRest) return;
-  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim());
-  if (myOrders.length === 0) { alert("لا توجد طلبات لنسخها!"); return; }
+  const myOrders = cloudOrders.filter(o => o && o.restaurant && o.restaurant.toLowerCase().trim() === currentPortalRest.toLowerCase().trim() && isOrderInPeriod(o.timestamp, selectedOrderPeriod));
+  if (myOrders.length === 0) { alert("لا توجد طلبات لهذه الفترة لنسخها!"); return; }
+  
   const sum = myOrders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-  let reportText = `📋 *كشف مبيعات مطعم ${currentPortalRest}*\n🔢 عدد الطلبات: *${myOrders.length}*\n💰 إجمالي المبيعات: *${money(sum)}*\n\n`;
+  let periodText = selectedOrderPeriod === 'today' ? 'اليوم' : selectedOrderPeriod === 'yesterday' ? 'البارحة' : selectedOrderPeriod === 'week' ? 'هذا الأسبوع' : selectedOrderPeriod === 'month' ? 'هذا الشهر' : 'الكل';
+  
+  let reportText = `📋 *كشف مبيعات مطعم ${currentPortalRest}*\n🕒 الفترة: *${periodText}*\n🔢 عدد الطلبات: *${myOrders.length}*\n💰 إجمالي المبيعات: *${money(sum)}*\n\n`;
 
   myOrders.forEach((o, idx) => {
     reportText += `${idx + 1}. ${o.id} | ${o.customer} | ${money(o.total)}\n   📦 ${o.items}\n\n`;
   });
 
-  navigator.clipboard.writeText(reportText).then(() => showToast("📋 تم نسخ الكشف!"));
+  navigator.clipboard.writeText(reportText).then(() => showToast("📋 تم نسخ الكشف المفلتر!"));
 }
 
 const SUPER_ADMIN_PIN = "198722";
@@ -2194,12 +2381,14 @@ function openAdminPanel() {
   renderActiveDiscountsList();
   renderRestPinsList();
   renderWheelAdminUI();
+  renderSubsAdminUI();
   filterQuickMeals();
   syncOrdersFromCloud();
   loadSelectedRestDelivery();
   document.getElementById("admDeliveryFee").value = orderDeliveryFee;
   const savedKey = localStorage.getItem('wj_gemini_api_key');
   if (savedKey) document.getElementById("geminiApiKey").value = savedKey;
+  setOrderPeriod('all', document.querySelector('#ordersLogTab .period-btn'), false);
   document.getElementById("adminPanelModal").classList.add("show");
 }
 function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
@@ -2214,6 +2403,7 @@ function switchAdminTab(tabId, btn) {
   if (tabId === 'wheelAdminTab') renderWheelAdminUI();
   if (tabId === 'ordersLogTab') syncOrdersFromCloud();
   if (tabId === 'deliveryTab') loadSelectedRestDelivery();
+  if (tabId === 'subsAdminTab') renderSubsAdminUI();
 }
 
 function populateFlashAlertInputs() {
@@ -2339,25 +2529,28 @@ async function syncOrdersFromCloud() {
       cloudOrders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }
   } catch(e) {}
-  renderOrdersLog();
+  
+  if (currentPortalRest) renderPortalOrders();
+  else renderOrdersLog();
 }
 
 function renderOrdersLog() {
   const filter = document.getElementById("ordersRestFilter")?.value || "الكل";
   const box = document.getElementById("ordersListContainer");
-  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())));
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())) && isOrderInPeriod(o.timestamp, selectedOrderPeriod));
   const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
 
   document.getElementById("filteredOrdersCount").innerText = filtered.length;
   document.getElementById("filteredOrdersTotal").innerText = money(sum);
 
   if (!box) return;
-  if (filtered.length === 0) { box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">لا توجد طلبات مسجلة</div>'; return; }
+  if (filtered.length === 0) { box.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">لا توجد طلبات مسجلة لهذه الفترة</div>'; return; }
 
   box.innerHTML = filtered.map(o => `
     <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px; margin-bottom:8px; font-size:11px;">
       <div style="display:flex; justify-content:space-between;"><strong style="color:var(--primary);">${o.id || '#WJ'}</strong><span style="color:var(--accent-green); font-weight:900;">${money(o.total)}</span></div>
-      <div style="color:#fff;">👤 ${o.customer} - ${o.phone} (🏪 ${o.restaurant})</div>
+      <div style="color:#fff; margin-top:4px;">👤 ${o.customer} - ${o.phone} (🏪 ${o.restaurant})</div>
+      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${o.date}</div>
       <div style="background:#101218; padding:5px 8px; border-radius:6px; color:#ddd; margin:4px 0;">📦 ${o.items}</div>
       ${o.wheelPrize && !o.wheelPrize.includes("بدون") ? `<div style="color:var(--accent-green); font-weight:800;">🎁 الهدية: ${o.wheelPrize}</div>` : ''}
     </div>
@@ -2366,16 +2559,19 @@ function renderOrdersLog() {
 
 function copyCurrentRestaurantReport() {
   const filter = document.getElementById("ordersRestFilter")?.value || "الكل";
-  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())));
-  if (filtered.length === 0) { alert("لا توجد طلبات!"); return; }
+  const filtered = cloudOrders.filter(o => o && (filter === "الكل" || (o.restaurant && o.restaurant.toLowerCase().trim() === filter.toLowerCase().trim())) && isOrderInPeriod(o.timestamp, selectedOrderPeriod));
+  if (filtered.length === 0) { alert("لا توجد طلبات لهذه الفترة!"); return; }
+  
   const sum = filtered.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
-  let text = `📋 *كشف مبيعات ${filter}*\n🔢 الطلبات: ${filtered.length}\n💰 المجموع: ${money(sum)}\n\n`;
+  let periodText = selectedOrderPeriod === 'today' ? 'اليوم' : selectedOrderPeriod === 'yesterday' ? 'البارحة' : selectedOrderPeriod === 'week' ? 'هذا الأسبوع' : selectedOrderPeriod === 'month' ? 'هذا الشهر' : 'الكل';
+
+  let text = `📋 *كشف مبيعات ${filter}*\n🕒 الفترة: *${periodText}*\n🔢 الطلبات: ${filtered.length}\n💰 المجموع: ${money(sum)}\n\n`;
   filtered.forEach((o, i) => { text += `${i + 1}. ${o.id} | ${o.customer} | ${money(o.total)}\n   📦 ${o.items}\n\n`; });
-  navigator.clipboard.writeText(text).then(() => showToast("📋 تم نسخ الكشف!"));
+  navigator.clipboard.writeText(text).then(() => showToast("📋 تم نسخ الكشف المفلتر!"));
 }
 
 function clearOrdersLog() {
-  if (confirm("هل تريد مسح سجل الطلبات بالكامل؟")) {
+  if (confirm("هل تريد مسح سجل الطلبات بالكامل؟ (سيتم تصفير الكشوفات لكافة الفترات)")) {
     cloudOrders = [];
     fetch(FIREBASE_ORDERS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
     renderOrdersLog();
@@ -2412,7 +2608,7 @@ function filterQuickMeals() {
   const box = document.getElementById("quickMealsList");
   if (!box) return;
 
-  const filtered = allMeals.filter(m => !q || m.name.toLowerCase().includes(q) || m.rest.toLowerCase().includes(q)).slice(0, 30);
+  const filtered = allMeals.filter(m => !q || m.name.toLowerCase().includes(q) || (m.rest && m.rest.toLowerCase().includes(q))).slice(0, 30);
   box.innerHTML = filtered.map(m => {
     const isAvail = (m.available !== false);
     return `
@@ -2428,6 +2624,7 @@ function filterQuickMeals() {
           </button>
           <button type="button" onclick="promptEditMealSavingPrice('${m.id}')" style="background:#4a148c; color:#fff; border:none; padding:5px 7px; border-radius:8px; font-weight:800; cursor:pointer;">🔥 توفير</button>
           <button type="button" onclick="promptEditMealPrice('${m.id}')" style="background:#2a2e3a; color:#fff; border:1px solid #3a3f50; padding:5px 7px; border-radius:8px; font-weight:800; cursor:pointer;">💰 سعر</button>
+          <button type="button" onclick="deleteMeal('${m.id}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:5px 7px; border-radius:8px; font-weight:800; cursor:pointer;">حذف 🗑️</button>
         </div>
       </div>
     `;
@@ -2471,7 +2668,7 @@ function addNewMealLocally() {
 
   if (!name || !price) { alert("أدخل اسم الوجبة والسعر!"); return; }
 
-  allMeals.unshift({
+  const newMealObj = {
     id: Date.now(),
     name,
     desc,
@@ -2483,7 +2680,9 @@ function addNewMealLocally() {
     phone: REST_PHONES[rest] || "9647708111561",
     zone,
     available: true
-  });
+  };
+
+  allMeals.unshift(newMealObj);
 
   fetch(FIREBASE_MEALS_URL, {
     method: "PUT",
@@ -2546,6 +2745,7 @@ function populateAdminDropdowns() {
   const rSelDisc = document.getElementById("admDiscountRestSelect");
   const rSelFilter = document.getElementById("ordersRestFilter");
   const rSelDeliv = document.getElementById("admRestDelivSelect");
+  const rSelSub = document.getElementById("admSubRestSelect");
 
   const uniqueRests = [];
   RESTS.forEach(r => {
@@ -2561,9 +2761,11 @@ function populateAdminDropdowns() {
   if (rSelAlert) rSelAlert.innerHTML = optionsHtml;
   if (rSelDisc) rSelDisc.innerHTML = optionsHtml;
   if (rSelDeliv) rSelDeliv.innerHTML = optionsHtml;
+  if (rSelSub) rSelSub.innerHTML = optionsHtml;
   if (rSelFilter) rSelFilter.innerHTML = `<option value="الكل">كل المطاعم (كشف عام)</option>` + optionsHtml;
 
   renderWheelAdminUI();
+  renderSubsAdminUI();
 }
 
 function renderWheelAdminUI() {
@@ -2619,225 +2821,9 @@ function saveWheelConfigToCloud() {
   showToast(wheelConfig.active ? "🎡 تم تفعيل عجلة الحظ وتعميمها!" : "❌ تم إيقاف عجلة الحظ");
 }
 
-function saveDeliveryFee() {
-  orderDeliveryFee = Number(document.getElementById("admDeliveryFee").value) || 1000;
-  localStorage.setItem('wj_delivery_fee', orderDeliveryFee);
-  updateCartUI();
-  renderCartDrawerContent();
-  renderMeals();
-  showToast("تم تحديث أجور التوصيل الافتراضية");
-}
-
-function saveAdminBanners() {
-  const t1 = document.getElementById("admB1Title").value.trim() || appBanners[0].title;
-  const d1 = document.getElementById("admB1Desc").value.trim() || appBanners[0].desc;
-  const i1 = document.getElementById("admB1Img").value.trim() || appBanners[0].img;
-  appBanners[0] = { title: t1, desc: d1, img: i1 };
-  renderBanners();
-  showToast("📢 تم تحديث البنر");
-}
-
-function openDiscountsModal() {
-  refreshCouponUI();
-  document.getElementById("discountsModal").classList.add("show");
-}
-function closeDiscountsModal() { document.getElementById("discountsModal").classList.remove("show"); }
-function closeIfOutsideDiscounts(e) { if (e.target.id === 'discountsModal') closeDiscountsModal(); }
-
-function refreshCouponUI() {
-  const modalBox = document.getElementById("couponModalContent");
-  if (!modalBox) return;
-
-  let genHtml = '';
-  if (generalDiscountConfig && generalDiscountConfig.active) {
-    genHtml = `
-      <div style="background:rgba(255,152,0,0.12); border:1px solid var(--accent-orange); border-radius:14px; padding:12px; margin-bottom:12px;">
-        <div style="font-weight:900; color:var(--accent-orange); font-size:13px; margin-bottom:6px;">🎁 خصومات عامة فورية لكل التطبيق:</div>
-        <div style="font-size:12px; color:#fff; line-height:1.6;">
-          • طلب من <strong>${money(generalDiscountConfig.tier1.min)}</strong> ⬅️ خصم <strong>${money(generalDiscountConfig.tier1.discount)}</strong><br>
-          • طلب من <strong>${money(generalDiscountConfig.tier2.min)}</strong> فما فوق ⬅️ خصم <strong>${money(generalDiscountConfig.tier2.discount)}</strong>
-        </div>
-      </div>
-    `;
-  }
-  modalBox.innerHTML = genHtml || '<div style="color:var(--text-muted); font-size:12px;">لا توجد عروض نشطة حالياً.</div>';
-}
-
-function saveCustomerData() {
-  try {
-    localStorage.setItem('wj_cust_name', document.getElementById("custName")?.value || "");
-    localStorage.setItem('wj_cust_phone', document.getElementById("custPhone")?.value || "");
-    localStorage.setItem('wj_cust_address', document.getElementById("custAddress")?.value || "");
-    localStorage.setItem('wj_cust_zone', document.getElementById("custZoneSelect")?.value || "الكرخ");
-  } catch(e) {}
-}
-
-function restoreCustomerData() {
-  try {
-    const name = localStorage.getItem('wj_cust_name');
-    const phone = localStorage.getItem('wj_cust_phone');
-    const address = localStorage.getItem('wj_cust_address');
-    const zone = localStorage.getItem('wj_cust_zone');
-    if (name && document.getElementById("custName")) document.getElementById("custName").value = name;
-    if (phone && document.getElementById("custPhone")) document.getElementById("custPhone").value = phone;
-    if (address && document.getElementById("custAddress")) document.getElementById("custAddress").value = address;
-    if (zone && document.getElementById("custZoneSelect")) document.getElementById("custZoneSelect").value = zone;
-  } catch(e) {}
-}
-
-// ماسح المنيو
-function saveGeminiApiKey() {
-  localStorage.setItem('wj_gemini_api_key', document.getElementById("geminiApiKey").value.trim());
-}
-
-function handleMenuFileSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const btn = document.getElementById("btnRunAiScan");
-  const previewText = document.getElementById("aiMenuPreviewText");
-  currentMenuBase64 = "";
-
-  btn.disabled = true;
-  btn.innerText = "⏳ جاري ضغط وتجهيز الصورة...";
-  previewText.innerText = "⏳ جاري المعالجة...";
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement("canvas");
-      let w = img.width, h = img.height;
-      if (w > 1200 || h > 1200) {
-        if (w > h) { h = Math.round((h * 1200) / w); w = 1200; }
-        else { w = Math.round((w * 1200) / h); h = 1200; }
-      }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      currentMenuBase64 = canvas.toDataURL("image/jpeg", 0.82).split(',')[1];
-      btn.disabled = false;
-      btn.innerText = "⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي";
-      previewText.innerText = "✅ الصورة جاهزة تماماً للمسح";
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function runAiMenuScan() {
-  const apiKey = (document.getElementById("geminiApiKey")?.value || localStorage.getItem('wj_gemini_api_key') || "").trim();
-  const rest = document.getElementById("aiScanRestSelect")?.value || "";
-
-  if (!apiKey || !currentMenuBase64) {
-    alert("تأكد من إدخال مفتاح Gemini واختيار صورة المنيو!");
-    return;
-  }
-
-  const btn = document.getElementById("btnRunAiScan");
-  const loading = document.getElementById("aiScanLoading");
-  const resultsBox = document.getElementById("aiScanResultsBox");
-
-  btn.disabled = true;
-  loading.style.display = "block";
-  resultsBox.style.display = "none";
-
-  const promptText = `أنت خبير محترف في تحليل قوائم طعام المطاعم وتطبيقات التوصيل مثل طلباتي في العراق.
-استخرج كل وجبة بدقة كـ JSON Array يحتوي على:
-- "name": اسم الوجبة.
-- "desc": مكونات وتفاصيل الوجبة الظاهرة تحتها بدقة.
-- "cat": اسم المطبخ أو القسم (مثال: وجبات التوفير، برجر، بيتزا، دجاج ومقرمش، ريزو، شاورما وصاج، عصائر...).
-- "price": السعر الأساسي بالدينار كرقم صحيح.
-- "savingPrice": سعر التوفير/الخصم إن وجد (مثل سعر pro أو العرض المخفض)، وإلا اتركه null.
-الإخراج JSON نقي فقط:
-[{"name": "بوكس طلبات", "desc": "ساندويش زنجر، ساندويش بركر، ساندويش تويستر", "cat": "وجبات التوفير", "price": 11250, "savingPrice": 5625}]`;
-
-  const models = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"];
-  let textResponse = "";
-
-  for (const m of models) {
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: "image/jpeg", data: currentMenuBase64 } }] }]
-        })
-      });
-      const data = await res.json();
-      textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      if (textResponse.trim()) break;
-    } catch(e) {}
-  }
-
-  loading.style.display = "none";
-  btn.disabled = false;
-
-  if (!textResponse) { alert("تعذر تحليل الصورة، يرجى المحاولة بصورة أوضح."); return; }
-
-  try {
-    const parsed = JSON.parse(textResponse.replace(/```json/g, '').replace(/```/g, '').trim());
-    tempAiExtractedMeals = parsed.map((m, idx) => ({
-      tempId: idx,
-      name: m.name || "وجبة",
-      desc: m.desc || "",
-      cat: m.cat || "وجبات عامة",
-      price: Number(m.price) || 3000,
-      savingPrice: m.savingPrice ? Number(m.savingPrice) : null
-    }));
-
-    document.getElementById("aiExtractedCount").innerText = tempAiExtractedMeals.length;
-    document.getElementById("aiExtractedList").innerHTML = tempAiExtractedMeals.map((m, i) => `
-      <div style="background:var(--bg-card); padding:8px; border-radius:10px; margin-bottom:6px; font-size:11px;">
-        <strong>${m.name}</strong> (${m.cat}) - <span style="color:var(--accent-green);">${money(m.price)}</span>
-        ${m.savingPrice ? `<span style="color:#e1bee7; margin-right:6px;">[توفير: ${money(m.savingPrice)}]</span>` : ''}
-        <div style="color:var(--text-muted); font-size:10px;">${m.desc}</div>
-      </div>
-    `).join('');
-    resultsBox.style.display = "block";
-    showToast(`✨ تم استخراج ${tempAiExtractedMeals.length} وجبة بنجاح!`);
-  } catch(e) {
-    alert("خطأ في قراءة بيانات الوجبات المستخرجة");
-  }
-}
-
-function saveAllAiMealsToCloud() {
-  const rest = document.getElementById("aiScanRestSelect").value;
-  const zone = document.getElementById("aiScanZoneSelect").value;
-  const phone = REST_PHONES[rest] || "9647708111561";
-
-  const newMeals = tempAiExtractedMeals.map((m, i) => ({
-    id: Date.now() + i,
-    name: m.name,
-    desc: m.desc,
-    rest: rest,
-    cat: m.cat,
-    price: m.price,
-    savingPrice: m.savingPrice,
-    img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600",
-    phone: phone,
-    zone: zone,
-    available: true
-  }));
-
-  allMeals.unshift(...newMeals);
-
-  fetch(FIREBASE_MEALS_URL, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(allMeals.filter(m => m && m.name))
-  });
-
-  buildCategoriesBar();
-  renderMeals();
-  document.getElementById("aiScanResultsBox").style.display = "none";
-  closeAdminPanel();
-  showToast(`🎉 تمت إضافة وتعميم وجبات ${rest} بنجاح!`);
-}
-
 // المزامنة السحابية الشاملة الآمنة
 async function syncQuietlyWithCloud() {
   try {
-    // 1. مزامنة المطاعم السحابية
     const resRests = await fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now());
     const dataRests = await resRests.json();
     if (dataRests && Array.isArray(dataRests)) {
@@ -2864,7 +2850,6 @@ async function syncQuietlyWithCloud() {
       localStorage.setItem('wj_rest_pins', JSON.stringify(REST_PINS));
     }
 
-    // مزامنة أجور التوصيل المخصصة للمطاعم
     const resDeliv = await fetch(FIREBASE_DELIVERY_URL + "?_t=" + Date.now());
     const dataDeliv = await resDeliv.json();
     if (dataDeliv && typeof dataDeliv === 'object') {
@@ -2872,7 +2857,12 @@ async function syncQuietlyWithCloud() {
       localStorage.setItem('wj_rest_delivery_fees', JSON.stringify(restDeliveryFees));
     }
 
-    // 2. مزامنة الوجبات
+    const resSubs = await fetch(FIREBASE_SUBS_URL + "?_t=" + Date.now());
+    const dataSubs = await resSubs.json();
+    if (dataSubs && typeof dataSubs === 'object') {
+      restSubscriptions = dataSubs;
+    }
+
     const resM = await fetch(FIREBASE_MEALS_URL + "?_t=" + Date.now());
     const dataM = await resM.json();
     if (dataM && typeof dataM === 'object') {
@@ -2885,7 +2875,6 @@ async function syncQuietlyWithCloud() {
       }
     }
 
-    // 3. مزامنة عجلة الحظ
     const resW = await fetch(FIREBASE_WHEEL_URL + "?_t=" + Date.now());
     const dataW = await resW.json();
     if (dataW && typeof dataW === 'object') {
@@ -2894,7 +2883,6 @@ async function syncQuietlyWithCloud() {
       drawLuckyWheel();
     }
 
-    // 4. مزامنة الإشعارات والخصومات
     const resAlert = await fetch(FIREBASE_FLASH_ALERT_URL + "?_t=" + Date.now());
     const dataAlert = await resAlert.json();
     if (dataAlert && typeof dataAlert === 'object') {
@@ -2939,7 +2927,6 @@ function loadInitialLocalData() {
   } catch(e) {}
 }
 
-// التشغيل والتهيئة
 loadInitialLocalData();
 restoreCustomerData();
 renderBanners();
