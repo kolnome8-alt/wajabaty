@@ -3133,6 +3133,100 @@ function clearAiResults() {
   document.getElementById("aiScanResultsBox").style.display = "none";
 }
 
+
+// استعادة بيانات الزبون المحفوظة محلياً
+function restoreCustomerData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('wj_customer_data') || '{}');
+    const fields = {
+      custName: saved.name || '',
+      custPhone: saved.phone || '',
+      custAddress: saved.address || '',
+      custZoneSelect: saved.zone || 'الكرخ'
+    };
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    });
+    const key = localStorage.getItem('wj_gemini_api_key') || '';
+    const api = document.getElementById('geminiApiKey');
+    if (api && key) api.value = key;
+  } catch (e) {}
+}
+
+// حفظ الوجبات المستخرجة بطريقة دمج آمنة: لا يستبدل قائمة الوجبات الموجودة
+async function saveAllAiMealsToCloud() {
+  if (!Array.isArray(tempAiExtractedMeals) || tempAiExtractedMeals.length === 0) {
+    alert('ماكو وجبات مستخرجة للحفظ. امسح المنيو من جديد أولاً.');
+    return;
+  }
+  const btn = document.querySelector('#aiScanResultsBox button[onclick="saveAllAiMealsToCloud()"]');
+  if (btn) { btn.disabled = true; btn.dataset.oldText = btn.innerText; btn.innerText = '⏳ جاري الحفظ بأمان...'; }
+  try {
+    const response = await fetch(FIREBASE_MEALS_URL + '?_t=' + Date.now(), { cache: 'no-store' });
+    if (!response.ok) throw new Error('تعذر قراءة قائمة الوجبات الحالية من السحابة.');
+    const cloudData = await response.json();
+    if (!Array.isArray(cloudData) && (!cloudData || typeof cloudData !== 'object')) {
+      throw new Error('بيانات الوجبات السحابية غير واضحة؛ لم يتم تغيير أي شيء.');
+    }
+    const existing = Array.isArray(cloudData) ? cloudData : Object.values(cloudData);
+    const validExisting = existing.filter(m => m && m.name);
+    if (existing.length > 0 && validExisting.length === 0) {
+      throw new Error('قائمة الوجبات الحالية غير صالحة؛ أوقفت الحفظ لحماية البيانات.');
+    }
+
+    const rest = document.getElementById('aiScanRestSelect')?.value || '';
+    const zone = document.getElementById('aiScanZoneSelect')?.value || 'الكرخ';
+    if (!rest) throw new Error('اختَر المطعم المستهدف أولاً.');
+
+    let nextId = Math.max(Date.now(), ...validExisting.map(m => Number(m.id) || 0)) + 1;
+    const additions = tempAiExtractedMeals.map((m, index) => ({
+      id: nextId + index,
+      name: String(m.name || 'وجبة').trim(),
+      desc: String(m.desc || ''),
+      cat: String(m.cat || 'وجبات عامة'),
+      price: Number(m.price) || 3000,
+      savingPrice: m.savingPrice ? Number(m.savingPrice) : null,
+      rest,
+      zone,
+      img: '',
+      available: true
+    })).filter(m => m.name);
+
+    // لا نستبدل وجبة موجودة بالاسم نفسه داخل المطعم؛ نضيف الجديد فقط
+    const seen = new Set(validExisting.map(m => `${String(m.rest || '').trim().toLowerCase()}|${String(m.name || '').trim().toLowerCase()}`));
+    const uniqueAdditions = additions.filter(m => {
+      const key = `${m.rest.trim().toLowerCase()}|${m.name.trim().toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (uniqueAdditions.length === 0) {
+      showToast('ℹ️ الوجبات موجودة مسبقاً؛ لم تتغير بياناتك.');
+      return;
+    }
+
+    const merged = [...validExisting, ...uniqueAdditions];
+    const saveResponse = await fetch(FIREBASE_MEALS_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(merged)
+    });
+    if (!saveResponse.ok) throw new Error('فشل حفظ القائمة بالسحابة.');
+    allMeals = merged;
+    renderMeals();
+    buildRestaurantsBar();
+    buildCategoriesBar();
+    document.getElementById('aiScanResultsBox').style.display = 'none';
+    tempAiExtractedMeals = [];
+    showToast(`✅ انضافت ${uniqueAdditions.length} وجبة، وبقيت الوجبات السابقة محفوظة.`);
+  } catch (error) {
+    alert('لم يتم تغيير قائمة الوجبات حفاظاً على بياناتك.\\n' + (error.message || 'حدث خطأ أثناء الحفظ.'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerText = btn.dataset.oldText || '🚀 حفظ كل الوجبات المستخرجة بالسحابة فوراً'; }
+  }
+}
+
 // بدء التشغيل
 window.onload = () => {
   loadInitialLocalData();
