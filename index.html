@@ -796,8 +796,7 @@
     <span class="brand-badge">Wj</span> وجباتي
   </div>
   <div class="header-actions">
-    <!-- العجلة مخفية افتراضياً -->
-    <button class="btn-wheel-header" id="btnWheelTrigger" style="display:none;" onclick="openWheelModal()">🎡 الحظ</button>
+    <button class="btn-wheel-header" id="btnWheelTrigger" onclick="openWheelModal()">🎡 الحظ</button>
     <button class="btn-cuisines-filter" onclick="openCuisinesModal()">المطابخ 🍕</button>
     <button class="btn-discount" onclick="openDiscountsModal()">خصومات 🏷️</button>
     <button class="btn-cart-top" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
@@ -840,7 +839,7 @@
       <span style="font-size:20px; cursor:pointer;" onclick="closeWheelModal()">✕</span>
     </div>
     <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;" id="wheelSubtext">
-      دور العجلة واربح جائزتك الفورية مع طلبك من <strong id="wheelRestBadge" style="color:var(--accent-orange);">المطعم</strong>!
+      دور العجلة واربح جائزتك الفورية مع طلبك من <strong id="wheelRestBadge" style="color:var(--accent-orange);">مطعم سندريلا</strong>!
     </p>
 
     <div style="position:relative; width:260px; height:260px; margin:0 auto 15px;">
@@ -1040,10 +1039,11 @@
           <option value="الرصافة">الرصافة</option>
         </select>
 
-        <label style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--accent-orange); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer; margin-top:8px;">
+        <label for="aiMenuFileInput" style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--accent-orange); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer; margin-top:8px;">
           📷 التقاط أو اختيار صورة المنيو
-          <input type="file" id="aiMenuFileInput" accept="image/*" style="display:none;" onchange="handleMenuFileSelect(this)">
         </label>
+        <input type="file" id="aiMenuFileInput" accept="image/*" style="position:absolute; opacity:0; width:1px; height:1px; z-index:-1;" onchange="handleMenuFileSelect(this)">
+        
         <div id="aiMenuPreviewText" style="font-size:11px; text-align:center; margin-top:5px; font-weight:700; color:var(--accent-green);"></div>
       </div>
 
@@ -2889,7 +2889,7 @@ function saveWheelConfigToCloud() {
   showToast(wheelConfig.active ? "🎡 تم تفعيل عجلة الحظ وتعميمها!" : "❌ تم إيقاف عجلة الحظ");
 }
 
-// التزامن السحابي الأساسي والمضمون
+// المزامنة السحابية
 async function syncQuietlyWithCloud() {
   try {
     const resRests = await fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now());
@@ -2995,7 +2995,145 @@ function loadInitialLocalData() {
   } catch(e) {}
 }
 
-// تفعيل كل شيء عند فتح الصفحة
+// دالة رفع ملف المنيو وتشغيل الذكاء الاصطناعي (تم الإصلاح بشكل نهائي)
+function saveGeminiApiKey() {
+  localStorage.setItem('wj_gemini_api_key', document.getElementById("geminiApiKey").value.trim());
+}
+
+function handleMenuFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const btn = document.getElementById("btnRunAiScan");
+  const previewText = document.getElementById("aiMenuPreviewText");
+  currentMenuBase64 = "";
+
+  btn.disabled = true;
+  btn.style.opacity = "0.5";
+  btn.innerText = "⏳ جاري ضغط وتجهيز الصورة...";
+  previewText.innerText = "⏳ جاري المعالجة...";
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      let w = img.width, h = img.height;
+      if (w > 1200 || h > 1200) {
+        if (w > h) { h = Math.round((h * 1200) / w); w = 1200; }
+        else { w = Math.round((w * 1200) / h); h = 1200; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      
+      currentMenuBase64 = canvas.toDataURL("image/jpeg", 0.82).split(',')[1];
+      
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.innerText = "⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي";
+      previewText.innerText = `✅ الصورة جاهزة تماماً للمسح (${Math.round(file.size / 1024)} KB)`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runAiMenuScan() {
+  const apiKey = (document.getElementById("geminiApiKey")?.value || localStorage.getItem('wj_gemini_api_key') || "").trim();
+  const rest = document.getElementById("aiScanRestSelect")?.value || "";
+
+  if (!apiKey || !currentMenuBase64) {
+    alert("تأكد من إدخال مفتاح Gemini واختيار صورة المنيو أولاً!");
+    return;
+  }
+
+  const btn = document.getElementById("btnRunAiScan");
+  const loading = document.getElementById("aiScanLoading");
+  const resultsBox = document.getElementById("aiScanResultsBox");
+
+  btn.disabled = true;
+  loading.style.display = "block";
+  resultsBox.style.display = "none";
+
+  const promptText = `أنت خبير محترف في تحليل قوائم طعام المطاعم وتطبيقات التوصيل مثل طلباتي في العراق.
+استخرج كل وجبة بدقة كـ JSON Array يحتوي على:
+- "name": اسم الوجبة.
+- "desc": مكونات وتفاصيل الوجبة الظاهرة تحتها بدقة.
+- "cat": اسم المطبخ أو القسم (مثال: وجبات التوفير، برجر، بيتزا، دجاج ومقرمش، ريزو، شاورما وصاج، عصائر...).
+- "price": السعر الأساسي بالدينار كرقم صحيح.
+- "savingPrice": سعر التوفير/الخصم إن وجد (مثل سعر pro أو العرض المخفض)، وإلا اتركه null.
+الإخراج JSON نقي فقط وبدون أي إضافات:
+[{"name": "بوكس طلبات", "desc": "ساندويش زنجر، ساندويش بركر، ساندويش تويستر", "cat": "وجبات التوفير", "price": 11250, "savingPrice": 5625}]`;
+
+  // الأسماء الصحيحة والرسمية من Google
+  const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro-vision", "gemini-1.5-pro", "gemini-1.0-pro-vision-latest"];
+  let textResponse = "";
+  let lastErrorMsg = "";
+
+  for (const m of models) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: "image/jpeg", data: currentMenuBase64 } }] }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) {
+        lastErrorMsg = data.error.message;
+        continue;
+      }
+      textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (textResponse.trim()) {
+        lastErrorMsg = "";
+        break;
+      }
+    } catch(e) {
+      lastErrorMsg = e.message;
+    }
+  }
+
+  loading.style.display = "none";
+  btn.disabled = false;
+
+  if (!textResponse) { 
+    alert("فشل الاستخراج. السبب من سيرفرات جوجل:\n" + (lastErrorMsg || "لم يتم التعرف على الصورة.")); 
+    return; 
+  }
+
+  try {
+    const parsed = JSON.parse(textResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+    tempAiExtractedMeals = parsed.map((m, idx) => ({
+      tempId: idx,
+      name: m.name || "وجبة",
+      desc: m.desc || "",
+      cat: m.cat || "وجبات عامة",
+      price: Number(m.price) || 3000,
+      savingPrice: m.savingPrice ? Number(m.savingPrice) : null
+    }));
+
+    document.getElementById("aiExtractedCount").innerText = tempAiExtractedMeals.length;
+    document.getElementById("aiExtractedList").innerHTML = tempAiExtractedMeals.map((m, i) => `
+      <div style="background:var(--bg-card); padding:8px; border-radius:10px; margin-bottom:6px; font-size:11px;">
+        <strong>${m.name}</strong> (${m.cat}) - <span style="color:var(--accent-green);">${money(m.price)}</span>
+        ${m.savingPrice ? `<span style="color:#e1bee7; margin-right:6px;">[توفير: ${money(m.savingPrice)}]</span>` : ''}
+        <div style="color:var(--text-muted); font-size:10px;">${m.desc}</div>
+      </div>
+    `).join('');
+    resultsBox.style.display = "block";
+    showToast(`✨ تم استخراج ${tempAiExtractedMeals.length} وجبة بنجاح!`);
+  } catch(e) {
+    alert("خطأ في قراءة بيانات الوجبات المستخرجة");
+  }
+}
+
+function clearAiResults() {
+  tempAiExtractedMeals = [];
+  document.getElementById("aiScanResultsBox").style.display = "none";
+}
+
+// بدء التشغيل
 window.onload = () => {
   loadInitialLocalData();
   restoreCustomerData();
