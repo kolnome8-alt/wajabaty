@@ -1396,6 +1396,15 @@
   </div>
 </div>
 
+<div id="bannerVideoModal" role="dialog" aria-modal="true" aria-label="مشغل فيديو البنر" aria-hidden="true" onclick="if(event.target===this)closeBannerVideo()" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:18px;">
+  <div style="width:100%;max-width:560px;background:#151720;border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#fff;font-weight:900"><span>🎬 فيديو وجباتي</span><button type="button" onclick="closeBannerVideo()" style="border:0;border-radius:50%;width:36px;height:36px;background:#333;color:#fff;font-size:22px">×</button></div>
+    <video id="bannerVideoPlayer" controls playsinline preload="none" style="display:block;width:100%;max-height:65vh;background:#000;border-radius:12px" controlsList="nodownload"></video>
+    <a id="bannerVideoExternalLink" href="#" target="_blank" rel="noopener noreferrer" style="display:none;margin-top:12px;background:#ff2a5f;color:white;text-decoration:none;padding:12px 16px;border-radius:12px;justify-content:center;font-weight:900">فتح الفيديو في المتصفح</a>
+    <p style="color:#aab0c2;font-size:11px;line-height:1.5;margin:10px 2px 0">الفيديو لا يبدأ تلقائياً. اضغط تشغيل بعد فتح المشغل. روابط Google Drive قد تحتاج فتحها في المتصفح.</p>
+  </div>
+</div>
+
 <script>
 const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
 const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
@@ -1654,7 +1663,37 @@ function renderBanners() {
   dotsBox.innerHTML = banners.map((_,i)=>`<div class="banner-dot ${i===0?'active':''}"></div>`).join('');
 }
 
-function openBannerVideo(url){ if(!url)return; const cleaned=String(url).trim(); if(cleaned.startsWith('data:video/')){const w=window.open('','_blank');if(w)w.document.write('<video controls autoplay playsinline style="width:100%;height:auto" src="'+cleaned+'"></video>');}else{window.open(cleaned,'_blank','noopener');} }
+function openBannerVideo(url){
+  if(!url) return;
+  const cleaned=String(url).trim();
+  // لا نفتح نافذة/تبويباً جديداً ولا نشغل الفيديو تلقائياً؛ هذا يقلل أعطال WebView.
+  const modal=document.getElementById('bannerVideoModal');
+  const player=document.getElementById('bannerVideoPlayer');
+  const external=document.getElementById('bannerVideoExternalLink');
+  if(!modal || !player || !external){
+    if(!cleaned.startsWith('data:video/')) window.location.href=cleaned;
+    else alert('تعذر فتح مشغل الفيديو.');
+    return;
+  }
+  player.pause(); player.removeAttribute('src'); player.load();
+  external.style.display='none'; external.removeAttribute('href');
+  if(cleaned.startsWith('data:video/') || /\.(mp4|webm|ogg)(\?|#|$)/i.test(cleaned)){
+    player.src=cleaned; player.style.display='block';
+    modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
+    // يتطلب التشغيل نقرة صريحة على زر التشغيل الأصلي داخل عنصر الفيديو.
+  } else {
+    // روابط Drive العادية لا تعتبر دائماً رابط تشغيل مباشر؛ نعرض خيار فتح الرابط خارجياً دون تشغيل تلقائي.
+    player.style.display='none';
+    external.href=cleaned; external.style.display='inline-flex';
+    modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
+  }
+}
+function closeBannerVideo(){
+  const modal=document.getElementById('bannerVideoModal');
+  const player=document.getElementById('bannerVideoPlayer');
+  if(player){player.pause();player.removeAttribute('src');player.load();player.style.display='block';}
+  if(modal){modal.style.display='none';modal.setAttribute('aria-hidden','true');}
+}
 
 function previewBannerImage(input) {
   const file = input?.files?.[0]; const preview = document.getElementById('admB1ImagePreview');
