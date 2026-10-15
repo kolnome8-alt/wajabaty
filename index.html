@@ -1343,7 +1343,15 @@
         <span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🌟 العرض الأول:</span>
         <input type="text" id="admB1Title" class="form-input" style="margin-top:6px;" placeholder="عنوان العرض">
         <input type="text" id="admB1Desc" class="form-input" placeholder="تفاصيل العرض">
-        <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة أو فيديو مباشر (MP4)">
+        <label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">🖼️ اختر صورة البنر من الهاتف</label>
+        <input type="file" id="admB1ImageFile" class="form-input" accept="image/*" onchange="previewBannerImage(this)" style="padding:9px;">
+        <img id="admB1ImagePreview" alt="معاينة صورة البنر" style="display:none;width:100%;max-height:150px;object-fit:cover;border-radius:12px;margin:5px 0 10px;">
+        <label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">🎬 فيديو من الهاتف (مدة دقيقة كحد أقصى)</label>
+        <input type="file" id="admB1VideoFile" class="form-input" accept="video/*" onchange="inspectBannerVideo(this)" style="padding:9px;">
+        <div id="admB1VideoStatus" style="font-size:11px;color:var(--text-muted);margin:4px 0 8px;"></div>
+        <label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">أو رابط صورة / فيديو مباشر</label>
+        <input type="url" id="admB1Img" class="form-input" placeholder="رابط فيديو مباشر MP4 أو رابط Drive (اختياري)">
+        <p style="font-size:10px;color:var(--text-muted);line-height:1.5;">تنبيه: الفيديو المحلي يُضغط إلى WebM منخفض الدقة قبل الحفظ، والمدة القصوى 60 ثانية. نجاح الرفع يعتمد على سماح قاعدة Firebase بحجم البيانات.</p>
       </div>
 
       <button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAdminBanners()">
@@ -1393,6 +1401,7 @@ const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com
 const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
 const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/general_discount.json";
 const FIREBASE_DISCOUNT_CODES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/discount_codes.json";
+const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/app_banners.json";
 const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
 const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
 const FIREBASE_WHEEL_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wheel_config.json";
@@ -1633,24 +1642,141 @@ function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dotsBox = document.getElementById("bannerDots");
   if (!track || !dotsBox) return;
-
-  track.innerHTML = appBanners.map(b => {
-    const isVideo = b.img && b.img.toLowerCase().includes('.mp4');
-    const mediaHtml = isVideo 
-      ? `<video src="${b.img}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>` 
-      : `<img src="${b.img}" alt="${b.title}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
-
-    return `
-      <div class="banner-slide">
-        ${mediaHtml}
-        <div class="banner-overlay">
-          <h2>${b.title}</h2>
-          <p>${b.desc}</p>
-        </div>
-      </div>
-    `;
+  const banners = Array.isArray(appBanners) && appBanners.length ? appBanners : [];
+  track.innerHTML = banners.map(b => {
+    const media = String(b.img || "");
+    const safeMedia = media.replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+    const mediaHtml = `<img src="${safeMedia || 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'}" alt="${String(b.title||'').replace(/"/g,'&quot;')}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
+    const videoUrl=String(b.video||'');
+    const videoButton=videoUrl ? `<button type="button" onclick="event.stopPropagation();openBannerVideo('${videoUrl.replace(/'/g,'%27')}')" style="position:absolute;left:12px;top:12px;z-index:8;border:0;border-radius:20px;padding:8px 12px;background:#ff2a5f;color:#fff;font-weight:900">▶ شاهد الفيديو</button>` : '';
+    return `<div class="banner-slide">${mediaHtml}${videoButton}<div class="banner-overlay"><h2>${String(b.title||'').replace(/</g,'&lt;')}</h2><p>${String(b.desc||'').replace(/</g,'&lt;')}</p></div></div>`;
   }).join('');
-  dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+  dotsBox.innerHTML = banners.map((_,i)=>`<div class="banner-dot ${i===0?'active':''}"></div>`).join('');
+}
+
+function openBannerVideo(url){ if(!url)return; const cleaned=String(url).trim(); if(cleaned.startsWith('data:video/')){const w=window.open('','_blank');if(w)w.document.write('<video controls autoplay playsinline style="width:100%;height:auto" src="'+cleaned+'"></video>');}else{window.open(cleaned,'_blank','noopener');} }
+
+function previewBannerImage(input) {
+  const file = input?.files?.[0]; const preview = document.getElementById('admB1ImagePreview');
+  if (!file || !preview) return;
+  if (!file.type.startsWith('image/')) { alert('اختر ملف صورة فقط.'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = () => { preview.src = reader.result; preview.style.display='block'; };
+  reader.readAsDataURL(file);
+}
+
+async function inspectBannerVideo(input) {
+  const file = input?.files?.[0]; const status = document.getElementById('admB1VideoStatus');
+  if (!file || !status) return;
+  status.textContent = 'جارٍ فحص الفيديو...';
+  const url = URL.createObjectURL(file); const video = document.createElement('video'); video.preload='metadata'; video.src=url;
+  video.onloadedmetadata = () => {
+    URL.revokeObjectURL(url);
+    if (!Number.isFinite(video.duration) || video.duration > 60) { input.value=''; status.textContent='الفيديو أطول من دقيقة؛ اختر فيديو مدته 60 ثانية أو أقل.'; status.style.color='var(--primary)'; return; }
+    status.textContent = `تم قبول الفيديو (${Math.ceil(video.duration)} ثانية). سيُضغط قبل الحفظ.`; status.style.color='var(--accent-green)';
+  };
+  video.onerror = () => { URL.revokeObjectURL(url); status.textContent='تعذر قراءة الفيديو. جرّب ملف MP4 آخر.'; };
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(String(r.result)); r.onerror=()=>reject(new Error('تعذرت قراءة الملف')); r.readAsDataURL(file); });
+}
+
+async function compressBannerVideo(file) {
+  const sourceUrl=URL.createObjectURL(file), video=document.createElement('video');
+  video.muted=true; video.playsInline=true; video.src=sourceUrl; video.preload='auto';
+  await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('تعذر فتح الفيديو'));});
+  if (video.duration > 60) { URL.revokeObjectURL(sourceUrl); throw new Error('مدة الفيديو يجب ألا تتجاوز دقيقة واحدة.'); }
+  const scale=Math.min(1,480/Math.max(video.videoWidth||480,video.videoHeight||480));
+  const canvas=document.createElement('canvas'); canvas.width=Math.max(2,Math.floor((video.videoWidth||480)*scale/2)*2); canvas.height=Math.max(2,Math.floor((video.videoHeight||480)*scale/2)*2);
+  const ctx=canvas.getContext('2d'); const stream=canvas.captureStream(12);
+  let recorder;
+  const mimeTypes=['video/webm;codecs=vp8','video/webm'];
+  const mime=mimeTypes.find(t=>window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+  if (!window.MediaRecorder || !mime) { URL.revokeObjectURL(sourceUrl); throw new Error('المتصفح لا يدعم ضغط الفيديو. استخدم رابط فيديو مباشر أو Drive.'); }
+  recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:350000}); const chunks=[];
+  const done=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};recorder.onerror=()=>reject(new Error('فشل ضغط الفيديو'));recorder.onstop=()=>resolve(new Blob(chunks,{type:mime}));});
+  const draw=()=>{if(video.ended||video.paused)return;ctx.drawImage(video,0,0,canvas.width,canvas.height);requestAnimationFrame(draw)};
+  recorder.start(500); video.currentTime=0; await video.play(); draw();
+  await new Promise(resolve=>{video.onended=resolve;setTimeout(resolve,Math.min(61000,(video.duration+0.3)*1000));});
+  if(recorder.state!=='inactive') recorder.stop(); const blob=await done; stream.getTracks().forEach(t=>t.stop()); video.pause(); URL.revokeObjectURL(sourceUrl);
+  if(blob.size > 4*1024*1024) throw new Error('حجم الفيديو بعد الضغط أكبر من 4MB. استخدم رابط Drive أو قصّر الفيديو أكثر.');
+  return await fileToDataURL(new File([blob],'banner.webm',{type:mime}));
+}
+
+async function loadAdminBannersFromCloud() {
+  try { const r=await fetch(FIREBASE_BANNERS_URL+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const d=await r.json(); if(Array.isArray(d)&&d.length){appBanners=d;renderBanners();populateAdminBannerInputs();} }
+  catch(e){ console.warn('تعذر تحميل البنرات',e); }
+}
+function populateAdminBannerInputs() {
+  const b=appBanners?.[0]; if(!b)return;
+  const title=document.getElementById('admB1Title'), desc=document.getElementById('admB1Desc'), url=document.getElementById('admB1Img');
+  if(title)title.value=b.title||''; if(desc)desc.value=b.desc||'';
+  if(url && !String(b.video||'').startsWith('data:')) url.value=b.video||'';
+  const preview=document.getElementById('admB1ImagePreview'); if(preview && b.img && !String(b.img).startsWith('data:video/')) {preview.src=b.img;preview.style.display='block';}
+}
+async function saveAdminBanners() {
+  const btn=document.querySelector('#bannerTab button[onclick="saveAdminBanners()"]');
+  const title=document.getElementById('admB1Title')?.value.trim()||'وجباتي VIP';
+  const desc=document.getElementById('admB1Desc')?.value.trim()||'';
+  const imageFile=document.getElementById('admB1ImageFile')?.files?.[0];
+  const videoFile=document.getElementById('admB1VideoFile')?.files?.[0];
+  const link=document.getElementById('admB1Img')?.value.trim()||'';
+  if(!imageFile && !appBanners?.[0]?.img){alert('اختر صورة للبنر من الهاتف أولاً.');return;}
+  if(btn){btn.disabled=true;btn.textContent='⏳ جارٍ تجهيز الملفات والحفظ...';}
+  try {
+    let media=appBanners?.[0]?.img || '';
+    let videoMedia=link || appBanners?.[0]?.video || '';
+    if(imageFile){
+      const data=await fileToDataURL(imageFile);
+      const img=new Image(); img.src=data; await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('تعذرت معالجة الصورة'));});
+      const canvas=document.createElement('canvas'); const scale=Math.min(1,1200/img.width); canvas.width=Math.round(img.width*scale); canvas.height=Math.round(img.height*scale); canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      media=canvas.toDataURL('image/jpeg',0.78);
+      if(media.length>850000) throw new Error('الصورة كبيرة بعد الضغط؛ اختر صورة أصغر.');
+    }
+    if(videoFile) videoMedia=await compressBannerVideo(videoFile);
+    const payload=[{title,desc,img:media,video:videoMedia}];
+    const response=await fetch(FIREBASE_BANNERS_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!response.ok) throw new Error('رفض Firebase الحفظ (HTTP '+response.status+').');
+    const verify=await fetch(FIREBASE_BANNERS_URL+'?t='+Date.now(),{cache:'no-store'}); if(!verify.ok)throw new Error('تم الإرسال لكن تعذر التحقق من الحفظ.');
+    const saved=await verify.json(); if(!Array.isArray(saved)||saved[0]?.title!==title||saved[0]?.img!==media||saved[0]?.video!==videoMedia)throw new Error('لم تتطابق البيانات بعد الحفظ؛ تحقق من صلاحيات Firebase.');
+    appBanners=saved;renderBanners();showToast('✅ تم حفظ البنر سحابياً');
+    const imageInput=document.getElementById('admB1ImageFile'), videoInput=document.getElementById('admB1VideoFile'); if(imageInput)imageInput.value='';if(videoInput)videoInput.value='';
+    const status=document.getElementById('admB1VideoStatus');if(status)status.textContent='';populateAdminBannerInputs();
+  } catch(e){alert('لم يكتمل حفظ البنر: '+(e?.message||'خطأ غير معروف'));}
+  finally {if(btn){btn.disabled=false;btn.textContent='💾 حفظ وتعميم عروض البنر والفيديو سحابياً';}}
+}
+
+function openDiscountsModal() {
+  const modal=document.getElementById('discountsModal'); if(!modal)return;
+  modal.classList.add('show');
+  const box=document.getElementById('couponModalContent'); if(box)box.innerHTML='<div style="padding:12px;color:var(--text-muted)">جارٍ تحميل الخصومات...</div>';
+  Promise.all([loadDiscountCodes(),loadActiveCustomerDiscounts()]).finally(()=>renderCustomerDiscountsModal());
+}
+function closeDiscountsModal(){document.getElementById('discountsModal')?.classList.remove('show');}
+function closeIfOutsideDiscounts(e){if(e.target?.id==='discountsModal')closeDiscountsModal();}
+async function loadActiveCustomerDiscounts(){
+  try {
+    const [codesRes, generalRes, restRes]=await Promise.all([
+      fetch(FIREBASE_DISCOUNT_CODES_URL+'?t='+Date.now(),{cache:'no-store'}),
+      fetch(FIREBASE_GENERAL_DISCOUNT_URL+'?t='+Date.now(),{cache:'no-store'}),
+      fetch(FIREBASE_DISCOUNTS_URL+'?t='+Date.now(),{cache:'no-store'})
+    ]);
+    const codes=codesRes.ok?await codesRes.json():{}; const general=generalRes.ok?await generalRes.json():null; const rests=restRes.ok?await restRes.json():{};
+    discountCodes=codes&&typeof codes==='object'?codes:{};
+    const items=Object.values(discountCodes).filter(c=>c&&c.active!==false&&(!c.expiry||new Date(c.expiry+'T23:59:59').getTime()>=Date.now())&&(!(Number(c.usageLimit)>0)||Number(c.usedCount)<Number(c.usageLimit)));
+    window._wajabatyCustomerDiscounts={items,general,rests};
+  } catch(e){window._wajabatyCustomerDiscounts={items:[],general:null,rests:{},error:true};}
+}
+function renderCustomerDiscountsModal(){
+ const box=document.getElementById('couponModalContent');if(!box)return;
+ const d=window._wajabatyCustomerDiscounts;if(!d){box.innerHTML='<div style="padding:12px">تعذر تحميل الخصومات. حاول مرة أخرى.</div>';return;}
+ let html='';
+ if(d.items?.length) html+=d.items.map(c=>`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:right"><strong style="color:var(--accent-green);font-size:15px">${String(c.code||'').replace(/</g,'&lt;')}</strong><div style="font-size:12px;margin-top:4px">${c.type==='percent'?`خصم ${Number(c.value)||0}%`:`خصم ${money(c.value)}`} ${c.scope==='restaurant'?'— '+String(c.restaurant||'مطعم محدد').replace(/</g,'&lt;'):'— عام لجميع المطاعم'}</div>${Number(c.minOrder)>0?`<small>الحد الأدنى: ${money(c.minOrder)}</small>`:''}</div>`).join('');
+ if(d.general&&d.general.active!==false)html+=`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border-radius:12px;text-align:right"><strong>🎁 الخصم العام</strong><div style="font-size:12px">${d.general.tier1?`خصم ${money(d.general.tier1.discount)} عند طلب ${money(d.general.tier1.min)}`:''} ${d.general.tier2?` — خصم ${money(d.general.tier2.discount)} عند طلب ${money(d.general.tier2.min)}`:''}</div></div>`;
+ if(d.rests&&Object.keys(d.rests).length)html+=Object.entries(d.rests).map(([name,c])=>c&&c.active!==false?`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border-radius:12px;text-align:right"><strong>🔥 ${String(name).replace(/</g,'&lt;')}</strong><div style="font-size:12px">خصم ${money(c.discount||c.value||0)}</div></div>`:'').join('');
+ if(!html)html='<div style="padding:16px;color:var(--text-muted)">لا توجد خصومات فعّالة حالياً.</div>';
+ box.innerHTML=html;
 }
 
 function normalizeDiscountCode(code) { return String(code || "").trim().toUpperCase().replace(/\s+/g, ""); }
@@ -2613,6 +2739,7 @@ function checkAdminPin() {
 
 function openAdminPanel() {
   populateAdminDropdowns();
+  loadAdminBannersFromCloud();
   populateFlashAlertInputs();
   populateGeneralDiscountInputs();
   renderActiveDiscountsList();
@@ -3414,6 +3541,7 @@ window.onload = () => {
   setInterval(syncQuietlyWithCloud, 20000);
 };
 
+loadAdminBannersFromCloud();
 </script>
 </body>
 </html>
