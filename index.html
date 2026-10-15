@@ -920,6 +920,54 @@
   </div>
 </div>
 
+<script>
+// فتح نافذة العروض والخصومات للزبائن، مع تحميل الرموز المنشأة من Firebase
+async function openDiscountsModal() {
+  const modal = document.getElementById("discountsModal");
+  const content = document.getElementById("couponModalContent");
+  if (!modal || !content) return;
+  modal.style.display = "flex";
+  modal.classList.add("active");
+  content.innerHTML = '<div style="padding:12px;color:var(--text-muted)">جارٍ تحميل الخصومات...</div>';
+  const items = [];
+  try {
+    if (typeof generalDiscountConfig !== "undefined" && generalDiscountConfig && generalDiscountConfig.active) {
+      const t1 = generalDiscountConfig.tier1 || {};
+      const t2 = generalDiscountConfig.tier2 || {};
+      if (Number(t1.discount) > 0) items.push(`<div style="padding:10px;margin-bottom:8px;border-radius:12px;background:#20232b;"><b style="color:#ffb300">🎁 خصم عام</b><div>خصم ${money(Number(t1.discount))} د.ع عند طلب ${money(Number(t1.min)||3000)} د.ع أو أكثر</div></div>`);
+      if (Number(t2.discount) > 0) items.push(`<div style="padding:10px;margin-bottom:8px;border-radius:12px;background:#20232b;"><b style="color:#00e676">🔥 خصم الطلبات الأكبر</b><div>خصم ${money(Number(t2.discount))} د.ع عند طلب ${money(Number(t2.min)||5000)} د.ع أو أكثر</div></div>`);
+    }
+    if (typeof restDiscounts !== "undefined" && restDiscounts) {
+      Object.entries(restDiscounts).forEach(([name, d]) => {
+        if (d && d.active && Number(d.amount) > 0) items.push(`<div style="padding:10px;margin-bottom:8px;border-radius:12px;background:#20232b;"><b style="color:#ff9800">🍔 خصم مطعم ${name}</b><div>خصم ${money(Number(d.amount))} د.ع${Number(d.minOrder)>0 ? ` عند طلب ${money(Number(d.minOrder))} د.ع أو أكثر` : ""}</div></div>`);
+      });
+    }
+    const couponResponse = await fetch(FIREBASE_DISCOUNT_CODES_URL + "?_t=" + Date.now(), {cache:"no-store"});
+    if (couponResponse.ok) {
+      const couponData = await couponResponse.json();
+      const now = Date.now();
+      Object.values(couponData && typeof couponData === "object" ? couponData : {}).forEach(c => {
+        if (!c || !c.active || !c.code) return;
+        if (c.expiry && new Date(c.expiry + "T23:59:59").getTime() < now) return;
+        if (Number(c.usageLimit)>0 && Number(c.usedCount)>=Number(c.usageLimit)) return;
+        const valueText = c.type === "percent" ? `${Number(c.value)}%` : `${money(Number(c.value)||0)} د.ع`;
+        const scopeText = c.scope === "restaurant" ? `لمطعم ${c.restaurant || "محدد"}` : "لجميع المطاعم";
+        const minText = Number(c.minOrder)>0 ? ` — الحد الأدنى ${money(Number(c.minOrder))} د.ع` : "";
+        items.push(`<div style="padding:10px;margin-bottom:8px;border-radius:12px;background:#20232b;border:1px dashed #ffb300;text-align:right;"><b style="color:#ffb300">🎟️ رمز خصم: <span dir="ltr">${String(c.code).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span></b><div>خصم ${valueText} — ${scopeText}${minText}</div><div style="font-size:11px;color:var(--text-muted);margin-top:5px;">اكتب الرمز في السلة ثم اضغط «تطبيق»</div></div>`);
+      });
+    }
+  } catch (e) { console.error("تعذر عرض الخصومات", e); }
+  content.innerHTML = items.length ? items.join("") : '<div style="padding:18px;color:var(--text-muted)">لا توجد عروض أو رموز خصم مفعّلة حالياً.</div>';
+}
+function closeDiscountsModal() {
+  const modal = document.getElementById("discountsModal");
+  if (modal) { modal.style.display = "none"; modal.classList.remove("active"); }
+}
+function closeIfOutsideDiscounts(event) {
+  if (event && event.target && event.target.id === "discountsModal") closeDiscountsModal();
+}
+</script>
+
 <!-- نافذة العروض والخصومات -->
 <div class="modal-backdrop" id="discountsModal" onclick="closeIfOutsideDiscounts(event)">
   <div class="modal-box" style="max-width:340px;">
@@ -1013,6 +1061,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 إشعار وتنبيه</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('restDiscountTab', this)">🔥 خصم المطاعم</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('discountCodesTab', this)">🎟️ رموز الخصم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار وقفل الوجبات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
@@ -1296,6 +1345,31 @@
       <div id="activeRestDiscountsList" style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
     </div>
 
+    <!-- 🎟️ إنشاء وإدارة رموز الخصم -->
+    <div id="discountCodesTab" class="admin-tab-content">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">أنشئ رموزاً يدوياً وشاركها مع الزبائن. يمكن تخصيص الرمز لكل المطاعم أو لمطعم محدد.</p>
+      <div style="background:var(--bg-card);padding:12px;border-radius:14px;border:1px solid var(--border-color);margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">رمز الخصم</label>
+        <input id="admCouponCode" class="form-input" maxlength="32" placeholder="مثال: WJ500" style="text-transform:uppercase;">
+        <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">نطاق الرمز</label>
+        <select id="admCouponScope" class="form-input" onchange="toggleCouponRestaurantField()"><option value="general">عام — جميع المطاعم</option><option value="restaurant">مطعم محدد</option></select>
+        <select id="admCouponRest" class="form-input" style="display:none;"></select>
+        <div style="display:flex;gap:8px;">
+          <select id="admCouponType" class="form-input" style="flex:1;"><option value="fixed">مبلغ ثابت (د.ع)</option><option value="percent">نسبة مئوية (%)</option></select>
+          <input id="admCouponValue" type="number" min="1" class="form-input" placeholder="قيمة الخصم" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input id="admCouponMin" type="number" min="0" class="form-input" placeholder="الحد الأدنى للطلب (0 = بلا حد)" style="flex:1;">
+          <input id="admCouponLimit" type="number" min="0" class="form-input" placeholder="عدد الاستخدامات (0 = غير محدود)" style="flex:1;">
+        </div>
+        <label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">تاريخ الانتهاء (اختياري)</label>
+        <input id="admCouponExpiry" type="date" class="form-input">
+        <button type="button" class="btn-discount" onclick="createDiscountCode()" style="width:100%;padding:12px;background:var(--accent-green);color:#111;font-weight:900;">💾 إنشاء وحفظ الرمز سحابياً</button>
+      </div>
+      <div style="font-size:12px;font-weight:800;margin-bottom:6px;">الرموز الحالية</div>
+      <div id="adminDiscountCodesList" style="max-height:230px;overflow-y:auto;border:1px solid var(--border-color);border-radius:12px;padding:6px;background:var(--bg-main);"></div>
+    </div>
+
     <!-- ✏️ إدارة الوجبات والأسعار وقفل الحاجات -->
     <div id="editMealsTab" class="admin-tab-content">
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">قفل أي وجبة تنفد بالمطعم، تعديل الأسعار، أو حذف الوجبات نهائياً:</p>
@@ -1366,6 +1440,7 @@
 const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
 const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
 const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/general_discount.json";
+const FIREBASE_DISCOUNT_CODES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/discount_codes.json";
 const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
 const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
 const FIREBASE_WHEEL_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wheel_config.json";
@@ -1388,6 +1463,8 @@ const ALL_TALABATY_CUISINES = [
 let selectedCuisinesFilters = [];
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
 let restDiscounts = {};
+let discountCodes = {};
+let activeCoupon = null;
 let cloudOrders = [];
 let restDeliveryFees = {};
 let restSubscriptions = {}; 
@@ -1622,6 +1699,117 @@ function renderBanners() {
     `;
   }).join('');
   dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+}
+
+function normalizeDiscountCode(code) { return String(code || "").trim().toUpperCase().replace(/\s+/g, ""); }
+function toggleCouponRestaurantField() {
+  const scope = document.getElementById("admCouponScope")?.value;
+  const rest = document.getElementById("admCouponRest");
+  if (!rest) return;
+  rest.style.display = scope === "restaurant" ? "block" : "none";
+  rest.innerHTML = RESTS.map(r => `<option value="${String(r).replace(/"/g,"&quot;")}">${r}</option>`).join("");
+}
+async function loadDiscountCodes() {
+  try {
+    const response = await fetch(FIREBASE_DISCOUNT_CODES_URL + "?_t=" + Date.now(), {cache:"no-store"});
+    if (!response.ok) return;
+    const data = await response.json();
+    if (data && typeof data === "object") discountCodes = data;
+    renderDiscountCodesAdmin();
+  } catch (e) { console.warn("تعذر تحميل رموز الخصم", e); }
+}
+async function createDiscountCode() {
+  const code = normalizeDiscountCode(document.getElementById("admCouponCode").value);
+  const scope = document.getElementById("admCouponScope").value;
+  const type = document.getElementById("admCouponType").value;
+  const value = Number(document.getElementById("admCouponValue").value);
+  const minOrder = Math.max(0, Number(document.getElementById("admCouponMin").value) || 0);
+  const usageLimit = Math.max(0, Number(document.getElementById("admCouponLimit").value) || 0);
+  const expiry = document.getElementById("admCouponExpiry").value || "";
+  if (!code || !/^[A-Z0-9_-]{2,32}$/.test(code)) { alert("اكتب رمزاً من 2 إلى 32 حرفاً/رقماً، دون مسافات أو رموز خاصة."); return; }
+  if (!(value > 0) || (type === "percent" && value > 100)) { alert("تحقق من قيمة الخصم؛ النسبة يجب ألا تتجاوز 100%."); return; }
+  if (scope === "restaurant" && !document.getElementById("admCouponRest").value) { alert("اختر المطعم المستفيد."); return; }
+  const key = code.replace(/[.#$\[\]\/]/g, "_");
+  if (discountCodes[key]) { alert("هذا الرمز موجود مسبقاً. استخدم رمزاً آخر أو احذف القديم أولاً."); return; }
+  const record = { code, scope, restaurant: scope === "restaurant" ? document.getElementById("admCouponRest").value : "", type, value, minOrder, usageLimit, usedCount: 0, expiry, active: true, createdAt: Date.now() };
+  try {
+    const response = await fetch(FIREBASE_DISCOUNT_CODES_URL.replace(/\.json$/, "/" + encodeURIComponent(key) + ".json"), {method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(record)});
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    discountCodes[key] = record;
+    document.getElementById("admCouponCode").value = "";
+    document.getElementById("admCouponValue").value = "";
+    renderDiscountCodesAdmin();
+    showToast("🎟️ تم إنشاء رمز الخصم وحفظه سحابياً");
+  } catch (e) { alert("تعذر حفظ الرمز في Firebase. لم يتم تأكيد الحفظ."); }
+}
+async function deleteDiscountCode(key) {
+  if (!confirm("هل تريد حذف هذا الرمز نهائياً؟")) return;
+  try {
+    const response = await fetch(FIREBASE_DISCOUNT_CODES_URL.replace(/\.json$/, "/" + encodeURIComponent(key) + ".json"), {method:"DELETE"});
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    delete discountCodes[key];
+    if (activeCoupon && activeCoupon.key === key) activeCoupon = null;
+    renderDiscountCodesAdmin(); updateCartUI(); renderCartDrawerContent();
+    showToast("تم حذف الرمز");
+  } catch(e) { alert("تعذر حذف الرمز من Firebase."); }
+}
+function renderDiscountCodesAdmin() {
+  const box = document.getElementById("adminDiscountCodesList");
+  if (!box) return;
+  const entries = Object.entries(discountCodes || {});
+  if (!entries.length) { box.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-muted);font-size:11px;">لا توجد رموز محفوظة حالياً</div>'; return; }
+  box.innerHTML = entries.map(([key,c]) => `<div style="padding:8px;border-bottom:1px solid var(--border-color);font-size:11px;display:flex;gap:8px;align-items:center;justify-content:space-between;"><div><strong style="color:var(--accent-green);font-size:13px;">${c.code || key}</strong><br>${c.scope === "restaurant" ? `مطعم: ${c.restaurant}` : "عام"} — ${c.type === "percent" ? `${c.value}%` : money(c.value)}<br><span style="color:var(--text-muted);">استخدام: ${Number(c.usedCount)||0}${Number(c.usageLimit)>0 ? "/"+c.usageLimit : "/∞"}${c.expiry ? " — ينتهي "+c.expiry : ""} — ${c.active ? "فعّال" : "متوقف"}</span></div><button type="button" onclick="deleteDiscountCode('${key}')" style="background:#4a1525;color:#ff4d6d;border:0;padding:6px 8px;border-radius:8px;">حذف</button></div>`).join("");
+}
+function getCouponDiscount(subtotal, targetRest) {
+  if (!activeCoupon || !activeCoupon.record) return {amount:0,label:"",key:""};
+  const c = activeCoupon.record;
+  if (!c.active) return {amount:0,label:"",key:activeCoupon.key};
+  if (c.scope === "restaurant" && String(c.restaurant||"").trim().toLowerCase() !== String(targetRest||"").trim().toLowerCase()) return {amount:0,label:"",key:activeCoupon.key};
+  if (subtotal < (Number(c.minOrder)||0)) return {amount:0,label:"",key:activeCoupon.key};
+  if (c.expiry && new Date(c.expiry + "T23:59:59").getTime() < Date.now()) return {amount:0,label:"",key:activeCoupon.key};
+  if (Number(c.usageLimit)>0 && Number(c.usedCount)>=Number(c.usageLimit)) return {amount:0,label:"",key:activeCoupon.key};
+  let amount = c.type === "percent" ? Math.floor(subtotal * Number(c.value) / 100) : Number(c.value);
+  amount = Math.max(0, Math.min(subtotal, amount));
+  return {amount, label:amount ? `🎟️ رمز ${c.code}` : "", key:activeCoupon.key};
+}
+async function applyDiscountCode() {
+  const input = document.getElementById("customerDiscountCode");
+  const status = document.getElementById("customerDiscountCodeStatus");
+  const code = normalizeDiscountCode(input?.value);
+  if (!code) { status.textContent = "أدخل الرمز أولاً."; status.style.color="var(--primary)"; return; }
+  try {
+    const response = await fetch(FIREBASE_DISCOUNT_CODES_URL + "?_t=" + Date.now(), {cache:"no-store"});
+    if (!response.ok) throw new Error("fetch failed");
+    const data = await response.json();
+    discountCodes = data && typeof data === "object" ? data : {};
+    const match = Object.entries(discountCodes).find(([k,c]) => normalizeDiscountCode(c?.code || k) === code);
+    if (!match) throw new Error("الرمز غير موجود.");
+    const [key, record] = match;
+    const subtotal = cart.reduce((sum,item)=>sum+(Number(item.actualPrice)*Number(item.qty)),0);
+    const rest = cart[0]?.rest || "";
+    if (!record.active) throw new Error("هذا الرمز متوقف حالياً.");
+    if (record.expiry && new Date(record.expiry + "T23:59:59").getTime() < Date.now()) throw new Error("انتهت صلاحية هذا الرمز.");
+    if (Number(record.usageLimit)>0 && Number(record.usedCount)>=Number(record.usageLimit)) throw new Error("اكتمل عدد مرات استخدام هذا الرمز.");
+    if (subtotal < (Number(record.minOrder)||0)) throw new Error(`الحد الأدنى لاستخدام الرمز هو ${money(record.minOrder)}.`);
+    if (record.scope === "restaurant" && String(record.restaurant||"").trim().toLowerCase() !== String(rest).trim().toLowerCase()) throw new Error(`هذا الرمز مخصص لمطعم ${record.restaurant}.`);
+    activeCoupon = {key, record};
+    const amount = getCouponDiscount(subtotal, rest).amount;
+    if (amount <= 0) { activeCoupon = null; throw new Error("لم يمكن تطبيق الخصم على هذه السلة."); }
+    updateCartUI(); renderCartDrawerContent();
+    const finalStatus = document.getElementById("customerDiscountCodeStatus");
+    if (finalStatus) { finalStatus.textContent = `تم تطبيق الرمز ${record.code} — خصم ${money(amount)}`; finalStatus.style.color="var(--accent-green)"; }
+  } catch(e) {
+    activeCoupon = null;
+    updateCartUI(); renderCartDrawerContent();
+    const errorStatus = document.getElementById("customerDiscountCodeStatus");
+    if (errorStatus) { errorStatus.textContent = e.message || "تعذر التحقق من الرمز. تحقق من الاتصال."; errorStatus.style.color="var(--primary)"; }
+  }
+}
+function removeAppliedDiscountCode() {
+  activeCoupon = null;
+  const input = document.getElementById("customerDiscountCode"); if (input) input.value = "";
+  const status = document.getElementById("customerDiscountCodeStatus"); if (status) {status.textContent="تم إلغاء رمز الخصم.";status.style.color="var(--text-muted)";}
+  updateCartUI(); renderCartDrawerContent();
 }
 
 function calculateCartDiscount(subtotal, targetRest) {
@@ -1977,7 +2165,8 @@ function updateCartUI() {
   const dynamicDelivery = getDeliveryFeeForRestaurant(primaryRest);
   
   const { discountAmount } = calculateCartDiscount(subtotal, primaryRest);
-  const grandTotal = subtotal > 0 ? Math.max(0, subtotal + dynamicDelivery - discountAmount) : 0;
+  const couponDiscount = getCouponDiscount(subtotal, primaryRest).amount;
+  const grandTotal = subtotal > 0 ? Math.max(0, subtotal + dynamicDelivery - Math.min(subtotal, discountAmount + couponDiscount)) : 0;
 
   document.getElementById("cartCountTop").innerText = totalCount;
   document.getElementById("cartTotalItems").innerText = totalCount;
@@ -1998,7 +2187,10 @@ function renderCartDrawerContent() {
   const targetZone = document.getElementById("custZoneSelect")?.value || "الكرخ";
   
   const { discountAmount, discountLabel } = calculateCartDiscount(subtotal, primaryRest);
-  const grandTotal = Math.max(0, subtotal + dynamicDelivery - discountAmount);
+  const couponInfo = getCouponDiscount(subtotal, primaryRest);
+  const couponDiscount = couponInfo.amount;
+  const totalDiscount = Math.min(subtotal, discountAmount + couponDiscount);
+  const grandTotal = Math.max(0, subtotal + dynamicDelivery - totalDiscount);
 
   if (box) {
     box.innerHTML = cart.map(item => `
@@ -2020,15 +2212,22 @@ function renderCartDrawerContent() {
   const billCard = document.getElementById("billSummaryCard");
   if (billCard) {
     billCard.innerHTML = `
+      <div id="customerDiscountCodeBox" style="margin:8px 0 12px;text-align:right;padding:10px;border:1px dashed var(--border-color);border-radius:12px;"></div>
       <div class="bill-row"><span>مجموع المواد:</span><strong>${money(subtotal)}</strong></div>
       <div class="bill-row" style="color:var(--accent-orange);">
         <span>أجور التوصيل إلى (${targetZone}):</span>
         <strong>${money(dynamicDelivery)}</strong>
       </div>
       ${discountAmount > 0 ? `<div class="bill-row" style="color:var(--accent-green); font-weight:800;"><span>${discountLabel}:</span><strong>-${money(discountAmount)}</strong></div>` : ''}
+      ${couponDiscount > 0 ? `<div class="bill-row" style="color:var(--accent-green);font-weight:800;"><span>${couponInfo.label}:</span><strong>-${money(couponDiscount)}</strong></div>` : ''}
       ${userWonPrize ? `<div class="bill-row" style="color:var(--accent-green); font-weight:800;"><span>🎁 هدية عجلة الحظ:</span><strong>${userWonPrize.item} (مجاناً)</strong></div>` : ''}
       <div class="bill-row total"><span>المجموع الكلي:</span><strong>${money(grandTotal)}</strong></div>
     `;
+    const couponBox = document.getElementById("customerDiscountCodeBox");
+    if (couponBox) {
+      couponBox.innerHTML = `<label style="font-size:12px;font-weight:900;display:block;margin-bottom:7px;color:var(--accent-green);">🎟️ عندك رمز خصم؟ اكتبه هنا</label><div style="display:flex;gap:6px;align-items:center;"><input id="customerDiscountCode" class="form-input" maxlength="32" placeholder="أدخل رمز الخصم" style="margin-bottom:0;flex:1;text-transform:uppercase;min-width:0;"><button type="button" class="btn-discount" onclick="applyDiscountCode()" style="padding:10px 12px;white-space:nowrap;">تطبيق</button></div><div id="customerDiscountCodeStatus" style="font-size:11px;margin-top:6px;"></div><button type="button" onclick="removeAppliedDiscountCode()" style="margin-top:5px;background:none;border:0;color:var(--text-muted);font-size:11px;">إلغاء الرمز</button>`;
+      if (activeCoupon) document.getElementById("customerDiscountCode").value = activeCoupon.record.code || "";
+    }
   }
 }
 
@@ -2087,8 +2286,11 @@ async function submitFullOrder() {
   const restName = cart[0].rest || "مطعم سندريلا";
   const dynamicDelivery = getDeliveryFeeForRestaurant(restName, targetZone);
   const { discountAmount, discountLabel } = calculateCartDiscount(subtotal, restName);
+  const couponInfo = getCouponDiscount(subtotal, restName);
+  const couponDiscount = couponInfo.amount;
+  const totalDiscount = Math.min(subtotal, discountAmount + couponDiscount);
   const targetPhone = cart[0].phone || REST_PHONES[restName] || "9647708111561";
-  const grandTotal = Math.max(0, subtotal + dynamicDelivery - discountAmount);
+  const grandTotal = Math.max(0, subtotal + dynamicDelivery - totalDiscount);
   const orderId = "#WJ-" + Math.floor(1000 + Math.random() * 9000);
 
   const orderPayload = {
@@ -2103,7 +2305,10 @@ async function submitFullOrder() {
     items: cart.map(i => `${i.name} (${i.qty}x)`).join(" + "),
     subtotal: subtotal,
     deliveryFee: dynamicDelivery,
-    discount: discountAmount,
+    discount: totalDiscount,
+    discountCode: couponDiscount ? (activeCoupon?.record?.code || "") : "",
+    couponDiscount: couponDiscount,
+    baseDiscount: discountAmount,
     wheelPrize: userWonPrize ? userWonPrize.item : "بدون هدية",
     total: grandTotal
   };
@@ -2115,6 +2320,14 @@ async function submitFullOrder() {
       body: JSON.stringify(orderPayload)
     });
   } catch(e) {}
+
+  if (couponDiscount > 0 && activeCoupon?.key && activeCoupon.record) {
+    const usedKey = activeCoupon.key;
+    const nextCount = (Number(activeCoupon.record.usedCount) || 0) + 1;
+    fetch(FIREBASE_DISCOUNT_CODES_URL.replace(/\.json$/, "/" + encodeURIComponent(usedKey) + "/usedCount.json"), {
+      method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(nextCount)
+    }).catch(()=>{});
+  }
 
   let waMsg = `*طلب جديد من تطبيق وجباتي 🍔*\n\n` +
     `رقم الطلب: *${orderId}*\n` +
@@ -2132,6 +2345,7 @@ async function submitFullOrder() {
   });
 
   if (discountAmount > 0) waMsg += `\n${discountLabel}: -${money(discountAmount)}\n`;
+  if (couponDiscount > 0) waMsg += `🎟️ رمز الخصم (${activeCoupon?.record?.code || ""}): -${money(couponDiscount)}\n`;
   if (userWonPrize) waMsg += `🎁 *هدية عجلة الحظ الرابحة:* ${userWonPrize.item} (مجاناً من ${userWonPrize.rest})\n`;
 
   waMsg += `\nأجور التوصيل إلى (${targetZone}): ${money(dynamicDelivery)}\n*المجموع الكلي المطلوب: ${money(grandTotal)}*`;
@@ -2141,6 +2355,7 @@ async function submitFullOrder() {
 
   cart = [];
   userWonPrize = null;
+  activeCoupon = null;
   updateCartUI();
   closeCartDrawer();
   window.location.assign(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waMsg)}`);
@@ -2966,6 +3181,8 @@ async function syncQuietlyWithCloud() {
     const dataGen = await resGen.json();
     if (dataGen && typeof dataGen === 'object') generalDiscountConfig = dataGen;
 
+    await loadDiscountCodes();
+    toggleCouponRestaurantField();
     updateCartUI();
   } catch(e) {}
 }
