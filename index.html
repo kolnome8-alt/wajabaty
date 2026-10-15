@@ -1343,16 +1343,11 @@
         <span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🌟 العرض الأول:</span>
         <input type="text" id="admB1Title" class="form-input" style="margin-top:6px;" placeholder="عنوان العرض">
         <input type="text" id="admB1Desc" class="form-input" placeholder="تفاصيل العرض">
-        <label for="admB1ImageFile" style="display:block;background:#252936;border:1px dashed var(--accent-green);padding:12px;border-radius:12px;text-align:center;font-weight:800;margin-bottom:8px;cursor:pointer;">🖼️ اختر صورة البنر من الهاتف</label>
-        <input type="file" id="admB1ImageFile" accept="image/*" class="form-input" style="padding:8px;" onchange="previewAdminBannerImage(this)">
-        <img id="admB1ImagePreview" alt="معاينة صورة البنر" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-        <input type="url" id="admB1Img" class="form-input" placeholder="أو رابط صورة مباشر (اختياري)">
-        <input type="url" id="admB1Video" class="form-input" placeholder="رابط فيديو Google Drive أو MP4 (اختياري)">
-        <small style="color:var(--text-muted);display:block;line-height:1.6;">اختر صورة أو الصق رابط صورة، ويمكن إضافة رابط الفيديو معها. الصورة تُضغط قبل الحفظ لتقليل حجم البيانات.</small>
+        <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة أو فيديو مباشر (MP4)">
       </div>
 
-      <button type="button" id="saveAdminBannersBtn" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAdminBanners()">
-        💾 حفظ وتعميم صورة البنر والفيديو سحابياً
+      <button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAdminBanners()">
+        💾 حفظ وتعميم عروض البنر والفيديو سحابياً
       </button>
     </div>
 
@@ -1406,7 +1401,6 @@ const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.co
 const FIREBASE_PINS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_pins.json";
 const FIREBASE_DELIVERY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_delivery_fees.json";
 const FIREBASE_SUBS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_subscriptions.json";
-const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/app_banners.json";
 
 const DEFAULT_GEMINI_API_KEY = "";
 
@@ -1639,113 +1633,24 @@ function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dotsBox = document.getElementById("bannerDots");
   if (!track || !dotsBox) return;
-  const banners = Array.isArray(appBanners) && appBanners.length ? appBanners : [];
-  track.innerHTML = banners.map((b, i) => {
-    const imageUrl = String(b.img || 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200');
-    const videoUrl = String(b.video || '');
-    const safeTitle = String(b.title || '').replace(/[<>]/g, '');
-    const safeDesc = String(b.desc || '').replace(/[<>]/g, '');
-    return `<div class="banner-slide">
-      <img src="${imageUrl.replace(/"/g, '&quot;')}" alt="${safeTitle}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">
-      <div class="banner-overlay"><h2>${safeTitle}</h2><p>${safeDesc}</p>
-      ${videoUrl ? `<a href="${videoUrl.replace(/"/g, '&quot;')}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-block;margin-top:8px;background:#ff2a5f;color:white;padding:7px 12px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:900;align-self:flex-start;">▶ مشاهدة الفيديو</a>` : ''}
-      </div></div>`;
-  }).join('');
-  dotsBox.innerHTML = banners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
-}
 
-let pendingBannerImageData = '';
-function compressBannerImage(file) {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith('image/')) return reject(new Error('اختَر ملف صورة صحيحاً.'));
-    if (file.size > 12 * 1024 * 1024) return reject(new Error('حجم الصورة كبير؛ اختَر صورة أقل من 12 ميغابايت.'));
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('تعذرت قراءة الصورة من الهاتف.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('تعذر فتح الصورة.'));
-      img.onload = () => {
-        const max = 1200, scale = Math.min(1, max / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        const data = canvas.toDataURL('image/jpeg', 0.72);
-        if (data.length > 850000) return reject(new Error('الصورة ما زالت كبيرة بعد الضغط؛ اختَر صورة أصغر.'));
-        resolve(data);
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-async function previewAdminBannerImage(input) {
-  const preview = document.getElementById('admB1ImagePreview');
-  pendingBannerImageData = '';
-  if (!input.files || !input.files[0]) { if (preview) preview.style.display = 'none'; return; }
-  try {
-    pendingBannerImageData = await compressBannerImage(input.files[0]);
-    if (preview) { preview.src = pendingBannerImageData; preview.style.display = 'block'; }
-    showToast('تم تجهيز الصورة، احفظها لتعميمها سحابياً.');
-  } catch (e) {
-    input.value = '';
-    if (preview) preview.style.display = 'none';
-    alert(e.message || 'تعذر تجهيز الصورة.');
-  }
-}
-function normalizeDriveVideoUrl(url) {
-  const value = String(url || '').trim();
-  const match = value.match(/drive\.google\.com\/file\/d\/([\w-]+)/i);
-  return match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : value;
-}
-async function loadAdminBannersFromCloud() {
-  try {
-    const res = await fetch(FIREBASE_BANNERS_URL + '?_t=' + Date.now(), {cache:'no-store'});
-    if (!res.ok) throw new Error('تعذر قراءة البنرات من السحابة');
-    const data = await res.json();
-    if (Array.isArray(data) && data.length) appBanners = data;
-    else if (data && typeof data === 'object' && data.title) appBanners = [data];
-    renderBanners();
-    const b = appBanners[0] || {};
-    const title = document.getElementById('admB1Title'); if (title) title.value = b.title || '';
-    const desc = document.getElementById('admB1Desc'); if (desc) desc.value = b.desc || '';
-    const img = document.getElementById('admB1Img'); if (img && !String(b.img || '').startsWith('data:image/')) img.value = b.img || '';
-    const video = document.getElementById('admB1Video'); if (video) video.value = b.video || '';
-    if (String(b.img || '').startsWith('data:image/')) {
-      const preview = document.getElementById('admB1ImagePreview');
-      if (preview) { preview.src = b.img; preview.style.display = 'block'; }
-    }
-  } catch (e) { console.warn('تعذر تحميل البنر السحابي', e); }
-}
-async function saveAdminBanners() {
-  const btn = document.getElementById('saveAdminBannersBtn');
-  const oldText = btn ? btn.innerText : '';
-  if (btn) { btn.disabled = true; btn.innerText = '⏳ جارٍ الحفظ والتحقق...'; }
-  try {
-    const title = document.getElementById('admB1Title').value.trim();
-    const desc = document.getElementById('admB1Desc').value.trim();
-    const typedImageUrl = document.getElementById('admB1Img').value.trim();
-    const videoRaw = document.getElementById('admB1Video').value.trim();
-    const old = (Array.isArray(appBanners) && appBanners[0]) || {};
-    const img = pendingBannerImageData || typedImageUrl || old.img || '';
-    const video = normalizeDriveVideoUrl(videoRaw);
-    if (!img && !video) throw new Error('اختَر صورة للبنر أو أضف رابط فيديو على الأقل.');
-    if (videoRaw && !/^https?:\/\//i.test(videoRaw)) throw new Error('رابط الفيديو يجب أن يبدأ بـ https:// أو http://');
-    const next = [{title: title || 'عرض وجباتي', desc, img: img || 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200', video, updatedAt: new Date().toISOString()}];
-    const response = await fetch(FIREBASE_BANNERS_URL, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(next)});
-    if (!response.ok) throw new Error('رفضت السحابة الحفظ (HTTP ' + response.status + '). تحقق من صلاحيات Firebase.');
-    const verify = await fetch(FIREBASE_BANNERS_URL + '?_t=' + Date.now(), {cache:'no-store'});
-    if (!verify.ok) throw new Error('تم إرسال الحفظ لكن تعذر التحقق منه؛ لم نعرض رسالة نجاح.');
-    const saved = await verify.json();
-    if (!Array.isArray(saved) || !saved[0] || saved[0].title !== next[0].title || saved[0].img !== next[0].img || saved[0].video !== next[0].video) throw new Error('لم تتطابق البيانات المقروءة مع البيانات المحفوظة؛ تحقق من صلاحيات السحابة.');
-    appBanners = saved;
-    pendingBannerImageData = '';
-    const file = document.getElementById('admB1ImageFile'); if (file) file.value = '';
-    renderBanners();
-    showToast('✅ تم حفظ صورة البنر والفيديو سحابياً والتحقق منهما.');
-  } catch (e) {
-    alert('لم يكتمل حفظ البنر.\n' + (e.message || 'خطأ غير معروف') + '\nلم نعرض رسالة نجاح.');
-  } finally { if (btn) { btn.disabled = false; btn.innerText = oldText || '💾 حفظ وتعميم صورة البنر والفيديو سحابياً'; } }
+  track.innerHTML = appBanners.map(b => {
+    const isVideo = b.img && b.img.toLowerCase().includes('.mp4');
+    const mediaHtml = isVideo 
+      ? `<video src="${b.img}" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>` 
+      : `<img src="${b.img}" alt="${b.title}" onerror="this.src='https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200'">`;
+
+    return `
+      <div class="banner-slide">
+        ${mediaHtml}
+        <div class="banner-overlay">
+          <h2>${b.title}</h2>
+          <p>${b.desc}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+  dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
 }
 
 function normalizeDiscountCode(code) { return String(code || "").trim().toUpperCase().replace(/\s+/g, ""); }
@@ -2256,15 +2161,6 @@ function renderCartDrawerContent() {
     `).join('');
   }
 
-  const couponEntry = document.getElementById("customerDiscountCode");
-  if (couponEntry && activeCoupon && !couponEntry.value) couponEntry.value = activeCoupon.record.code || "";
-  const couponBox = document.getElementById("customerDiscountCodeBox");
-  if (couponBox && !couponBox.dataset.ready) {
-    couponBox.dataset.ready = "1";
-    couponBox.innerHTML = `<label style="font-size:12px;font-weight:900;display:block;margin-bottom:5px;">🎟️ رمز الخصم</label><div style="display:flex;gap:6px;"><input id="customerDiscountCode" class="form-input" maxlength="32" placeholder="أدخل الرمز الذي حصلت عليه" style="margin-bottom:0;flex:1;text-transform:uppercase;"><button type="button" class="btn-discount" onclick="applyDiscountCode()" style="padding:8px 12px;">تطبيق</button></div><div id="customerDiscountCodeStatus" style="font-size:11px;margin-top:5px;"></div><button type="button" onclick="removeAppliedDiscountCode()" style="margin-top:4px;background:none;border:0;color:var(--text-muted);font-size:11px;">إلغاء الرمز</button>`;
-    if (activeCoupon) document.getElementById("customerDiscountCode").value = activeCoupon.record.code || "";
-  }
-
   const billCard = document.getElementById("billSummaryCard");
   if (billCard) {
     billCard.innerHTML = `
@@ -2279,6 +2175,13 @@ function renderCartDrawerContent() {
       ${userWonPrize ? `<div class="bill-row" style="color:var(--accent-green); font-weight:800;"><span>🎁 هدية عجلة الحظ:</span><strong>${userWonPrize.item} (مجاناً)</strong></div>` : ''}
       <div class="bill-row total"><span>المجموع الكلي:</span><strong>${money(grandTotal)}</strong></div>
     `;
+    // Build the coupon controls only after replacing the bill card HTML; otherwise the input is erased.
+    const couponBox = document.getElementById("customerDiscountCodeBox");
+    if (couponBox) {
+      couponBox.innerHTML = `<label style="font-size:12px;font-weight:900;display:block;margin-bottom:5px;color:var(--accent-orange);">🎟️ رمز الخصم</label><div style="display:flex;gap:6px;align-items:center;"><input id="customerDiscountCode" class="form-input" maxlength="32" placeholder="أدخل رمز الخصم هنا" style="margin-bottom:0;flex:1;text-transform:uppercase;min-width:0;"><button type="button" class="btn-discount" onclick="applyDiscountCode()" style="padding:8px 12px;white-space:nowrap;">تطبيق</button></div><div id="customerDiscountCodeStatus" style="font-size:11px;margin-top:5px;${activeCoupon ? 'color:var(--accent-green);' : ''}">${activeCoupon ? 'تم تفعيل الرمز: ' + (activeCoupon.record.code || '') : ''}</div><button type="button" onclick="removeAppliedDiscountCode()" style="margin-top:4px;background:none;border:0;color:var(--text-muted);font-size:11px;">إلغاء الرمز</button>`;
+      const couponInput = document.getElementById("customerDiscountCode");
+      if (couponInput && activeCoupon) couponInput.value = activeCoupon.record.code || "";
+    }
   }
 }
 
@@ -3500,7 +3403,6 @@ window.onload = () => {
   loadInitialLocalData();
   restoreCustomerData();
   renderBanners();
-  loadAdminBannersFromCloud();
   buildRestaurantsBar();
   buildCategoriesBar();
   renderMeals();
