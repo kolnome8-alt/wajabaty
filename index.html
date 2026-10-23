@@ -2390,6 +2390,24 @@ function getExactGpsLocation() {
   }, { enableHighAccuracy: true });
 }
 
+function formatOrderDate(order) {
+  const timestamp = Number(order && order.timestamp) || 0;
+  if (timestamp > 0) {
+    return new Date(timestamp).toLocaleString("en-GB", {
+      timeZone: "Asia/Baghdad",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  }
+  if (order && order.date) return String(order.date);
+  if (order && order.dateText) return String(order.dateText);
+  return "التاريخ غير متوفر";
+}
+
 async function submitFullOrder() {
   const name = document.getElementById("custName").value.trim();
   const phone = document.getElementById("custPhone").value.trim();
@@ -2415,6 +2433,8 @@ async function submitFullOrder() {
   const orderPayload = {
     id: orderId,
     timestamp: Date.now(),
+    date: new Date().toLocaleString("en-GB", { timeZone: "Asia/Baghdad", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true }),
+    dateText: new Date().toLocaleString("en-GB", { timeZone: "Asia/Baghdad", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true }),
     customer: name,
     phone: phone,
     address: address,
@@ -2433,12 +2453,17 @@ async function submitFullOrder() {
   };
 
   try {
-    fetch(FIREBASE_ORDERS_URL, {
+    const saveResponse = await fetch(FIREBASE_ORDERS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderPayload)
     });
-  } catch(e) {}
+    if (!saveResponse.ok) {
+      console.error("تعذر حفظ الطلب في Firebase:", saveResponse.status);
+    }
+  } catch (e) {
+    console.error("تعذر الاتصال بـ Firebase لحفظ الطلب:", e);
+  }
 
   if (couponDiscount > 0 && activeCoupon?.key && activeCoupon.record) {
     const usedKey = activeCoupon.key;
@@ -2723,7 +2748,7 @@ function renderPortalOrders() {
         <span style="color:var(--accent-green); font-weight:900;">${money(o.total)}</span>
       </div>
       <div style="color:#fff;">👤 ${o.customer} - ${o.phone}</div>
-      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${o.date}</div>
+      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${formatOrderDate(o)}</div>
       <div style="background:#101218; padding:5px 8px; border-radius:6px; color:#ddd; margin:4px 0;">📦 ${o.items}</div>
       ${o.wheelPrize && !o.wheelPrize.includes("بدون") ? `<div style="color:var(--accent-green); font-weight:800;">🎁 الهدية: ${o.wheelPrize}</div>` : ''}
     </div>
@@ -2741,7 +2766,11 @@ function copyPortalRestaurantReport() {
   let reportText = `📋 *كشف مبيعات مطعم ${currentPortalRest}*\n🕒 الفترة: *${periodText}*\n🔢 عدد الطلبات: *${myOrders.length}*\n💰 إجمالي المبيعات: *${money(sum)}*\n\n`;
 
   myOrders.forEach((o, idx) => {
-    reportText += `${idx + 1}. ${o.id} | ${o.customer} | ${money(o.total)}\n   📦 ${o.items}\n\n`;
+    reportText += `${idx + 1}. ${o.id || "#WJ"}\n`;
+    reportText += `📅 التاريخ والوقت: ${formatOrderDate(o)}\n`;
+    reportText += `👤 الزبون: ${o.customer || "غير مسجل"} | الهاتف: ${o.phone || "غير مسجل"}\n`;
+    reportText += `💰 المبلغ: ${money(o.total)}\n`;
+    reportText += `📦 الطلب: ${o.items || "غير متوفر"}\n\n`;
   });
 
   navigator.clipboard.writeText(reportText).then(() => showToast("📋 تم نسخ الكشف المفلتر!"));
@@ -2953,7 +2982,7 @@ function renderOrdersLog() {
     <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px; margin-bottom:8px; font-size:11px;">
       <div style="display:flex; justify-content:space-between;"><strong style="color:var(--primary);">${o.id || '#WJ'}</strong><span style="color:var(--accent-green); font-weight:900;">${money(o.total)}</span></div>
       <div style="color:#fff; margin-top:4px;">👤 ${o.customer} - ${o.phone} (🏪 ${o.restaurant})</div>
-      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${o.date}</div>
+      <div style="color:var(--text-muted); margin-bottom:4px;">📅 ${formatOrderDate(o)}</div>
       <div style="background:#101218; padding:5px 8px; border-radius:6px; color:#ddd; margin:4px 0;">📦 ${o.items}</div>
       ${o.wheelPrize && !o.wheelPrize.includes("بدون") ? `<div style="color:var(--accent-green); font-weight:800;">🎁 الهدية: ${o.wheelPrize}</div>` : ''}
     </div>
@@ -2969,7 +2998,14 @@ function copyCurrentRestaurantReport() {
   let periodText = selectedOrderPeriod === 'today' ? 'اليوم' : selectedOrderPeriod === 'yesterday' ? 'البارحة' : selectedOrderPeriod === 'week' ? 'هذا الأسبوع' : selectedOrderPeriod === 'month' ? 'هذا الشهر' : 'الكل';
 
   let text = `📋 *كشف مبيعات ${filter}*\n🕒 الفترة: *${periodText}*\n🔢 الطلبات: ${filtered.length}\n💰 المجموع: ${money(sum)}\n\n`;
-  filtered.forEach((o, i) => { text += `${i + 1}. ${o.id} | ${o.customer} | ${money(o.total)}\n   📦 ${o.items}\n\n`; });
+  filtered.forEach((o, i) => {
+    text += `${i + 1}. ${o.id || "#WJ"}\n`;
+    text += `📅 التاريخ والوقت: ${formatOrderDate(o)}\n`;
+    text += `👤 الزبون: ${o.customer || "غير مسجل"} | الهاتف: ${o.phone || "غير مسجل"}\n`;
+    text += `🏪 المطعم: ${o.restaurant || "غير محدد"}\n`;
+    text += `💰 المبلغ: ${money(o.total)}\n`;
+    text += `📦 الطلب: ${o.items || "غير متوفر"}\n\n`;
+  });
   navigator.clipboard.writeText(text).then(() => showToast("📋 تم نسخ الكشف المفلتر!"));
 }
 
