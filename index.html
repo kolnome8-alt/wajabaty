@@ -1456,10 +1456,12 @@ let restSubscriptions = {};
 let selectedOrderPeriod = 'all';
 
 let generalDiscountConfig = {
-  active: true,
+  // Fail-safe: لا تفعّل الخصم تلقائياً إذا تعذرت قراءة إعدادات السحابة
+  active: false,
   tier1: { min: 3000, discount: 500 },
   tier2: { min: 5000, discount: 1000 }
 };
+let generalDiscountConfigUpdatedAt = 0;
 
 // إعداد رسم خدمة وجباتي الموحّد المحفوظ سحابياً
 let wajabatyServiceFee = { active: true, amount: 250 };
@@ -2932,16 +2934,19 @@ async function saveGeneralDiscountTiers() {
   const nextConfig = {
     active: document.getElementById("admGeneralDiscountStatus").value === "1",
     tier1: { min: Math.max(0, Number(document.getElementById("admTier1Min").value) || 3000), discount: Math.max(0, Number(document.getElementById("admTier1Discount").value) || 500) },
-    tier2: { min: Math.max(0, Number(document.getElementById("admTier2Min").value) || 5000), discount: Math.max(0, Number(document.getElementById("admTier2Discount").value) || 1000) }
+    tier2: { min: Math.max(0, Number(document.getElementById("admTier2Min").value) || 5000), discount: Math.max(0, Number(document.getElementById("admTier2Discount").value) || 1000) },
+    updatedAt: Date.now()
   };
   try {
     const response = await fetch(FIREBASE_GENERAL_DISCOUNT_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nextConfig) });
     if (!response.ok) throw new Error("HTTP " + response.status);
     generalDiscountConfig = nextConfig;
+    generalDiscountConfigUpdatedAt = nextConfig.updatedAt;
+    localStorage.setItem("wj_general_discount", JSON.stringify(nextConfig));
     populateGeneralDiscountInputs();
     updateCartUI(); renderCartDrawerContent();
     showToast(nextConfig.active ? "✅ تم تفعيل الخصم العام وحفظه للجميع" : "🔒 تم قفل الخصم العام وحفظ الإيقاف للجميع");
-  } catch (e) { alert("تعذر حفظ حالة الخصم العام في السحابة. تحقق من الاتصال ثم أعد المحاولة."); }
+  } catch (e) { alert("تعذر حفظ الخصم العام في السحابة؛ لم يتم تأكيد الحفظ. تحقق من الاتصال ثم أعد المحاولة."); }
 }
 
 function populateServiceFeeInputs() {
@@ -3386,7 +3391,15 @@ async function syncQuietlyWithCloud() {
 
     const resGen = await fetch(FIREBASE_GENERAL_DISCOUNT_URL + "?_t=" + Date.now());
     const dataGen = await resGen.json();
-    if (dataGen && typeof dataGen === 'object' && typeof dataGen.active === 'boolean') generalDiscountConfig = dataGen;
+    if (dataGen && typeof dataGen === 'object' && typeof dataGen.active === 'boolean') {
+      const cloudUpdatedAt = Number(dataGen.updatedAt) || 0;
+      // لا تسمح لبيانات سحابية قديمة بإعادة فتح الخصم بعد أن أغلقه المدير.
+      if (!generalDiscountConfigUpdatedAt || cloudUpdatedAt >= generalDiscountConfigUpdatedAt) {
+        generalDiscountConfig = dataGen;
+        generalDiscountConfigUpdatedAt = cloudUpdatedAt;
+        localStorage.setItem("wj_general_discount", JSON.stringify(dataGen));
+      }
+    }
 
     const resFee = await fetch(FIREBASE_SERVICE_FEE_URL + "?_t=" + Date.now());
     const dataFee = await resFee.json();
@@ -3404,6 +3417,14 @@ async function syncQuietlyWithCloud() {
 
 function loadInitialLocalData() {
   try {
+    const savedGeneralDiscount = localStorage.getItem("wj_general_discount");
+    if (savedGeneralDiscount) {
+      const parsedGeneralDiscount = JSON.parse(savedGeneralDiscount);
+      if (parsedGeneralDiscount && typeof parsedGeneralDiscount.active === "boolean") {
+        generalDiscountConfig = parsedGeneralDiscount;
+        generalDiscountConfigUpdatedAt = Number(parsedGeneralDiscount.updatedAt) || 0;
+      }
+    }
     const savedFee = localStorage.getItem("wj_service_fee");
     if (savedFee) {
       const parsedFee = JSON.parse(savedFee);
