@@ -192,10 +192,15 @@
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
-      display: flex;
+      display: none; 
       align-items: center;
       gap: 4px;
       box-shadow: 0 4px 15px rgba(233, 30, 99, 0.35);
+      animation: pulseWheel 2s infinite alternate;
+    }
+    @keyframes pulseWheel {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
     }
     .btn-cuisines-filter {
       background: linear-gradient(135deg, #ff5722, #ff9800);
@@ -369,6 +374,7 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
+    .btn-quick-add:active { transform: scale(0.9); }
     .talabaty-info-box {
       flex: 1;
       min-width: 0;
@@ -396,6 +402,83 @@
     }
     .talabaty-main-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
     .talabaty-old-price { font-size: 11px; color: #8c93a8; text-decoration: line-through; font-weight: 700; }
+
+    /* عجلة الحظ */
+    .wheel-pointer {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 26px;
+      color: #ff2a5f;
+      z-index: 10;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    /* نافذة المطابخ */
+    .cuisines-drawer-box {
+      background: #14161f;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 26px 26px 0 0;
+      border: 1.5px solid var(--border-color);
+      border-bottom: none;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.25s ease-out;
+      padding-bottom: 20px;
+    }
+    .cuisines-header {
+      padding: 16px 18px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .cuisines-header-title { font-size: 17px; font-weight: 900; }
+    .btn-clear-cuisines {
+      background: none;
+      border: none;
+      color: var(--accent-orange);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .cuisines-search-wrap { padding: 12px 18px 8px; }
+    .cuisines-search-input {
+      width: 100%;
+      background: #1a1c26;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .cuisines-list-body { flex: 1; overflow-y: auto; padding: 4px 18px 12px; }
+    .cuisine-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+    }
+    .cuisine-row-label { font-size: 14px; font-weight: 800; color: #e0e4ef; }
+    .cuisine-checkbox { width: 20px; height: 20px; border-radius: 6px; accent-color: var(--accent-orange); cursor: pointer; }
+    .btn-apply-cuisines {
+      background: linear-gradient(135deg, #ff5722, #f4511e);
+      color: #fff;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+    }
 
     /* السلة العائمة */
     .float-cart-bar {
@@ -484,6 +567,26 @@
       gap: 10px;
     }
     .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-title { font-size: 13px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-rest { font-size: 11px; color: var(--accent-orange); margin-top: 2px; }
+    .cart-item-price { font-size: 13px; font-weight: 900; color: var(--accent-green); margin-top: 3px; }
+    .cart-qty-ctrl { display: flex; align-items: center; gap: 8px; }
+    .btn-qty {
+      width: 28px; 
+      height: 28px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border-color);
+      background: var(--bg-elevated); 
+      color: #fff; 
+      font-size: 15px; 
+      font-weight: 900;
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    .qty-num { font-size: 14px; font-weight: 900; min-width: 18px; text-align: center; }
+
     .form-input {
       width: 100%; 
       background: #191c25; 
@@ -611,6 +714,47 @@
     }
     .btn-stock-toggle.in-stock { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
     .btn-stock-toggle.out-of-stock { background: rgba(255, 42, 95, 0.2); border: 1px solid var(--primary); color: #ff4d6d; }
+
+    .admin-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .admin-stat-card {
+      background: var(--bg-elevated);
+      padding: 10px;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+    .admin-stat-num { font-size: 16px; font-weight: 900; color: var(--accent-green); }
+    .admin-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 700; }
+
+    .period-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .period-btn {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 4px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .period-btn.active {
+      background: var(--accent-blue);
+      color: #111;
+      border-color: var(--accent-blue);
+      font-weight: 900;
+    }
   </style>
 </head>
 <body>
@@ -665,14 +809,57 @@
 <div class="horizontal-pills" id="restaurantsBar"></div>
 <div class="horizontal-pills" id="categoriesBar"></div>
 
+<!-- شبكة الوجبات -->
 <div class="meals-grid" id="mealsGrid"></div>
 
+<!-- شريط السلة العائم -->
 <div class="float-cart-bar" id="floatCartBar">
   <div>
     <span id="cartTotalItems" style="font-weight:900;">0</span> وجبات |
     <span class="cart-total-badge" id="cartTotalSum">0 د.ع</span>
   </div>
   <button class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
+</div>
+
+<!-- نافذة عجلة الحظ -->
+<div class="modal-backdrop" id="wheelModal" onclick="closeIfOutsideWheel(event)">
+  <div class="modal-box" style="max-width:350px; text-align:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h3 style="margin:0; font-size:16px;">🎡 عجلة الحظ والهدايا</h3>
+      <span style="font-size:20px; cursor:pointer;" onclick="closeWheelModal()">✕</span>
+    </div>
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;" id="wheelSubtext">
+      دور العجلة واربح جائزتك الفورية مع طلبك!
+    </p>
+    <div style="position:relative; width:260px; height:260px; margin:0 auto 15px;">
+      <div class="wheel-pointer">▼</div>
+      <canvas id="wheelCanvas" width="260" height="260" style="border-radius:50%; box-shadow:0 0 25px rgba(255,42,95,0.45);"></canvas>
+    </div>
+    <button type="button" class="btn-discount" id="btnSpinWheel" style="width:100%; padding:13px; font-weight:900; font-size:14px; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111;" onclick="spinWheel()">
+      🎯 تدوير العجلة الآن!
+    </button>
+    <div id="wheelResultBox" style="display:none; margin-top:12px; padding:10px; border-radius:12px; background:rgba(0,230,118,0.15); border:1px solid var(--accent-green); font-size:12px; font-weight:800; line-height:1.5;"></div>
+  </div>
+</div>
+
+<!-- نافذة تصنيفات المطابخ -->
+<div class="cart-drawer-backdrop" id="cuisinesModal" onclick="closeIfOutsideCuisines(event)">
+  <div class="cuisines-drawer-box">
+    <div class="cuisines-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:20px; cursor:pointer;" onclick="closeCuisinesModal()">✕</span>
+        <span class="cuisines-header-title">المطابخ والتصنيفات</span>
+      </div>
+      <button class="btn-clear-cuisines" onclick="clearAllSelectedCuisines()">حذف الكل</button>
+    </div>
+    <div class="cuisines-search-wrap">
+      <input type="text" id="cuisineFilterSearch" class="cuisines-search-input" placeholder="🔍 ابحث عن المطابخ..." oninput="filterCuisinesList()">
+    </div>
+    <div class="cuisines-list-body" id="cuisinesCheckList"></div>
+    <div style="padding:10px 18px 0;">
+      <button class="btn-apply-cuisines" onclick="applyCuisinesFilter()">تطبيق الفلتر</button>
+    </div>
+  </div>
 </div>
 
 <!-- سلة المشتريات -->
@@ -682,42 +869,47 @@
       <h3 class="drawer-title">🛒 سلة وجباتي</h3>
       <button class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
     </div>
-
     <div class="drawer-body">
       <div id="drawerItemsList" style="margin-bottom:14px;"></div>
-
       <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
         <button type="button" onclick="confirmClearCart()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:800; cursor:pointer;">🗑️ تفريغ السلة بالكامل</button>
       </div>
-
       <div style="margin-bottom:12px;">
-        <input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" required>
-        <input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" required>
-        <input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" required>
-        
+        <input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" oninput="saveCustomerData()" required>
+        <input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" oninput="saveCustomerData()" required>
+        <input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" oninput="saveCustomerData()" required>
         <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك:</label>
-        <select id="custZoneSelect" class="form-input" onchange="updateCartUI(); renderCartDrawerContent();">
+        <select id="custZoneSelect" class="form-input" onchange="saveCustomerData(); updateCartUI(); renderCartDrawerContent();">
           <option value="الكرخ">جانب الكرخ</option>
           <option value="الرصافة">جانب الرصافة</option>
         </select>
       </div>
-
       <button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">📍 تثبيت موقعي بالخريطة بدقة فيت (GPS)</button>
       <div id="gpsStatusText" style="font-size:12px; margin:-6px 0 12px 4px; font-weight:800;"></div>
-
       <div class="bill-summary-card" id="billSummaryCard"></div>
-
       <button type="button" class="btn-submit-order-wa" id="submitBtn" onclick="submitFullOrder()">💬 إرسال الطلب لواتساب المطعم مباشرة</button>
     </div>
   </div>
 </div>
 
-<!-- شاشة الرمز السري -->
+<!-- نافذة العروض والخصومات -->
+<div class="modal-backdrop" id="discountsModal" onclick="closeIfOutsideDiscounts(event)">
+  <div class="modal-box" style="max-width:340px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h4 style="margin:0; font-size:16px;">🏷️ العروض والتخفيضات الفورية</h4>
+      <span style="font-size:20px; cursor:pointer;" onclick="closeDiscountsModal()">✕</span>
+    </div>
+    <div id="couponModalContent" style="padding:10px 0; text-align:center;"></div>
+    <button type="button" class="btn-discount" style="width:100%; margin-top:10px;" onclick="closeDiscountsModal()">إغلاق</button>
+  </div>
+</div>
+
+<!-- شاشة طلب الرمز السري -->
 <div class="modal-backdrop" id="adminPinModal" onclick="closeIfOutsideAdminPin(event)">
   <div class="modal-box" style="max-width:320px; text-align:center;">
     <h3 style="margin-top:0; font-size:16px;">🔐 دخول الإدارة والمطاعم</h3>
     <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">أدخل الرمز السري الخاص بك للمتابعة</p>
-    <input type="password" id="adminPinInput" class="form-input" placeholder="••••" maxlength="6" style="text-align:center; font-size:22px; letter-spacing:5px;" inputmode="numeric" value="">
+    <input type="password" id="adminPinInput" class="form-input" placeholder="••••" maxlength="6" style="text-align:center; font-size:22px; letter-spacing:5px;" inputmode="numeric">
     <div style="display:flex; gap:8px;">
       <button type="button" class="btn-discount" style="flex:1; background:#333; color:#fff;" onclick="closeAdminPin()">إلغاء</button>
       <button type="button" class="btn-discount" style="flex:1;" onclick="checkAdminPin()">دخول</button>
@@ -725,155 +917,159 @@
   </div>
 </div>
 
-<!-- لوحة الإدارة العامة الشاملة الأصلية بكامل التبويبات ووظائف الأزرار السحابية -->
+<!-- لوحة تحكم المطعم المستقلة -->
+<div class="modal-backdrop" id="restPortalModal" onclick="closeIfOutsideRestPortal(event)">
+  <div class="modal-box" style="max-width:460px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+      <div>
+        <h3 style="margin:0; font-size:16px; color:#fff;">🏪 لوحة إدارة: <span id="portalRestTitle" style="color:var(--accent-orange);"></span></h3>
+      </div>
+      <span style="font-size:22px; cursor:pointer; color:var(--text-muted);" onclick="closeRestPortal()">✕</span>
+    </div>
+    <div class="admin-stat-grid" style="margin-bottom:12px;">
+      <div class="admin-stat-card"><div class="admin-stat-num" id="portalMealsCount">0</div><div class="admin-stat-lbl">وجبات المطعم</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-num" id="portalOrdersTotal">0 د.ع</div><div class="admin-stat-lbl">مبيعات الفترة</div></div>
+    </div>
+    <div class="admin-tabs" style="margin-bottom:12px;">
+      <button class="admin-tab-btn active" onclick="switchPortalTab('portalMealsTab', this)">🍔 وجباتي وقفل الحاجات</button>
+      <button class="admin-tab-btn" onclick="switchPortalTab('portalOrdersTab', this)">📋 كشف طلباتي</button>
+    </div>
+    <div id="portalMealsTab" class="portal-tab-content" style="display:block;">
+      <input type="text" id="portalMealSearch" class="form-input" placeholder="ابحث عن وجبة..." oninput="renderPortalMeals()">
+      <div id="portalMealsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+    <div id="portalOrdersTab" class="portal-tab-content" style="display:none;">
+      <div class="period-filter-bar">
+        <div class="period-btn active" onclick="setOrderPeriod('all', this, true)">الكل</div>
+        <div class="period-btn" onclick="setOrderPeriod('today', this, true)">اليوم</div>
+        <div class="period-btn" onclick="setOrderPeriod('week', this, true)">أسبوع</div>
+        <div class="period-btn" onclick="setOrderPeriod('month', this, true)">شهر</div>
+      </div>
+      <div id="portalOrdersList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+    <button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeRestPortal()">إغلاق اللوحة</button>
+  </div>
+</div>
+
+<!-- لوحة الإدارة العامة VIP -->
 <div class="modal-backdrop" id="adminPanelModal" onclick="closeIfOutsideAdminPanel(event)">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
       <h3 style="margin:0; font-size:16px; color:#fff;">⚙️ إدارة وجباتي السحابية VIP</h3>
       <span style="font-size:20px; cursor:pointer; color:var(--text-muted);" onclick="closeAdminPanel()">✕</span>
     </div>
-
     <div class="admin-tabs">
       <button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('subsAdminTab', this)">💳 الاشتراكات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 المبيعات</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 عجلة الحظ</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 الإشعار الحي</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 العجلة</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 الإشعار</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('serviceFeeTab', this)">🧾 خدمة وجباتي</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('discountCodesTab', this)">🎟️ رموز الخصم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ تعديل الوجبات</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('serviceFeeTab', this)">🧾 رسم الخدمة</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('discountCodesTab', this)">🎟️ الكوبونات</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الوجبات</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 الرموز</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 إدارة المطاعم</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
     </div>
 
-    <!-- 📷 ماسح المنيو -->
+    <!-- المحتويات الأساسية للوحات الإدارية -->
     <div id="aiScanTab" class="admin-tab-content active">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">اختر المطعم وارفع صورة قائمته لاستخراج الوجبات تلقائياً بالذكاء الاصطناعي:</p>
       <input type="password" id="geminiApiKey" class="form-input" placeholder="مفتاح Gemini API">
       <select id="aiScanRestSelect" class="form-input"></select>
       <select id="aiScanZoneSelect" class="form-input"><option value="الكرخ">الكرخ</option><option value="الرصافة">الرصافة</option></select>
       <input type="file" id="aiMenuFileInput" accept="image/*" class="form-input" onchange="handleMenuFileSelect(this)">
-      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="runAiMenuScan()">⚡ قراءة المنيو واستخراج الوجبات</button>
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="runAiMenuScan()">⚡ قراءة المنيو بالذكاء الاصطناعي</button>
       <div id="aiScanResultsBox" style="display:none; margin-top:10px;">
         <div id="aiExtractedList" style="max-height:150px; overflow-y:auto; margin-bottom:8px;"></div>
         <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveAllAiMealsToCloud()">🚀 حفظ الوجبات المستخرجة</button>
       </div>
     </div>
 
-    <!-- 💳 الاشتراكات -->
     <div id="subsAdminTab" class="admin-tab-content">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">إدارة اشتراكات المطاعم الشهرية:</p>
       <select id="admSubRestSelect" class="form-input"></select>
-      <input type="number" id="admSubAmount" class="form-input" placeholder="مبلغ الاشتراك (د.ع)">
+      <input type="number" id="admSubAmount" class="form-input" placeholder="مبلغ الاشتراك">
       <input type="date" id="admSubExpiry" class="form-input">
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveSubscription()">💾 حفظ الاشتراك</button>
       <div id="admSubsList" style="max-height:140px; overflow-y:auto; margin-top:8px;"></div>
     </div>
 
-    <!-- 📋 المبيعات -->
     <div id="ordersLogTab" class="admin-tab-content">
       <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
       <div id="ordersListContainer" style="max-height:200px; overflow-y:auto;"></div>
     </div>
 
-    <!-- 🛵 التوصيل -->
     <div id="deliveryTab" class="admin-tab-content">
-      <input type="number" id="admDeliveryFee" class="form-input" placeholder="سعر التوصيل الافتراضي العام">
+      <input type="number" id="admDeliveryFee" class="form-input" placeholder="سعر التوصيل الافتراضي">
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveDeliveryFee()">💾 حفظ التوصيل العام</button>
     </div>
 
-    <!-- 🎡 عجلة الحظ -->
     <div id="wheelAdminTab" class="admin-tab-content">
-      <select id="admWheelActive" class="form-input"><option value="1">مفعلة ✅</option><option value="0">متوقفة ❌</option></select>
+      <select id="admWheelActive" class="form-input"><option value="1">مفعل ✅</option><option value="0">متوقف ❌</option></select>
       <select id="admWheelRest" class="form-input"></select>
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveWheelConfigToCloud()">💾 حفظ إعدادات العجلة</button>
     </div>
 
-    <!-- 📢 الإشعار الحي -->
     <div id="flashAlertTab" class="admin-tab-content">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">إرسال شريط إشعار تفاعلي يظل ظاهراً للزبائن بشكل دائم حتى تقوم بإلغائه يدوياً:</p>
-      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
-        <label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">اختر المطعم المستهدف:</label>
-        <select id="admAlertRestSelect" class="form-input"></select>
-        <label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">عنوان الإشعار:</label>
-        <input type="text" id="admAlertTitle" class="form-input" placeholder="مثال: 🔥 عرض ناري وتخفيض فوري!">
-        <label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">نص التخفيض والتفاصيل:</label>
-        <input type="text" id="admAlertBody" class="form-input" placeholder="مثال: خصم 1,000 د.ع عند الطلب الآن">
-        <label style="font-size:12px; font-weight:800; display:block; margin-top:6px;">حالة الإشعار:</label>
-        <select id="admAlertStatus" class="form-input">
-          <option value="1">مفعّل ويظهر للجميع ✅</option>
-          <option value="0">إيقاف وتعطيل الإشعار ❌</option>
-        </select>
-      </div>
-      <div style="display:flex; gap:6px;">
-        <button type="button" class="btn-discount" style="flex:1; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveFlashAlert()">💾 حفظ وتثبيت الإشعار سحابياً</button>
-        <button type="button" onclick="clearFlashAlert()" style="background:#4a1525; color:#ff4d6d; border:none; padding:0 14px; border-radius:14px; font-size:11px; font-weight:800; cursor:pointer;">إلغاء الإشعار</button>
-      </div>
+      <select id="admAlertRestSelect" class="form-input"></select>
+      <input type="text" id="admAlertTitle" class="form-input" placeholder="عنوان الإشعار">
+      <input type="text" id="admAlertBody" class="form-input" placeholder="نص الإشعار">
+      <select id="admAlertStatus" class="form-input"><option value="1">مفعل ✅</option><option value="0">متوقف ❌</option></select>
+      <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveFlashAlert()">💾 حفظ وتثبيت الإشعار</button>
     </div>
 
-    <!-- 🎁 الخصم العام -->
     <div id="generalDiscountTab" class="admin-tab-content">
-      <input type="number" id="admTier1Min" class="form-input" placeholder="الحد الأدنى للشريحة الأولى">
+      <input type="number" id="admTier1Min" class="form-input" placeholder="الحد الأدنى">
       <input type="number" id="admTier1Discount" class="form-input" placeholder="مبلغ الخصم">
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveGeneralDiscountTiers()">💾 حفظ الخصم العام</button>
     </div>
 
-    <!-- 🧾 خدمة وجباتي -->
     <div id="serviceFeeTab" class="admin-tab-content">
-      <input type="number" id="admServiceFeeAmount" class="form-input" placeholder="رسم الخدمة (د.ع)">
-      <select id="admServiceFeeStatus" class="form-input"><option value="1">مفعل ✅</option><option value="0">معطل ❌</option></select>
+      <input type="number" id="admServiceFeeAmount" class="form-input" placeholder="رسم الخدمة">
+      <select id="admServiceFeeStatus" class="form-input"><option value="1">مفعل ✅</option><option value="0">متوقف ❌</option></select>
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveWajabatyServiceFee()">💾 حفظ رسم الخدمة</button>
     </div>
 
-    <!-- 🎟️ رموز الخصم -->
     <div id="discountCodesTab" class="admin-tab-content">
-      <input type="text" id="admCouponCode" class="form-input" placeholder="رمز الكوبون (مثال: WJ500)">
+      <input type="text" id="admCouponCode" class="form-input" placeholder="رمز الكوبون">
       <input type="number" id="admCouponValue" class="form-input" placeholder="قيمة الخصم">
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="createDiscountCode()">💾 إنشاء الكوبون</button>
       <div id="adminDiscountCodesList" style="max-height:140px; overflow-y:auto; margin-top:8px;"></div>
     </div>
 
-    <!-- ✏️ تعديل الوجبات -->
     <div id="editMealsTab" class="admin-tab-content">
       <input type="text" id="quickSearchMeal" class="form-input" placeholder="ابحث عن وجبة..." oninput="filterQuickMeals()">
       <div id="quickMealsList" style="max-height:220px; overflow-y:auto;"></div>
     </div>
 
-    <!-- 🔐 رموز المطاعم -->
     <div id="restPinsTab" class="admin-tab-content">
       <div id="restPinsList" style="max-height:200px; overflow-y:auto;"></div>
     </div>
 
-    <!-- 📢 البنر -->
     <div id="bannerTab" class="admin-tab-content">
       <input type="text" id="admB1Title" class="form-input" placeholder="عنوان البنر">
       <input type="text" id="admB1Desc" class="form-input" placeholder="وصف البنر">
-      <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة البنر المباشر">
+      <input type="url" id="admB1Img" class="form-input" placeholder="رابط البنر">
       <button type="button" class="btn-discount" style="width:100%; padding:10px;" onclick="saveAdminBanners()">💾 حفظ البنر</button>
     </div>
 
-    <!-- ➕ إضافة وجبة -->
     <div id="addMealTab" class="admin-tab-content">
       <input type="text" id="newMealName" class="form-input" placeholder="اسم الوجبة">
       <input type="text" id="newMealDesc" class="form-input" placeholder="المكونات">
       <select id="newMealRest" class="form-input"></select>
       <input type="text" id="newMealCatCustom" class="form-input" placeholder="التصنيف">
-      <input type="number" id="newMealPrice" class="form-input" placeholder="السعر الأصلي">
+      <input type="number" id="newMealPrice" class="form-input" placeholder="السعر">
       <input type="number" id="newMealSavingPrice" class="form-input" placeholder="سعر التوفير (اختياري)">
       <select id="newMealZone" class="form-input"><option value="الكرخ">الكرخ</option><option value="الرصافة">الرصافة</option></select>
       <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="addNewMealLocally()">➕ إضافة الوجبة</button>
     </div>
 
-    <!-- 🏪 إدارة المطاعم (مع حذف المطعم ومحتوياته بالكامل) -->
     <div id="addRestTab" class="admin-tab-content">
       <input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد">
-      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900; margin-bottom:14px;" onclick="addNewRestaurant()">➕ إضافة المطعم الجديد</button>
-      <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">قائمة المطاعم المسجلة (حذف المطعم سيحذفه مع محتوياته بالكامل):</div>
-      <div id="restaurantsAdminList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
+      <input type="tel" id="newRestPhone" class="form-input" placeholder="رقم الهاتف">
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="addNewRestaurant()">➕ إضافة المطعم</button>
     </div>
 
     <button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
@@ -979,7 +1175,6 @@ function buildRestaurantsBar() {
     const sel = document.getElementById(id);
     if (sel) sel.innerHTML = RESTS.map(r => `<option value="${r}">${r}</option>`).join('');
   });
-  renderRestaurantsAdminList();
 }
 
 function buildCategoriesBar() {
@@ -1082,9 +1277,7 @@ function closeAdminPin() {
 }
 
 function closeIfOutsideAdminPin(e) {
-  if (e.target.id === 'adminPinModal') {
-    closeAdminPin();
-  }
+  if (e.target.id === 'adminPinModal') closeAdminPin();
 }
 
 function checkAdminPin() {
@@ -1098,11 +1291,7 @@ function checkAdminPin() {
   alert("الرمز غير صحيح!");
 }
 
-function openAdminPanel() {
-  document.getElementById("adminPanelModal").classList.add("show");
-  filterQuickMeals();
-  renderRestaurantsAdminList();
-}
+function openAdminPanel() { document.getElementById("adminPanelModal").classList.add("show"); filterQuickMeals(); }
 function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
 function closeIfOutsideAdminPanel(e) { if (e.target.id === 'adminPanelModal') closeAdminPanel(); }
 
@@ -1111,8 +1300,6 @@ function switchAdminTab(tabId, btn) {
   document.querySelectorAll('#adminPanelModal .admin-tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(tabId).classList.add('active');
-  if (tabId === 'editMealsTab') filterQuickMeals();
-  if (tabId === 'addRestTab') renderRestaurantsAdminList();
 }
 
 function saveFlashAlert() {
@@ -1166,7 +1353,7 @@ function saveWajabatyServiceFee() {
   appSettings.serviceFee = amt;
   appSettings.serviceFeeActive = active;
   syncSettingsToCloud();
-  showToast("💾 تم حفظ خدمة وجباتي");
+  showToast("💾 تم حفظ رسم الخدمة");
 }
 
 function saveGeneralDiscountTiers() {
@@ -1261,44 +1448,14 @@ function addNewRestaurant() {
   if (RESTS.includes(name)) { alert("المطعم موجود مسبقاً!"); return; }
   
   RESTS.push(name);
-  syncRestaurantsToCloud();
-  buildRestaurantsBar();
-  renderRestaurantsAdminList();
-  showToast(`🏪 تم إضافة المطعم: ${name}`);
-  document.getElementById("newRestName").value = "";
-}
-
-function deleteRestaurant(restName) {
-  if (confirm(`⚠️ تنبيه: هل أنت متأكد من حذف المطعم (${restName}) مع كافة وجباته ومحتوياته نهائياً؟`)) {
-    RESTS = RESTS.filter(r => r.toLowerCase().trim() !== restName.toLowerCase().trim());
-    syncRestaurantsToCloud();
-    allMeals = allMeals.filter(m => m.rest && m.rest.toLowerCase().trim() !== restName.toLowerCase().trim());
-    syncMealsToCloud();
-    buildRestaurantsBar();
-    buildCategoriesBar();
-    renderMeals();
-    renderRestaurantsAdminList();
-    filterQuickMeals();
-    showToast(`🗑️ تم حذف المطعم (${restName}) ومحتوياته بالكامل`);
-  }
-}
-
-function renderRestaurantsAdminList() {
-  const box = document.getElementById("restaurantsAdminList");
-  if (!box) return;
-  box.innerHTML = RESTS.map(r => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #292d38; font-size:12px;">
-      <span>🏪 ${r}</span>
-      <button type="button" onclick="deleteRestaurant('${r}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">حذف مع محتوياته 🗑️</button>
-    </div>
-  `).join('');
-}
-
-function syncRestaurantsToCloud() {
   fetch(FIREBASE_RESTS_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(RESTS)
+  }).then(() => {
+    buildRestaurantsBar();
+    showToast(`🏪 تم إضافة المطعم: ${name}`);
+    document.getElementById("newRestName").value = "";
   });
 }
 
@@ -1330,27 +1487,19 @@ async function loadInitialData() {
 
     const resMeals = await fetch(FIREBASE_MEALS_URL);
     const dataMeals = await resMeals.json();
-    if (Array.isArray(dataMeals)) {
-      allMeals = dataMeals;
-    }
+    if (Array.isArray(dataMeals)) allMeals = dataMeals;
 
     const resRests = await fetch(FIREBASE_RESTS_URL);
     const dataRests = await resRests.json();
-    if (Array.isArray(dataRests)) {
-      RESTS = dataRests;
-    }
+    if (Array.isArray(dataRests)) RESTS = dataRests;
 
     const resBanners = await fetch(FIREBASE_BANNERS_URL);
     const dataBanners = await resBanners.json();
-    if (Array.isArray(dataBanners) && dataBanners.length > 0) {
-      appBanners = dataBanners;
-    }
+    if (Array.isArray(dataBanners) && dataBanners.length > 0) appBanners = dataBanners;
 
     const resSettings = await fetch(FIREBASE_SETTINGS_URL);
     const dataSettings = await resSettings.json();
-    if (dataSettings && typeof dataSettings === 'object') {
-      appSettings = { ...appSettings, ...dataSettings };
-    }
+    if (dataSettings && typeof dataSettings === 'object') appSettings = { ...appSettings, ...dataSettings };
   } catch(e) {}
 
   renderBanners();
