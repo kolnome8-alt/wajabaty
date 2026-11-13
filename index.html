@@ -1,939 +1,1241 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>وجباتي - Wajabaty VIP</title>
-<style>
-:root {
---bg-main: #0b0c10;
---bg-card: #14161d;
---bg-elevated: #1e212b;
---primary: #ff2a5f;
---primary-glow: rgba(255, 42, 95, 0.4);
---accent-orange: #ff5722;
---accent-green: #00e676;
---accent-blue: #00b0ff;
---accent-purple: #9c27b0;
---text-main: #ffffff;
---text-muted: #8c93a8;
---border-color: rgba(255, 255, 255, 0.08);
---radius-lg: 20px;
---radius-md: 14px;
-}
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>وجباتي - Wajabaty VIP</title>
+  <style>
+    :root {
+      --bg-main: #0b0c10;
+      --bg-card: #14161d;
+      --bg-elevated: #1e212b;
+      --primary: #ff2a5f;
+      --primary-glow: rgba(255, 42, 95, 0.4);
+      --accent-orange: #ff5722;
+      --accent-green: #00e676;
+      --accent-blue: #00b0ff;
+      --accent-purple: #9c27b0;
+      --text-main: #ffffff;
+      --text-muted: #8c93a8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-body {
-background-color: var(--bg-main);
-color: var(--text-main);
-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-padding-bottom: 150px;
-user-select: none;
-overflow-x: hidden;
-}
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding-bottom: 150px;
+      user-select: none;
+      overflow-x: hidden;
+    }
 
-#toastBox {
-position: fixed;
-top: 20px;
-left: 50%;
-transform: translateX(-50%) translateY(-100px);
-background: rgba(20, 22, 29, 0.95);
-border: 1px solid var(--accent-green);
-color: #fff;
-padding: 12px 24px;
-border-radius: 30px;
-font-size: 13px;
-font-weight: 800;
-z-index: 9999;
-box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-pointer-events: none;
-display: flex;
-align-items: center;
-gap: 8px;
-}
-#toastBox.show { transform: translateX(-50%) translateY(0); }
+    #toastBox {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(20, 22, 29, 0.95);
+      border: 1px solid var(--accent-green);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 800;
+      z-index: 9999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #toastBox.show { transform: translateX(-50%) translateY(0); }
 
-.live-alert-bar {
-margin: 10px 14px 6px;
-background: linear-gradient(135deg, rgba(255, 42, 95, 0.95), rgba(255, 152, 0, 0.95));
-border-radius: 16px;
-padding: 10px 14px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 10px;
-box-shadow: 0 6px 20px rgba(255, 42, 95, 0.35);
-cursor: pointer;
-animation: pulseGlow 2.2s infinite alternate;
-position: relative;
-z-index: 500;
-}
-@keyframes pulseGlow {
-from { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 42, 95, 0.3); }
-to { transform: scale(1.015); box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5); }
-}
-.live-alert-content { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
-.live-alert-badge {
-background: #fff;
-color: var(--primary);
-font-weight: 900;
-font-size: 11px;
-padding: 3px 8px;
-border-radius: 8px;
-flex-shrink: 0;
-}
-.live-alert-text { display: flex; flex-direction: column; min-width: 0; }
-.live-alert-text strong { font-size: 12px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.live-alert-text span { font-size: 11px; color: #ffe6ec; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
-.btn-live-alert-action {
-background: #111;
-color: #fff;
-border: none;
-padding: 6px 12px;
-border-radius: 10px;
-font-size: 11px;
-font-weight: 900;
-cursor: pointer;
-flex-shrink: 0;
-}
-.live-alert-close {
-color: rgba(255,255,255,0.85);
-font-size: 16px;
-font-weight: 900;
-cursor: pointer;
-padding: 2px 6px;
-}
+    .live-alert-bar {
+      margin: 10px 14px 6px;
+      background: linear-gradient(135deg, rgba(255, 42, 95, 0.95), rgba(255, 152, 0, 0.95));
+      border-radius: 16px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(255, 42, 95, 0.35);
+      cursor: pointer;
+      animation: pulseGlow 2.2s infinite alternate;
+      position: relative;
+      z-index: 500;
+    }
+    @keyframes pulseGlow {
+      from { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 42, 95, 0.3); }
+      to { transform: scale(1.015); box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5); }
+    }
+    .live-alert-content { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
+    .live-alert-badge {
+      background: #fff;
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .live-alert-text { display: flex; flex-direction: column; min-width: 0; }
+    .live-alert-text strong { font-size: 12px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .live-alert-text span { font-size: 11px; color: #ffe6ec; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+    .btn-live-alert-action {
+      background: #111;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .live-alert-close {
+      color: rgba(255,255,255,0.85);
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
 
-.banner-slider-container {
-margin: 10px 14px 12px;
-position: relative;
-border-radius: var(--radius-lg);
-overflow: hidden;
-height: 160px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-cursor: pointer;
-border: 1px solid var(--border-color);
-background: #14161d;
-}
-.banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
-.banner-slide { min-width: 100%; position: relative; height: 100%; }
-.banner-slide img, .banner-slide video { width: 100%; height: 100%; object-fit: cover; }
-.banner-overlay {
-position: absolute;
-inset: 0;
-background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
-display: flex;
-flex-direction: column;
-justify-content: flex-end;
-padding: 16px 18px;
-}
-.banner-overlay h2 { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-.banner-overlay p { font-size: 12px; color: #e0e0e0; font-weight: 700; }
-.banner-dots {
-position: absolute;
-bottom: 8px;
-left: 50%;
-transform: translateX(-50%);
-display: flex;
-gap: 6px;
-z-index: 5;
-}
-.banner-dot {
-width: 7px;
-height: 7px;
-border-radius: 50%;
-background: rgba(255,255,255,0.3);
-transition: all 0.3s ease;
-}
-.banner-dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
+    .banner-slider-container {
+      margin: 10px 14px 12px;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      height: 160px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: #14161d;
+    }
+    .banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
+    .banner-slide { min-width: 100%; position: relative; height: 100%; }
+    .banner-slide img, .banner-slide video { width: 100%; height: 100%; object-fit: cover; }
+    .banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px 18px;
+    }
+    .banner-overlay h2 { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .banner-overlay p { font-size: 12px; color: #e0e0e0; font-weight: 700; }
+    .banner-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 5;
+    }
+    .banner-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transition: all 0.3s ease;
+    }
+    .banner-dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
 
-.control-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 6px 14px 12px;
-gap: 6px;
-}
-.brand-pill {
-display: flex;
-align-items: center;
-gap: 6px;
-background: var(--bg-card);
-padding: 8px 14px;
-border-radius: 16px;
-border: 1px solid var(--border-color);
-font-weight: 900;
-font-size: 13px;
-cursor: pointer;
-transition: transform 0.15s ease;
-}
-.brand-pill:active { transform: scale(0.95); }
-.brand-badge {
-background: var(--primary);
-color: white;
-border-radius: 8px;
-padding: 2px 6px;
-font-size: 11px;
-font-weight: 900;
-}
-.header-actions { display: flex; gap: 6px; }
+    .control-header {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      padding: 6px 14px 12px; 
+      gap: 6px;
+    }
+    .brand-pill {
+      display: flex; 
+      align-items: center; 
+      gap: 6px;
+      background: var(--bg-card); 
+      padding: 8px 14px; 
+      border-radius: 16px;
+      border: 1px solid var(--border-color); 
+      font-weight: 900; 
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .brand-pill:active { transform: scale(0.95); }
+    .brand-badge {
+      background: var(--primary); 
+      color: white; 
+      border-radius: 8px;
+      padding: 2px 6px; 
+      font-size: 11px; 
+      font-weight: 900;
+    }
+    .header-actions { display: flex; gap: 6px; }
+    
+    .btn-cuisines-filter {
+      background: linear-gradient(135deg, #ff5722, #ff9800);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-discount {
+      background: linear-gradient(135deg, #ff9800, #ffb300);
+      color: #111; 
+      border: none; 
+      padding: 8px 12px; 
+      border-radius: 14px;
+      font-size: 12px; 
+      font-weight: 900; 
+      cursor: pointer;
+    }
+    .btn-cart-top {
+      background: rgba(255, 42, 95, 0.15); 
+      color: var(--primary);
+      border: 1px solid var(--primary); 
+      padding: 8px 12px; 
+      border-radius: 14px;
+      font-size: 12px; 
+      font-weight: 900; 
+      cursor: pointer;
+    }
 
-.btn-wheel-header {
-background: linear-gradient(135deg, #9c27b0, #e91e63);
-color: #fff;
-border: none;
-padding: 8px 12px;
-border-radius: 14px;
-font-size: 12px;
-font-weight: 900;
-cursor: pointer;
-display: none;
-align-items: center;
-gap: 4px;
-box-shadow: 0 4px 15px rgba(233, 30, 99, 0.35);
-animation: pulseWheel 2s infinite alternate;
-}
-@keyframes pulseWheel {
-from { transform: scale(1); }
-to { transform: scale(1.05); }
-}
-.btn-cuisines-filter {
-background: linear-gradient(135deg, #ff5722, #ff9800);
-color: #fff;
-border: none;
-padding: 8px 12px;
-border-radius: 14px;
-font-size: 12px;
-font-weight: 900;
-cursor: pointer;
-display: flex;
-align-items: center;
-gap: 4px;
-}
-.btn-discount {
-background: linear-gradient(135deg, #ff9800, #ffb300);
-color: #111;
-border: none;
-padding: 8px 12px;
-border-radius: 14px;
-font-size: 12px;
-font-weight: 900;
-cursor: pointer;
-}
-.btn-cart-top {
-background: rgba(255, 42, 95, 0.15);
-color: var(--primary);
-border: 1px solid var(--primary);
-padding: 8px 12px;
-border-radius: 14px;
-font-size: 12px;
-font-weight: 900;
-cursor: pointer;
-}
+    .search-wrapper { display: flex; gap: 8px; margin: 0 14px 12px; }
+    .search-input-box { flex: 1; position: relative; }
+    .search-input-box input {
+      width: 100%; 
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      padding: 12px 16px; 
+      border-radius: 16px; 
+      color: white; 
+      outline: none; 
+      font-size: 13px;
+    }
+    .btn-search {
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      padding: 0 20px; 
+      border-radius: 16px; 
+      font-weight: 900; 
+      cursor: pointer;
+    }
 
-.search-wrapper { display: flex; gap: 8px; margin: 0 14px 12px; }
-.search-input-box { flex: 1; position: relative; }
-.search-input-box input {
-width: 100%;
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-padding: 12px 16px;
-border-radius: 16px;
-color: white;
-outline: none;
-font-size: 13px;
-}
-.btn-search {
-background: var(--primary);
-color: white;
-border: none;
-padding: 0 20px;
-border-radius: 16px;
-font-weight: 900;
-cursor: pointer;
-}
+    .zones-bar { display: flex; gap: 8px; margin: 0 14px 10px; }
+    .zone-chip {
+      flex: 1; 
+      padding: 9px 4px; 
+      background: var(--bg-card);
+      border: 1px solid var(--border-color); 
+      border-radius: 14px;
+      color: var(--text-muted); 
+      font-size: 12px; 
+      font-weight: 800; 
+      text-align: center; 
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .zone-chip.active {
+      background: var(--primary); 
+      color: white; 
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
 
-.zones-bar { display: flex; gap: 8px; margin: 0 14px 10px; }
-.zone-chip {
-flex: 1;
-padding: 9px 4px;
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-border-radius: 14px;
-color: var(--text-muted);
-font-size: 12px;
-font-weight: 800;
-text-align: center;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-.zone-chip.active {
-background: var(--primary);
-color: white;
-border-color: var(--primary);
-box-shadow: 0 4px 15px var(--primary-glow);
-}
+    .horizontal-pills {
+      display: flex; 
+      gap: 8px; 
+      overflow-x: auto; 
+      white-space: nowrap;
+      padding: 0 14px 10px; 
+      scrollbar-width: none; 
+      -webkit-overflow-scrolling: touch;
+    }
+    .horizontal-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      flex-shrink: 0; 
+      padding: 8px 16px; 
+      border-radius: 20px;
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      color: var(--text-muted); 
+      font-size: 12px; 
+      font-weight: 700; 
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .pill.active-white { background: #ffffff; color: #111; font-weight: 900; border-color: #fff; }
+    .pill.active-green { background: var(--accent-green); color: #111; font-weight: 900; border-color: var(--accent-green); }
 
-.horizontal-pills {
-display: flex;
-gap: 8px;
-overflow-x: auto;
-white-space: nowrap;
-padding: 0 14px 10px;
-scrollbar-width: none;
--webkit-overflow-scrolling: touch;
-}
-.horizontal-pills::-webkit-scrollbar { display: none; }
-.pill {
-flex-shrink: 0;
-padding: 8px 16px;
-border-radius: 20px;
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-color: var(--text-muted);
-font-size: 12px;
-font-weight: 700;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-.pill.active-white { background: #ffffff; color: #111; font-weight: 900; border-color: #fff; }
-.pill.active-green { background: var(--accent-green); color: #111; font-weight: 900; border-color: var(--accent-green); }
+    /* كروت الوجبات */
+    .meals-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 14px;
+      min-height: 200px;
+    }
+    .meal-card-talabaty {
+      background: var(--bg-card);
+      border-radius: 18px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      padding: 12px;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      transition: transform 0.15s ease;
+    }
+    .meal-card-talabaty.out-of-stock {
+      opacity: 0.65;
+      border-color: rgba(255, 42, 95, 0.35);
+    }
+    .meal-card-talabaty.out-of-stock .talabaty-img-box img {
+      filter: grayscale(0.9);
+    }
+    .talabaty-img-box {
+      width: 95px;
+      height: 95px;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #1a1c24;
+    }
+    .talabaty-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .soldout-badge-overlay {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(220, 20, 60, 0.95);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 6px;
+      z-index: 5;
+    }
+    .btn-quick-add {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--primary);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .btn-quick-add:active { transform: scale(0.9); }
+    .talabaty-info-box {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .talabaty-title { font-size: 14px; font-weight: 900; color: #ffffff; line-height: 1.3; }
+    .talabaty-desc {
+      font-size: 11px;
+      color: #9aa1b5;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .talabaty-rest-tag { font-size: 10px; color: var(--accent-orange); font-weight: 800; }
+    .talabaty-pricing {
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .talabaty-main-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
+    .talabaty-old-price { font-size: 11px; color: #8c93a8; text-decoration: line-through; font-weight: 700; }
 
-/* كروت الوجبات */
-.meals-grid {
-display: flex;
-flex-direction: column;
-gap: 12px;
-padding: 4px 14px;
-min-height: 200px;
-}
-.meal-card-talabaty {
-background: var(--bg-card);
-border-radius: 18px;
-border: 1px solid var(--border-color);
-display: flex;
-padding: 12px;
-gap: 12px;
-align-items: center;
-position: relative;
-transition: transform 0.15s ease;
-}
-.meal-card-talabaty.out-of-stock {
-opacity: 0.65;
-border-color: rgba(255, 42, 95, 0.35);
-}
-.meal-card-talabaty.out-of-stock .talabaty-img-box img {
-filter: grayscale(0.9);
-}
-.talabaty-img-box {
-width: 95px;
-height: 95px;
-border-radius: 16px;
-position: relative;
-overflow: hidden;
-flex-shrink: 0;
-background: #1a1c24;
-}
-.talabaty-img-box img {
-width: 100%;
-height: 100%;
-object-fit: cover;
-}
-.soldout-badge-overlay {
-position: absolute;
-top: 6px;
-right: 6px;
-background: rgba(220, 20, 60, 0.95);
-color: #fff;
-font-size: 9px;
-font-weight: 900;
-padding: 2px 6px;
-border-radius: 6px;
-z-index: 5;
-}
-.btn-quick-add {
-position: absolute;
-bottom: 6px;
-left: 6px;
-width: 28px;
-height: 28px;
-border-radius: 50%;
-background: #fff;
-color: var(--primary);
-border: none;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 18px;
-font-weight: 900;
-cursor: pointer;
-box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-.btn-quick-add:active { transform: scale(0.9); }
-.talabaty-info-box {
-flex: 1;
-min-width: 0;
-display: flex;
-flex-direction: column;
-gap: 3px;
-}
-.talabaty-title { font-size: 14px; font-weight: 900; color: #ffffff; line-height: 1.3; }
-.talabaty-desc {
-font-size: 11px;
-color: #9aa1b5;
-line-height: 1.4;
-display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
-}
-.talabaty-rest-tag { font-size: 10px; color: var(--accent-orange); font-weight: 800; }
-.talabaty-pricing {
-margin-top: 4px;
-display: flex;
-align-items: center;
-gap: 8px;
-flex-wrap: wrap;
-}
-.talabaty-main-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
-.talabaty-old-price { font-size: 11px; color: #8c93a8; text-decoration: line-through; font-weight: 700; }
-.talabaty-pro-badge {
-background: rgba(156, 39, 176, 0.25);
-border: 1px solid #ab47bc;
-color: #e1bee7;
-padding: 2px 7px;
-border-radius: 6px;
-font-size: 10px;
-font-weight: 800;
-}
+    /* السلة العائمة */
+    .float-cart-bar {
+      position: fixed; 
+      bottom: 75px; 
+      left: 14px; 
+      right: 14px;
+      background: rgba(22, 25, 34, 0.95); 
+      border: 1.5px solid var(--primary);
+      border-radius: 20px; 
+      padding: 11px 16px; 
+      display: none;
+      justify-content: space-between; 
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+    }
+    .float-cart-bar.show { display: flex; }
+    .cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
+    .btn-open-vip-cart {
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      padding: 9px 18px; 
+      border-radius: 14px; 
+      font-weight: 900; 
+      font-size: 13px; 
+      cursor: pointer;
+    }
 
-/* عجلة الحظ */
-.wheel-pointer {
-position: absolute;
-top: -10px;
-left: 50%;
-transform: translateX(-50%);
-font-size: 26px;
-color: #ff2a5f;
-z-index: 10;
-text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-}
+    .cart-drawer-backdrop {
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px); 
+      display: none; 
+      align-items: flex-end;
+      justify-content: center; 
+      z-index: 2500;
+    }
+    .cart-drawer-backdrop.show { display: flex; }
+    .cart-drawer-box {
+      background: #14161f; 
+      width: 100%; 
+      max-width: 520px;
+      border-radius: 26px 26px 0 0; 
+      border: 1.5px solid var(--border-color);
+      border-bottom: none; 
+      max-height: 88vh; 
+      display: flex; 
+      flex-direction: column;
+      animation: slideUp 0.25s ease-out; 
+      padding-bottom: 25px;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .drawer-header {
+      padding: 16px 18px 12px; 
+      display: flex; 
+      justify-content: space-between;
+      align-items: center; 
+      border-bottom: 1px solid var(--border-color);
+    }
+    .drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
+    .btn-close-drawer {
+      background: rgba(255,255,255,0.08); 
+      border: none; 
+      color: #fff;
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .drawer-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
 
-/* نافذة المطابخ */
-.cuisines-drawer-box {
-background: #14161f;
-width: 100%;
-max-width: 500px;
-border-radius: 26px 26px 0 0;
-border: 1.5px solid var(--border-color);
-border-bottom: none;
-max-height: 85vh;
-display: flex;
-flex-direction: column;
-animation: slideUp 0.25s ease-out;
-padding-bottom: 20px;
-}
-.cuisines-header {
-padding: 16px 18px 12px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-border-bottom: 1px solid var(--border-color);
-}
-.cuisines-header-title { font-size: 17px; font-weight: 900; }
-.btn-clear-cuisines {
-background: none;
-border: none;
-color: var(--accent-orange);
-font-size: 13px;
-font-weight: 800;
-cursor: pointer;
-}
-.cuisines-search-wrap { padding: 12px 18px 8px; }
-.cuisines-search-input {
-width: 100%;
-background: #1a1c26;
-border: 1px solid var(--border-color);
-border-radius: 14px;
-padding: 10px 14px;
-color: #fff;
-font-size: 13px;
-outline: none;
-}
-.cuisines-list-body { flex: 1; overflow-y: auto; padding: 4px 18px 12px; }
-.cuisine-row-item {
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 12px 0;
-border-bottom: 1px solid rgba(255,255,255,0.05);
-cursor: pointer;
-}
-.cuisine-row-label { font-size: 14px; font-weight: 800; color: #e0e4ef; }
-.cuisine-checkbox { width: 20px; height: 20px; border-radius: 6px; accent-color: var(--accent-orange); cursor: pointer; }
-.btn-apply-cuisines {
-background: linear-gradient(135deg, #ff5722, #f4511e);
-color: #fff;
-border: none;
-width: 100%;
-padding: 14px;
-border-radius: 16px;
-font-weight: 900;
-font-size: 15px;
-cursor: pointer;
-box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
-}
+    .cart-item-row {
+      background: var(--bg-card); 
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); 
+      padding: 10px 12px; 
+      margin-bottom: 10px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .form-input {
+      width: 100%; 
+      background: #191c25; 
+      border: 1px solid var(--border-color);
+      padding: 12px 14px; 
+      border-radius: 14px; 
+      color: white; 
+      margin-bottom: 9px; 
+      font-size: 13px; 
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--primary); }
+    .btn-gps-loc {
+      width: 100%; 
+      background: rgba(0, 230, 118, 0.12); 
+      color: var(--accent-green);
+      border: 1px dashed var(--accent-green); 
+      border-radius: 14px; 
+      padding: 12px;
+      font-size: 13px; 
+      font-weight: 800; 
+      cursor: pointer; 
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 12px;
+    }
+    .bill-summary-card {
+      background: #0f1015; 
+      border-radius: 14px; 
+      padding: 12px 14px;
+      border: 1px solid var(--border-color); 
+      font-size: 12px; 
+      margin-bottom: 14px;
+    }
+    .bill-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .bill-row.total {
+      border-top: 1px dashed rgba(255,255,255,0.15); 
+      padding-top: 8px; 
+      margin-top: 8px;
+      font-size: 15px; 
+      font-weight: 900; 
+      color: var(--accent-green);
+    }
 
-/* السلة العائمة */
-.float-cart-bar {
-position: fixed;
-bottom: 75px;
-left: 14px;
-right: 14px;
-background: rgba(22, 25, 34, 0.95);
-border: 1.5px solid var(--primary);
-border-radius: 20px;
-padding: 11px 16px;
-display: none;
-justify-content: space-between;
-align-items: center;
-box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-z-index: 1000;
-backdrop-filter: blur(12px);
-}
-.float-cart-bar.show { display: flex; }
-.cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
-.btn-open-vip-cart {
-background: var(--primary);
-color: white;
-border: none;
-padding: 9px 18px;
-border-radius: 14px;
-font-weight: 900;
-font-size: 13px;
-cursor: pointer;
-}
+    .btn-submit-order-wa {
+      width: 100%; 
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white; 
+      border: none; 
+      padding: 14px; 
+      border-radius: 16px;
+      font-weight: 900; 
+      font-size: 15px; 
+      cursor: pointer; 
+      display: flex;
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35); 
+    }
 
-.cart-drawer-backdrop {
-position: fixed;
-inset: 0;
-background: rgba(0, 0, 0, 0.78);
-backdrop-filter: blur(8px);
-display: none;
-align-items: flex-end;
-justify-content: center;
-z-index: 2500;
-}
-.cart-drawer-backdrop.show { display: flex; }
-.cart-drawer-box {
-background: #14161f;
-width: 100%;
-max-width: 520px;
-border-radius: 26px 26px 0 0;
-border: 1.5px solid var(--border-color);
-border-bottom: none;
-max-height: 88vh;
-display: flex;
-flex-direction: column;
-animation: slideUp 0.25s ease-out;
-padding-bottom: 25px;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.drawer-header {
-padding: 16px 18px 12px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-border-bottom: 1px solid var(--border-color);
-}
-.drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
-.btn-close-drawer {
-background: rgba(255,255,255,0.08);
-border: none;
-color: #fff;
-width: 32px;
-height: 32px;
-border-radius: 50%;
-font-size: 16px;
-cursor: pointer;
-}
-.drawer-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+    .modal-backdrop {
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px); 
+      display: none; 
+      align-items: center;
+      justify-content: center; 
+      z-index: 3000; 
+      padding: 14px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-box {
+      background: #161822; 
+      width: 100%; 
+      max-width: 460px;
+      border-radius: 24px; 
+      padding: 20px; 
+      border: 1.5px solid var(--border-color);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
 
-.cart-item-row {
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-border-radius: var(--radius-md);
-padding: 10px 12px;
-margin-bottom: 10px;
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 10px;
-}
-.cart-item-info { flex: 1; min-width: 0; }
-.cart-item-title { font-size: 13px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cart-item-rest { font-size: 11px; color: var(--accent-orange); margin-top: 2px; }
-.cart-item-price { font-size: 13px; font-weight: 900; color: var(--accent-green); margin-top: 3px; }
-.cart-qty-ctrl { display: flex; align-items: center; gap: 8px; }
-.btn-qty {
-width: 28px;
-height: 28px;
-border-radius: 8px;
-border: 1px solid var(--border-color);
-background: var(--bg-elevated);
-color: #fff;
-font-size: 15px;
-font-weight: 900;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.qty-num { font-size: 14px; font-weight: 900; min-width: 18px; text-align: center; }
+    .admin-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      background: var(--bg-main);
+      padding: 5px;
+      border-radius: 16px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .admin-tab-btn.active { background: var(--primary); color: #fff; }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; }
 
-.form-input {
-width: 100%;
-background: #191c25;
-border: 1px solid var(--border-color);
-padding: 12px 14px;
-border-radius: 14px;
-color: white;
-margin-bottom: 9px;
-font-size: 13px;
-outline: none;
-}
-.form-input:focus { border-color: var(--primary); }
-.btn-gps-loc {
-width: 100%;
-background: rgba(0, 230, 118, 0.12);
-color: var(--accent-green);
-border: 1px dashed var(--accent-green);
-border-radius: 14px;
-padding: 12px;
-font-size: 13px;
-font-weight: 800;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-margin-bottom: 12px;
-}
-.bill-summary-card {
-background: #0f1015;
-border-radius: 14px;
-padding: 12px 14px;
-border: 1px solid var(--border-color);
-font-size: 12px;
-margin-bottom: 14px;
-}
-.bill-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.bill-row.total {
-border-top: 1px dashed rgba(255,255,255,0.15);
-padding-top: 8px;
-margin-top: 8px;
-font-size: 15px;
-font-weight: 900;
-color: var(--accent-green);
-}
-
-.btn-submit-order-wa {
-width: 100%;
-background: linear-gradient(135deg, #25D366, #128C7E);
-color: white;
-border: none;
-padding: 14px;
-border-radius: 16px;
-font-weight: 900;
-font-size: 15px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
-}
-
-.modal-backdrop {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.8);
-backdrop-filter: blur(8px);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 3000;
-padding: 14px;
-}
-.modal-backdrop.show { display: flex; }
-.modal-box {
-background: #161822;
-width: 100%;
-max-width: 460px;
-border-radius: 24px;
-padding: 20px;
-border: 1.5px solid var(--border-color);
-max-height: 92vh;
-overflow-y: auto;
-}
-
-.admin-tabs {
-display: flex;
-gap: 6px;
-margin-bottom: 15px;
-background: var(--bg-main);
-padding: 5px;
-border-radius: 16px;
-overflow-x: auto;
-white-space: nowrap;
-scrollbar-width: none;
-}
-.admin-tabs::-webkit-scrollbar { display: none; }
-.admin-tab-btn {
-flex-shrink: 0;
-background: none;
-border: none;
-color: var(--text-muted);
-padding: 8px 12px;
-font-size: 11px;
-font-weight: 800;
-border-radius: 12px;
-cursor: pointer;
-}
-.admin-tab-btn.active { background: var(--primary); color: #fff; }
-.admin-tab-content { display: none; }
-.admin-tab-content.active { display: block; }
-
-/* أزرار قفل وحذف الوجبات */
-.btn-stock-toggle {
-border: none;
-padding: 6px 10px;
-border-radius: 10px;
-font-size: 11px;
-font-weight: 900;
-cursor: pointer;
-display: flex;
-align-items: center;
-gap: 4px;
-transition: all 0.2s ease;
-}
-.btn-stock-toggle.in-stock { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
-.btn-stock-toggle.out-of-stock { background: rgba(255, 42, 95, 0.2); border: 1px solid var(--primary); color: #ff4d6d; }
-
-.admin-stat-grid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 8px;
-margin-bottom: 12px;
-}
-.admin-stat-card {
-background: var(--bg-elevated);
-padding: 10px;
-border-radius: 14px;
-text-align: center;
-border: 1px solid var(--border-color);
-}
-.admin-stat-num { font-size: 16px; font-weight: 900; color: var(--accent-green); }
-.admin-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 700; }
-
-.period-filter-bar {
-display: flex;
-gap: 6px;
-margin-bottom: 12px;
-}
-.period-btn {
-flex: 1;
-background: var(--bg-card);
-border: 1px solid var(--border-color);
-color: var(--text-muted);
-padding: 8px 4px;
-border-radius: 12px;
-font-size: 11px;
-font-weight: 800;
-cursor: pointer;
-text-align: center;
-transition: all 0.2s;
-}
-.period-btn.active {
-background: var(--accent-blue);
-color: #111;
-border-color: var(--accent-blue);
-font-weight: 900;
-}
-</style>
+    .btn-stock-toggle {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .btn-stock-toggle.in-stock { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
+    .btn-stock-toggle.out-of-stock { background: rgba(255, 42, 95, 0.2); border: 1px solid var(--primary); color: #ff4d6d; }
+  </style>
 </head>
 <body>
 
 <div id="toastBox">✨ تم التحديث بنجاح</div>
 
-<!-- شريط الإشعار الحي المباشر الثابت سحابياً -->
+<!-- شريط الإشعار الحي المباشر (ثابت 24 ساعة سحابياً) -->
 <div id="liveAlertBar" class="live-alert-bar" style="display:none;" onclick="handleLiveAlertClick()">
-<div class="live-alert-content">
-<div class="live-alert-badge">🔔 عرض خاص</div>
-<div class="live-alert-text">
-<strong id="liveAlertTitle">...</strong>
-<span id="liveAlertDesc">...</span>
-</div>
-</div>
-<div style="display:flex; align-items:center; gap:8px;">
-<button class="btn-live-alert-action" id="liveAlertBtn">اطلب الآن 👈</button>
-<span class="live-alert-close" onclick="dismissLiveAlert(event)">✕</span>
-</div>
+  <div class="live-alert-content">
+    <div class="live-alert-badge">🔔 عرض خاص</div>
+    <div class="live-alert-text">
+      <strong id="liveAlertTitle">...</strong>
+      <span id="liveAlertDesc">...</span>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button class="btn-live-alert-action" id="liveAlertBtn">اطلب الآن 👈</button>
+    <span class="live-alert-close" onclick="dismissLiveAlert(event)">✕</span>
+  </div>
 </div>
 
-<div class="banner-slider-container" onclick="openDiscountsModal()">
-<div class="banner-slides-track" id="bannerTrack"></div>
-<div class="banner-dots" id="bannerDots"></div>
+<div class="banner-slider-container">
+  <div class="banner-slides-track" id="bannerTrack"></div>
+  <div class="banner-dots" id="bannerDots"></div>
 </div>
 
 <div class="control-header">
-<div class="brand-pill" onclick="handleAdminDoubleTap()">
-<span class="brand-badge">Wj</span> وجباتي
-</div>
-<div class="header-actions">
-<button class="btn-wheel-header" id="btnWheelTrigger" onclick="openWheelModal()">🎡 الحظ</button>
-<button class="btn-cuisines-filter" onclick="openCuisinesModal()">المطابخ 🍕</button>
-<button class="btn-discount" onclick="openDiscountsModal()">خصومات 🏷️</button>
-<button class="btn-cart-top" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
-</div>
+  <div class="brand-pill" onclick="handleAdminDoubleTap()">
+    <span class="brand-badge">Wj</span> وجباتي
+  </div>
+  <div class="header-actions">
+    <button class="btn-discount" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
+  </div>
 </div>
 
 <div class="search-wrapper">
-<div class="search-input-box">
-<input type="text" id="searchInput" placeholder="ابحث عن اسم المطعم أو الوجبة أو المكونات..." oninput="renderMeals()">
-</div>
-<button class="btn-search" onclick="renderMeals()">بحث</button>
+  <div class="search-input-box">
+    <input type="text" id="searchInput" placeholder="ابحث عن اسم المطعم أو الوجبة أو المكونات..." oninput="renderMeals()">
+  </div>
+  <button class="btn-search" onclick="renderMeals()">بحث</button>
 </div>
 
 <div class="zones-bar">
-<div class="zone-chip active" onclick="setZone('الكل', this)">كل بغداد / All</div>
-<div class="zone-chip" onclick="setZone('الكرخ', this)">الكرخ / Karkh</div>
-<div class="zone-chip" onclick="setZone('الرصافة', this)">الرصافة / Rusafa</div>
+  <div class="zone-chip active" onclick="setZone('الكل', this)">كل بغداد / All</div>
+  <div class="zone-chip" onclick="setZone('الكرخ', this)">الكرخ / Karkh</div>
+  <div class="zone-chip" onclick="setZone('الرصافة', this)">الرصافة / Rusafa</div>
 </div>
 
 <div class="horizontal-pills" id="restaurantsBar"></div>
 <div class="horizontal-pills" id="categoriesBar"></div>
 
-<!-- شبكة الوجبات بتصميم طلباتي الحديث -->
 <div class="meals-grid" id="mealsGrid"></div>
 
-<!-- شريط السلة العائم -->
 <div class="float-cart-bar" id="floatCartBar">
-<div>
-<span id="cartTotalItems" style="font-weight:900;">0</span> وجبات |
-<span class="cart-total-badge" id="cartTotalSum">0 د.ع</span>
-</div>
-<button class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
-</div>
-
-<!-- نافذة عجلة الحظ (Lucky Wheel Modal) -->
-<div class="modal-backdrop" id="wheelModal" onclick="closeIfOutsideWheel(event)">
-<div class="modal-box" style="max-width:350px; text-align:center;">
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-<h3 style="margin:0; font-size:16px;">🎡 عجلة الحظ والهدايا</h3>
-<span style="font-size:20px; cursor:pointer;" onclick="closeWheelModal()">✕</span>
-</div>
-<p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;" id="wheelSubtext">
-دور العجلة واربح جائزتك الفورية مع طلبك من <strong id="wheelRestBadge" style="color:var(--accent-orange);">مطعم سندريلا</strong>!
-</p>
-
-<div style="position:relative; width:260px; height:260px; margin:0 auto 15px;">
-<div class="wheel-pointer">▼</div>
-<canvas id="wheelCanvas" width="260" height="260" style="border-radius:50%; box-shadow:0 0 25px rgba(255,42,95,0.45);"></canvas>
-</div>
-
-<button type="button" class="btn-discount" id="btnSpinWheel" style="width:100%; padding:13px; font-weight:900; font-size:14px; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111;" onclick="spinWheel()">
-🎯 تدوير العجلة الآن!
-</button>
-
-<div id="wheelResultBox" style="display:none; margin-top:12px; padding:10px; border-radius:12px; background:rgba(0,230,118,0.15); border:1px solid var(--accent-green); font-size:12px; font-weight:800; line-height:1.5;"></div>
-</div>
-</div>
-
-<!-- نافذة تصنيفات المطابخ -->
-<div class="cart-drawer-backdrop" id="cuisinesModal" onclick="closeIfOutsideCuisines(event)">
-<div class="cuisines-drawer-box">
-<div class="cuisines-header">
-<div style="display:flex; align-items:center; gap:8px;">
-<span style="font-size:20px; cursor:pointer;" onclick="closeCuisinesModal()">✕</span>
-<span class="cuisines-header-title">المطابخ والتصنيفات</span>
-</div>
-<button class="btn-clear-cuisines" onclick="clearAllSelectedCuisines()">حذف الكل</button>
-</div>
-
-<div class="cuisines-search-wrap">
-<input type="text" id="cuisineFilterSearch" class="cuisines-search-input" placeholder="🔍 ابحث عن المطابخ (وجبات التوفير، عراقي، برجر...)" oninput="filterCuisinesList()">
-</div>
-
-<div class="cuisines-list-body" id="cuisinesCheckList"></div>
-
-<div style="padding:10px 18px 0;">
-<button class="btn-apply-cuisines" onclick="applyCuisinesFilter()">تطبيق الفلتر</button>
-</div>
-</div>
+  <div>
+    <span id="cartTotalItems" style="font-weight:900;">0</span> وجبات |
+    <span class="cart-total-badge" id="cartTotalSum">0 د.ع</span>
+  </div>
+  <button class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
 </div>
 
 <!-- سلة المشتريات -->
 <div class="cart-drawer-backdrop" id="cartDrawer" onclick="closeIfOutsideDrawer(event)">
-<div class="cart-drawer-box">
-<div class="drawer-header">
-<h3 class="drawer-title">🛒 سلة وجباتي</h3>
-<button class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
+  <div class="cart-drawer-box">
+    <div class="drawer-header">
+      <h3 class="drawer-title">🛒 سلة وجباتي</h3>
+      <button class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div id="drawerItemsList" style="margin-bottom:14px;"></div>
+
+      <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+        <button type="button" onclick="confirmClearCart()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:800; cursor:pointer;">🗑️ تفريغ السلة بالكامل</button>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" required>
+        <input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" required>
+        <input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" required>
+        
+        <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك:</label>
+        <select id="custZoneSelect" class="form-input" onchange="updateCartUI(); renderCartDrawerContent();">
+          <option value="الكرخ">جانب الكرخ</option>
+          <option value="الرصافة">جانب الرصافة</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">📍 تثبيت موقعي بالخريطة بدقة فيت (GPS)</button>
+      <div id="gpsStatusText" style="font-size:12px; margin:-6px 0 12px 4px; font-weight:800;"></div>
+
+      <div class="bill-summary-card" id="billSummaryCard"></div>
+
+      <button type="button" class="btn-submit-order-wa" id="submitBtn" onclick="submitFullOrder()">💬 إرسال الطلب لواتساب المطعم مباشرة</button>
+    </div>
+  </div>
 </div>
 
-<div class="drawer-body">
-<div id="drawerItemsList" style="margin-bottom:14px;"></div>
-
-<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-<button type="button" onclick="confirmClearCart()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:800; cursor:pointer;">🗑️ تفريغ السلة بالكامل</button>
-</div>
-
-<div style="margin-bottom:12px;">
-<input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" oninput="saveCustomerData()" required>
-<input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" oninput="saveCustomerData()" required>
-<input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" oninput="saveCustomerData()" required>
-<!-- اختيار منطقة التوصيل لحساب أجور المطعم المحددة -->
-<label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك (لحساب كلفة التوصيل الدقيقة):</label>
-<select id="custZoneSelect" class="form-input" onchange="saveCustomerData(); updateCartUI(); renderCartDrawerContent();">
-<option value="الكرخ">جانب الكرخ</option>
-<option value="الرصافة">جانب الرصافة</option>
-</select>
-</div>
-
-<button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">
-📍 تثبيت موقعي بالخريطة بدقة فيت (GPS)
-</button>
-<div id="gpsStatusText" style="font-size:12px; margin:-6px 0 12px 4px; font-weight:800;"></div>
-
-<div class="bill-summary-card" id="billSummaryCard"></div>
-
-<button type="button" class="btn-submit-order-wa" id="submitBtn" onclick="submitFullOrder()">
-💬 إرسال الطلب لواتساب المطعم مباشرة
-</button>
-</div>
-</div>
-</div>
-
-<!-- نافذة العروض والخصومات -->
-<div class="modal-backdrop" id="discountsModal" onclick="closeIfOutsideDiscounts(event)">
-<div class="modal-box" style="max-width:340px;">
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-<h4 style="margin:0; font-size:16px;">🏷️ العروض والتخفيضات الفورية</h4>
-<span style="font-size:20px; cursor:pointer;" onclick="closeDiscountsModal()">✕</span>
-</div>
-<div id="couponModalContent" style="padding:10px 0; text-align:center;"></div>
-<button type="button" class="btn-discount" style="width:100%; margin-top:10px;" onclick="closeDiscountsModal()">إغلاق</button>
-</div>
-</div>
-
-<!-- شاشة طلب الرمز السري للدخول (تتفرغ تلقائياً للأمان) -->
+<!-- شاشة طلب الرمز السري (تتفرغ وتصبح نظيفة تماماً عند كل فتح أو إغلاق) -->
 <div class="modal-backdrop" id="adminPinModal" onclick="closeIfOutsideAdminPin(event)">
-<div class="modal-box" style="max-width:320px; text-align:center;">
-<h3 style="margin-top:0; font-size:16px;">🔐 دخول الإدارة والمطاعم</h3>
-<p style="font-size:12px
+  <div class="modal-box" style="max-width:320px; text-align:center;">
+    <h3 style="margin-top:0; font-size:16px;">🔐 دخول الإدارة والمطاعم</h3>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">أدخل الرمز السري الخاص بك للمتابعة</p>
+    <input type="password" id="adminPinInput" class="form-input" placeholder="••••" maxlength="6" style="text-align:center; font-size:22px; letter-spacing:5px;" inputmode="numeric" value="">
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-discount" style="flex:1; background:#333; color:#fff;" onclick="closeAdminPin()">إلغاء</button>
+      <button type="button" class="btn-discount" style="flex:1;" onclick="checkAdminPin()">دخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- لوحة الإدارة العامة الشاملة -->
+<div class="modal-backdrop" id="adminPanelModal" onclick="closeIfOutsideAdminPanel(event)">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+      <h3 style="margin:0; font-size:16px; color:#fff;">⚙️ إدارة وجباتي السحابية VIP</h3>
+      <span style="font-size:20px; cursor:pointer; color:var(--text-muted);" onclick="closeAdminPanel()">✕</span>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('flashAlertTab', this)">📢 الإشعار الحي</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ تعديل وقفل وحذف الوجبات</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 إدارة ومطعم جديد</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">🖼️ البنر العلوي</button>
+    </div>
+
+    <!-- 📢 الإشعار الحي -->
+    <div id="flashAlertTab" class="admin-tab-content active">
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">إرسال شريط إشعار تفاعلي يظل ظاهراً للزبائن بشكل دائم حتى تقوم بإلغائه يدوياً:</p>
+      
+      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+        <label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">اختر المطعم المستهدف:</label>
+        <select id="admAlertRestSelect" class="form-input"></select>
+
+        <label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">عنوان الإشعار:</label>
+        <input type="text" id="admAlertTitle" class="form-input" placeholder="مثال: 🔥 عرض ناري وتخفيض فوري!">
+
+        <label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">نص التخفيض والتفاصيل:</label>
+        <input type="text" id="admAlertBody" class="form-input" placeholder="مثال: خصم 1,000 د.ع عند الطلب الآن لفترة محدودة">
+
+        <label style="font-size:12px; font-weight:800; display:block; margin-top:6px;">حالة الإشعار:</label>
+        <select id="admAlertStatus" class="form-input">
+          <option value="1">مفعّل ويظهر للجميع ✅</option>
+          <option value="0">إيقاف وتعطيل الإشعار ❌</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="btn-discount" style="flex:1; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveFlashAlert()">💾 حفظ وتثبيت الإشعار سحابياً</button>
+        <button type="button" onclick="clearFlashAlert()" style="background:#4a1525; color:#ff4d6d; border:none; padding:0 14px; border-radius:14px; font-size:11px; font-weight:800; cursor:pointer;">إلغاء الإشعار</button>
+      </div>
+    </div>
+
+    <!-- ✏️ تعديل وقفل وحذف الوجبات -->
+    <div id="editMealsTab" class="admin-tab-content">
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">تعديل الأسعار، قفل الوجبات المنتهية، أو حذفها نهائياً:</p>
+      <input type="text" id="quickSearchMeal" class="form-input" placeholder="ابحث باسم الوجبة أو المطعم..." oninput="filterQuickMeals()">
+      <div id="quickMealsList" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+
+    <!-- ➕ إضافة وجبة جديدة -->
+    <div id="addMealTab" class="admin-tab-content">
+      <input type="text" id="newMealName" class="form-input" placeholder="اسم الوجبة (مثال: وجبة كرسبي توفير)">
+      <input type="text" id="newMealDesc" class="form-input" placeholder="مكونات الوجبة">
+      <select id="newMealRest" class="form-input"></select>
+      <input type="text" id="newMealCatCustom" class="form-input" placeholder="التصنيف (مثال: وجبات التوفير)">
+      <input type="number" id="newMealPrice" class="form-input" placeholder="السعر الأصلي (د.ع)">
+      <input type="number" id="newMealSavingPrice" class="form-input" placeholder="سعر التوفير المخفض (اختياري)">
+      <select id="newMealZone" class="form-input"><option value="الكرخ">الكرخ</option><option value="الرصافة">الرصافة</option></select>
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="addNewMealLocally()">➕ إضافة وحفظ الوجبة بالسحابة</button>
+    </div>
+
+    <!-- 🏪 إضافة وإدارة المطاعم (مع حذف المطعم ومحتوياته بالكامل) -->
+    <div id="addRestTab" class="admin-tab-content">
+      <input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد">
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900; margin-bottom:14px;" onclick="addNewRestaurant()">➕ إضافة المطعم الجديد</button>
+      
+      <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">قائمة المطاعم المسجلة (حذف المطعم سيحذفه مع محتوياته بالكامل):</div>
+      <div id="restaurantsAdminList" style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
+    </div>
+
+    <!-- 🖼️ البنر العلوي -->
+    <div id="bannerTab" class="admin-tab-content">
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">رابط صورة البنر العلوي (يتم عرض صورة افتراضية جميلة إذا تُرك فارغاً):</p>
+      <input type="text" id="admB1Title" class="form-input" placeholder="عنوان البنر">
+      <input type="text" id="admB1Desc" class="form-input" placeholder="وصف البنر">
+      <input type="url" id="admB1Img" class="form-input" placeholder="رابط صورة البنر المباشر">
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111; font-weight:900;" onclick="saveAdminBanners()">💾 حفظ وتحديث البنر</button>
+    </div>
+
+    <button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
+  </div>
+</div>
+
+<script>
+const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
+const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
+const FIREBASE_RESTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/restaurants.json";
+const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/app_banners.json";
+
+let currentFlashAlert = null;
+let allMeals = [];
+let RESTS = ["مطعم سندريلا", "Riz", "اهل الكرم", "بوراك", "بوكس بركر", "جكن عمو ناجي", "جيكي بركر", "دجاج الباشا الشهير", "زعتر وزيتون", "شاورما ابو العبد", "صاج البديع"];
+let appBanners = [{ title: "🍔 وجباتي VIP", desc: "أقوى المطاعم وأشهى عروض التوفير", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" }];
+let cart = [];
+let selectedZone = "الكل";
+let selectedRest = "الكل";
+let selectedCat = "الكل";
+
+function money(num) { return Number(num || 0).toLocaleString('ar-IQ') + " د.ع"; }
+function showToast(msg) {
+  const t = document.getElementById("toastBox");
+  if (!t) return;
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function renderBanners() {
+  const track = document.getElementById("bannerTrack");
+  const dotsBox = document.getElementById("bannerDots");
+  if (!track || !dotsBox) return;
+
+  if (!appBanners || appBanners.length === 0 || !appBanners[0].img) {
+    appBanners = [{ title: "🍔 وجباتي VIP", desc: "أقوى المطاعم وأشهى عروض التوفير", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" }];
+  }
+
+  track.innerHTML = appBanners.map(b => `
+    <div class="banner-slide">
+      <img src="${b.img}" alt="banner" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200'">
+      <div class="banner-overlay">
+        <h2>${b.title || 'وجباتي VIP'}</h2>
+        <p>${b.desc || 'أطلب الآن بأفضل الأسعار'}</p>
+      </div>
+    </div>
+  `).join('');
+  dotsBox.innerHTML = appBanners.map((_, i) => `<div class="banner-dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+}
+
+function renderMeals() {
+  const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+  const grid = document.getElementById("mealsGrid");
+  if (!grid) return;
+
+  const filtered = allMeals.filter(m => {
+    const matchZone = selectedZone === "الكل" || m.zone === selectedZone;
+    const matchRest = selectedRest === "الكل" || (m.rest && m.rest.toLowerCase().trim() === selectedRest.toLowerCase().trim());
+    const matchCat = selectedCat === "الكل" || m.cat === selectedCat;
+    const matchQuery = !query || m.name.toLowerCase().includes(query) || (m.rest && m.rest.toLowerCase().includes(query));
+    return matchZone && matchRest && matchCat && matchQuery;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px;">لا توجد وجبات مطابقة</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(m => {
+    const isAvailable = (m.available !== false);
+    const hasSaving = (m.savingPrice && Number(m.savingPrice) > 0 && Number(m.savingPrice) < Number(m.price));
+    return `
+      <div class="meal-card-talabaty ${!isAvailable ? 'out-of-stock' : ''}">
+        <div class="talabaty-img-box">
+          <img src="${m.img || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600'}" alt="">
+          ${!isAvailable ? `<span class="soldout-badge-overlay">نفدت 🚫</span>` : ''}
+          ${isAvailable ? `<button class="btn-quick-add" onclick="addToCart('${m.id}')">+</button>` : ''}
+        </div>
+        <div class="talabaty-info-box">
+          <div class="talabaty-title">${m.name}</div>
+          <div class="talabaty-desc">${m.desc || 'وجبة شهية ومميزة'}</div>
+          <div class="talabaty-rest-tag">🏪 ${m.rest}</div>
+          <div class="talabaty-pricing">
+            ${hasSaving ? `<span class="talabaty-main-price">${money(m.savingPrice)}</span><span class="talabaty-old-price">${money(m.price)}</span>` : `<span class="talabaty-main-price">${money(m.price)}</span>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildRestaurantsBar() {
+  const rests = ["الكل", ...new Set([...RESTS, ...allMeals.map(m => m.rest)])];
+  const rBar = document.getElementById("restaurantsBar");
+  if (!rBar) return;
+  rBar.innerHTML = rests.map(r => `<div class="pill ${r === selectedRest ? 'active-white' : ''}" onclick="setRestaurant('${r}', this)">${r === 'الكل' ? 'كل المطاعم' : r}</div>`).join('');
+  
+  const selects = ['admAlertRestSelect', 'newMealRest'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) sel.innerHTML = RESTS.map(r => `<option value="${r}">${r}</option>`).join('');
+  });
+  renderRestaurantsAdminList();
+}
+
+function buildCategoriesBar() {
+  const cBar = document.getElementById("categoriesBar");
+  if (!cBar) return;
+  const cats = ["الكل", ...new Set(allMeals.map(m => m.cat).filter(Boolean))];
+  cBar.innerHTML = cats.map(c => `<div class="pill ${c === selectedCat ? 'active-green' : ''}" onclick="setCategory('${c}', this)">${c === 'الكل' ? 'كل الأصناف' : c}</div>`).join('');
+}
+
+function setZone(zone, el) {
+  selectedZone = zone;
+  document.querySelectorAll('.zone-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderMeals();
+}
+
+function setRestaurant(rest, el) {
+  selectedRest = rest;
+  document.querySelectorAll('#restaurantsBar .pill').forEach(c => c.classList.remove('active-white'));
+  if (el) el.classList.add('active-white');
+  renderMeals();
+}
+
+function setCategory(cat, el) {
+  selectedCat = cat;
+  document.querySelectorAll('#categoriesBar .pill').forEach(c => c.classList.remove('active-green'));
+  el.classList.add('active-green');
+  renderMeals();
+}
+
+function addToCart(mealId) {
+  const meal = allMeals.find(item => String(item.id) === String(mealId));
+  if (!meal || meal.available === false) return;
+  const finalPrice = meal.savingPrice || meal.price;
+  const existing = cart.find(item => String(item.id) === String(mealId));
+  if (existing) existing.qty += 1;
+  else cart.push({ ...meal, actualPrice: finalPrice, qty: 1 });
+  updateCartUI();
+  showToast(`🍔 أضيفت: ${meal.name}`);
+}
+
+function updateCartUI() {
+  const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
+  document.getElementById("cartCountTop").innerText = totalCount;
+  document.getElementById("cartTotalItems").innerText = totalCount;
+  document.getElementById("cartTotalSum").innerText = money(subtotal);
+  const bar = document.getElementById("floatCartBar");
+  if (bar) bar.style.display = totalCount > 0 ? "flex" : "none";
+}
+
+function openCartDrawer() {
+  if (cart.length === 0) { showToast("⚠️ السلة فارغة!"); return; }
+  renderCartDrawerContent();
+  document.getElementById("cartDrawer").classList.add("show");
+}
+function closeCartDrawer() { document.getElementById("cartDrawer").classList.remove("show"); }
+function closeIfOutsideDrawer(e) { if (e.target.id === 'cartDrawer') closeCartDrawer(); }
+
+function renderCartDrawerContent() {
+  const box = document.getElementById("drawerItemsList");
+  const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
+  if (box) box.innerHTML = cart.map(i => `<div class="cart-item-row"><div class="cart-item-info"><strong>${i.name}</strong><br>${money(i.actualPrice * i.qty)}</div><span>${i.qty}x</span></div>`).join('');
+  const bill = document.getElementById("billSummaryCard");
+  if (bill) bill.innerHTML = `<div class="bill-row total"><span>المجموع الكلي:</span><strong>${money(subtotal)}</strong></div>`;
+}
+
+function submitFullOrder() {
+  const name = document.getElementById("custName").value.trim();
+  const phone = document.getElementById("custPhone").value.trim();
+  if (!name || !phone) { alert("أدخل الاسم ورقم الهاتف!"); return; }
+  cart = [];
+  updateCartUI();
+  closeCartDrawer();
+  showToast("✅ تم إرسال الطلب بنجاح");
+}
+
+let lastTap = 0;
+function handleAdminDoubleTap() {
+  const now = Date.now();
+  if (now - lastTap < 500) {
+    const pinInput = document.getElementById("adminPinInput");
+    if (pinInput) pinInput.value = "";
+    document.getElementById("adminPinModal").classList.add("show");
+  }
+  lastTap = now;
+}
+
+function closeAdminPin() {
+  const pinInput = document.getElementById("adminPinInput");
+  if (pinInput) pinInput.value = "";
+  document.getElementById("adminPinModal").classList.remove("show");
+}
+
+function closeIfOutsideAdminPin(e) {
+  if (e.target.id === 'adminPinModal') {
+    closeAdminPin();
+  }
+}
+
+function checkAdminPin() {
+  const enteredPin = document.getElementById("adminPinInput").value.trim();
+  closeAdminPin();
+  if (enteredPin === "198722") {
+    openAdminPanel();
+    showToast("👑 مرحباً بك في لوحة الإدارة");
+    return;
+  }
+  alert("الرمز غير صحيح!");
+}
+
+function openAdminPanel() {
+  document.getElementById("adminPanelModal").classList.add("show");
+  filterQuickMeals();
+  renderRestaurantsAdminList();
+}
+function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
+function closeIfOutsideAdminPanel(e) { if (e.target.id === 'adminPanelModal') closeAdminPanel(); }
+
+function switchAdminTab(tabId, btn) {
+  document.querySelectorAll('#adminPanelModal .admin-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#adminPanelModal .admin-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  if (tabId === 'editMealsTab') filterQuickMeals();
+  if (tabId === 'addRestTab') renderRestaurantsAdminList();
+}
+
+function saveFlashAlert() {
+  const rest = document.getElementById("admAlertRestSelect")?.value || RESTS[0];
+  const title = document.getElementById("admAlertTitle")?.value.trim() || "";
+  const body = document.getElementById("admAlertBody")?.value.trim() || "";
+  const active = document.getElementById("admAlertStatus")?.value === "1";
+
+  currentFlashAlert = { active, title, body, rest };
+  fetch(FIREBASE_FLASH_ALERT_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(currentFlashAlert)
+  });
+  updateLiveAlertUI();
+  showToast("📢 تم حفظ وتثبيت الإشعار بنجاح");
+}
+
+function clearFlashAlert() {
+  currentFlashAlert = { active: false, title: "", body: "", rest: "" };
+  fetch(FIREBASE_FLASH_ALERT_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({})
+  });
+  updateLiveAlertUI();
+  showToast("🗑️ تم إلغاء الإشعار الحي");
+}
+
+function updateLiveAlertUI() {
+  const bar = document.getElementById("liveAlertBar");
+  if (!bar) return;
+  if (currentFlashAlert && currentFlashAlert.active && currentFlashAlert.title) {
+    document.getElementById("liveAlertTitle").innerText = currentFlashAlert.title;
+    document.getElementById("liveAlertDesc").innerText = currentFlashAlert.body || "";
+    bar.style.display = "flex";
+  } else {
+    bar.style.display = "none";
+  }
+}
+function dismissLiveAlert(e) { e.stopPropagation(); document.getElementById("liveAlertBar").style.display = "none"; }
+
+function toggleMealAvailability(mealId) {
+  const item = allMeals.find(m => String(m.id) === String(mealId));
+  if (!item) return;
+  item.available = (item.available === false) ? true : false;
+  syncMealsToCloud();
+  renderMeals();
+  filterQuickMeals();
+  showToast(item.available ? `✅ متوفرة: ${item.name}` : `🚫 مقفولة: ${item.name}`);
+}
+
+function deleteMeal(mealId) {
+  const item = allMeals.find(m => String(m.id) === String(mealId));
+  if (!item) return;
+  if (confirm(`هل أنت متأكد من حذف الوجبة (${item.name}) نهائياً؟`)) {
+    allMeals = allMeals.filter(m => String(m.id) !== String(mealId));
+    syncMealsToCloud();
+    renderMeals();
+    filterQuickMeals();
+    showToast(`🗑️ تم الحذف: ${item.name}`);
+  }
+}
+
+function filterQuickMeals() {
+  const q = (document.getElementById("quickSearchMeal")?.value || "").toLowerCase().trim();
+  const box = document.getElementById("quickMealsList");
+  if (!box) return;
+  const filtered = allMeals.filter(m => !q || m.name.toLowerCase().includes(q) || m.rest.toLowerCase().includes(q)).slice(0, 40);
+  box.innerHTML = filtered.map(m => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #292d38; font-size:11px;">
+      <div><strong>${m.name}</strong> (${m.rest})<br><span style="color:var(--accent-green);">${money(m.price)}</span></div>
+      <div style="display:flex; gap:4px;">
+        <button type="button" class="btn-stock-toggle ${m.available !== false ? 'in-stock' : 'out-of-stock'}" onclick="toggleMealAvailability('${m.id}')">
+          ${m.available !== false ? 'متوفرة ✅' : 'قفل ❌'}
+        </button>
+        <button type="button" onclick="deleteMeal('${m.id}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:5px 7px; border-radius:8px; cursor:pointer;">حذف 🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addNewMealLocally() {
+  const name = document.getElementById("newMealName")?.value.trim();
+  const desc = document.getElementById("newMealDesc")?.value.trim();
+  const rest = document.getElementById("newMealRest")?.value;
+  const cat = document.getElementById("newMealCatCustom")?.value.trim() || "وجبات سريعة";
+  const price = Number(document.getElementById("newMealPrice")?.value) || 0;
+  const savingPrice = Number(document.getElementById("newMealSavingPrice")?.value) || 0;
+  const zone = document.getElementById("newMealZone")?.value || "الكرخ";
+
+  if (!name || price <= 0) { alert("أدخل اسم الوجبة والسعر بشكل صحيح!"); return; }
+  
+  const newMeal = { id: Date.now(), name, desc, rest, cat, price, savingPrice, zone, available: true };
+  allMeals.unshift(newMeal);
+  syncMealsToCloud();
+  renderMeals();
+  buildCategoriesBar();
+  showToast("➕ تمت إضافة الوجبة بنجاح");
+  document.getElementById("newMealName").value = "";
+  document.getElementById("newMealPrice").value = "";
+  document.getElementById("newMealSavingPrice").value = "";
+}
+
+function syncMealsToCloud() {
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals)
+  });
+}
+
+function addNewRestaurant() {
+  const name = document.getElementById("newRestName")?.value.trim();
+  if (!name) { alert("أدخل اسم المطعم!"); return; }
+  if (RESTS.includes(name)) { alert("المطعم موجود مسبقاً!"); return; }
+  
+  RESTS.push(name);
+  syncRestaurantsToCloud();
+  buildRestaurantsBar();
+  renderRestaurantsAdminList();
+  showToast(`🏪 تم إضافة المطعم: ${name}`);
+  document.getElementById("newRestName").value = "";
+}
+
+// ميزة حذف المطعم مع كافة محتوياته (وجباته) بالكامل دفعة واحدة
+function deleteRestaurant(restName) {
+  if (confirm(`⚠️ تنبيه: هل أنت متأكد من حذف المطعم (${restName}) مع كافة وجباته ومحتوياته نهائياً؟`)) {
+    // 1. حذف المطعم من قائمة المطاعم
+    RESTS = RESTS.filter(r => r.toLowerCase().trim() !== restName.toLowerCase().trim());
+    syncRestaurantsToCloud();
+
+    // 2. حذف كافة الوجبات التابعة لهذا المطعم من قاعدة البيانات
+    allMeals = allMeals.filter(m => m.rest && m.rest.toLowerCase().trim() !== restName.toLowerCase().trim());
+    syncMealsToCloud();
+
+    // 3. تحديث واجهة المستخدم فوراً
+    buildRestaurantsBar();
+    buildCategoriesBar();
+    renderMeals();
+    renderRestaurantsAdminList();
+    filterQuickMeals();
+
+    showToast(`🗑️ تم حذف المطعم (${restName}) ومحتوياته بالكامل`);
+  }
+}
+
+function renderRestaurantsAdminList() {
+  const box = document.getElementById("restaurantsAdminList");
+  if (!box) return;
+  box.innerHTML = RESTS.map(r => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #292d38; font-size:12px;">
+      <span>🏪 ${r}</span>
+      <button type="button" onclick="deleteRestaurant('${r}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">حذف مع محتوياته 🗑️</button>
+    </div>
+  `).join('');
+}
+
+function syncRestaurantsToCloud() {
+  fetch(FIREBASE_RESTS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(RESTS)
+  });
+}
+
+function saveAdminBanners() {
+  const title = document.getElementById("admB1Title")?.value.trim();
+  const desc = document.getElementById("admB1Desc")?.value.trim();
+  const img = document.getElementById("admB1Img")?.value.trim();
+  if (img) {
+    appBanners = [{ title: title || "وجباتي VIP", desc: desc || "أقوى العروض", img }];
+    fetch(FIREBASE_BANNERS_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appBanners)
+    });
+    renderBanners();
+    showToast("🖼️ تم تحديث البنر بنجاح");
+  }
+}
+
+async function loadInitialData() {
+  try {
+    const resAlert = await fetch(FIREBASE_FLASH_ALERT_URL);
+    const dataAlert = await resAlert.json();
+    if (dataAlert && typeof dataAlert === 'object') {
+      currentFlashAlert = dataAlert;
+      updateLiveAlertUI();
+    }
+
+    const resMeals = await fetch(FIREBASE_MEALS_URL);
+    const dataMeals = await resMeals.json();
+    if (Array.isArray(dataMeals)) {
+      allMeals = dataMeals;
+    }
+
+    const resRests = await fetch(FIREBASE_RESTS_URL);
+    const dataRests = await resRests.json();
+    if (Array.isArray(dataRests)) {
+      RESTS = dataRests;
+    }
+
+    const resBanners = await fetch(FIREBASE_BANNERS_URL);
+    const dataBanners = await resBanners.json();
+    if (Array.isArray(dataBanners) && dataBanners.length > 0) {
+      appBanners = dataBanners;
+    }
+  } catch(e) {}
+
+  renderBanners();
+  buildRestaurantsBar();
+  buildCategoriesBar();
+  renderMeals();
+}
+
+window.onload = () => {
+  loadInitialData();
+};
+</script>
+</body>
+</html>
