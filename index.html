@@ -1,551 +1,576 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>وجباتي - Wajabaty VIP</title>
+<style>
+:root {
+--bg-main: #0b0c10;
+--bg-card: #14161d;
+--bg-elevated: #1e212b;
+--primary: #ff2a5f;
+--primary-glow: rgba(255, 42, 95, 0.4);
+--accent-orange: #ff5722;
+--accent-green: #00e676;
+--accent-blue: #00b0ff;
+--accent-purple: #9c27b0;
+--text-main: #ffffff;
+--text-muted: #8c93a8;
+--border-color: rgba(255, 255, 255, 0.08);
+--radius-lg: 20px;
+--radius-md: 14px;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  padding-bottom: 150px;
-  user-select: none;
-  overflow-x: hidden;
+background-color: var(--bg-main);
+color: var(--text-main);
+font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+padding-bottom: 150px;
+user-select: none;
+overflow-x: hidden;
 }
 
 #toastBox {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  background: rgba(20, 22, 29, 0.95);
-  border: 1px solid var(--accent-green);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 800;
-  z-index: 9999;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+position: fixed;
+top: 20px;
+left: 50%;
+transform: translateX(-50%) translateY(-100px);
+background: rgba(20, 22, 29, 0.95);
+border: 1px solid var(--accent-green);
+color: #fff;
+padding: 12px 24px;
+border-radius: 30px;
+font-size: 13px;
+font-weight: 800;
+z-index: 9999;
+box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+pointer-events: none;
+display: flex;
+align-items: center;
+gap: 8px;
 }
 #toastBox.show { transform: translateX(-50%) translateY(0); }
 
 .live-alert-bar {
-  margin: 10px 14px 6px;
-  background: linear-gradient(135deg, rgba(255, 42, 95, 0.95), rgba(255, 152, 0, 0.95));
-  border-radius: 16px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  box-shadow: 0 6px 20px rgba(255, 42, 95, 0.35);
-  cursor: pointer;
-  animation: pulseGlow 2.2s infinite alternate;
-  position: relative;
-  z-index: 500;
+margin: 10px 14px 6px;
+background: linear-gradient(135deg, rgba(255, 42, 95, 0.95), rgba(255, 152, 0, 0.95));
+border-radius: 16px;
+padding: 10px 14px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+box-shadow: 0 6px 20px rgba(255, 42, 95, 0.35);
+cursor: pointer;
+animation: pulseGlow 2.2s infinite alternate;
+position: relative;
+z-index: 500;
 }
 @keyframes pulseGlow {
-  from { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 42, 95, 0.3); }
-  to { transform: scale(1.015); box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5); }
+from { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 42, 95, 0.3); }
+to { transform: scale(1.015); box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5); }
 }
 .live-alert-content { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
 .live-alert-badge {
-  background: #fff;
-  color: var(--primary);
-  font-weight: 900;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 8px;
-  flex-shrink: 0;
+background: #fff;
+color: var(--primary);
+font-weight: 900;
+font-size: 11px;
+padding: 3px 8px;
+border-radius: 8px;
+flex-shrink: 0;
 }
 .live-alert-text { display: flex; flex-direction: column; min-width: 0; }
 .live-alert-text strong { font-size: 12px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .live-alert-text span { font-size: 11px; color: #ffe6ec; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
 .btn-live-alert-action {
-  background: #111;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 900;
-  cursor: pointer;
-  flex-shrink: 0;
+background: #111;
+color: #fff;
+border: none;
+padding: 6px 12px;
+border-radius: 10px;
+font-size: 11px;
+font-weight: 900;
+cursor: pointer;
+flex-shrink: 0;
 }
 .live-alert-close {
-  color: rgba(255,255,255,0.85);
-  font-size: 16px;
-  font-weight: 900;
-  cursor: pointer;
-  padding: 2px 6px;
+color: rgba(255,255,255,0.85);
+font-size: 16px;
+font-weight: 900;
+cursor: pointer;
+padding: 2px 6px;
 }
 
 .banner-slider-container {
-  margin: 10px 14px 12px;
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  height: 160px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  cursor: pointer;
-  border: 1px solid var(--border-color);
-  background: #14161d;
+margin: 10px 14px 12px;
+position: relative;
+border-radius: var(--radius-lg);
+overflow: hidden;
+height: 160px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+cursor: pointer;
+border: 1px solid var(--border-color);
+background: #14161d;
 }
 .banner-slides-track { display: flex; height: 100%; transition: transform 0.5s ease; }
 .banner-slide { min-width: 100%; position: relative; height: 100%; }
 .banner-slide img, .banner-slide video { width: 100%; height: 100%; object-fit: cover; }
 .banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 16px 18px;
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(11,12,16,0.92) 100%);
+display: flex;
+flex-direction: column;
+justify-content: flex-end;
+padding: 16px 18px;
 }
 .banner-overlay h2 { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
 .banner-overlay p { font-size: 12px; color: #e0e0e0; font-weight: 700; }
 .banner-dots {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 5;
+position: absolute;
+bottom: 8px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 6px;
+z-index: 5;
 }
 .banner-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transition: all 0.3s ease;
+width: 7px;
+height: 7px;
+border-radius: 50%;
+background: rgba(255,255,255,0.3);
+transition: all 0.3s ease;
 }
 .banner-dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
 
 .control-header {
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center;
-  padding: 6px 14px 12px; 
-  gap: 6px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 14px 12px;
+gap: 6px;
 }
 .brand-pill {
-  display: flex; 
-  align-items: center; 
-  gap: 6px;
-  background: var(--bg-card); 
-  padding: 8px 14px; 
-  border-radius: 16px;
-  border: 1px solid var(--border-color); 
-  font-weight: 900; 
-  font-size: 13px;
-  cursor: pointer;
-
+display: flex;
+align-items: center;
+gap: 6px;
+background: var(--bg-card);
+padding: 8px 14px;
+border-radius: 16px;
+border: 1px solid var(--border-color);
+font-weight: 900;
+font-size: 13px;
+cursor: pointer;
 transition: transform 0.15s ease;
 }
 .brand-pill:active { transform: scale(0.95); }
 .brand-badge {
-  background: var(--primary); 
-  color: white; 
-  border-radius: 8px;
-  padding: 2px 6px; 
-  font-size: 11px; 
-  font-weight: 900;
+background: var(--primary);
+color: white;
+border-radius: 8px;
+padding: 2px 6px;
+font-size: 11px;
+font-weight: 900;
 }
 .header-actions { display: flex; gap: 6px; }
 
 .btn-wheel-header {
-  background: linear-gradient(135deg, #9c27b0, #e91e63);
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 14px;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-  display: none; 
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 4px 15px rgba(233, 30, 99, 0.35);
-  animation: pulseWheel 2s infinite alternate;
+background: linear-gradient(135deg, #9c27b0, #e91e63);
+color: #fff;
+border: none;
+padding: 8px 12px;
+border-radius: 14px;
+font-size: 12px;
+font-weight: 900;
+cursor: pointer;
+display: none;
+align-items: center;
+gap: 4px;
+box-shadow: 0 4px 15px rgba(233, 30, 99, 0.35);
+animation: pulseWheel 2s infinite alternate;
 }
 @keyframes pulseWheel {
-  from { transform: scale(1); }
-  to { transform: scale(1.05); }
+from { transform: scale(1); }
+to { transform: scale(1.05); }
 }
 .btn-cuisines-filter {
-  background: linear-gradient(135deg, #ff5722, #ff9800);
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 14px;
-  font-size: 12px;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+background: linear-gradient(135deg, #ff5722, #ff9800);
+color: #fff;
+border: none;
+padding: 8px 12px;
+border-radius: 14px;
+font-size: 12px;
+font-weight: 900;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 4px;
 }
 .btn-discount {
-  background: linear-gradient(135deg, #ff9800, #ffb300);
-  color: #111; 
-  border: none; 
-  padding: 8px 12px; 
-  border-radius: 14px;
-  font-size: 12px; 
-  font-weight: 900; 
-  cursor: pointer;
+background: linear-gradient(135deg, #ff9800, #ffb300);
+color: #111;
+border: none;
+padding: 8px 12px;
+border-radius: 14px;
+font-size: 12px;
+font-weight: 900;
+cursor: pointer;
 }
 .btn-cart-top {
-  background: rgba(255, 42, 95, 0.15); 
-  color: var(--primary);
-  border: 1px solid var(--primary); 
-  padding: 8px 12px; 
-  border-radius: 14px;
-  font-size: 12px; 
-  font-weight: 900; 
-  cursor: pointer;
+background: rgba(255, 42, 95, 0.15);
+color: var(--primary);
+border: 1px solid var(--primary);
+padding: 8px 12px;
+border-radius: 14px;
+font-size: 12px;
+font-weight: 900;
+cursor: pointer;
 }
 
 .search-wrapper { display: flex; gap: 8px; margin: 0 14px 12px; }
 .search-input-box { flex: 1; position: relative; }
 .search-input-box input {
-  width: 100%; 
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  padding: 12px 16px; 
-  border-radius: 16px; 
-  color: white; 
-  outline: none; 
-  font-size: 13px;
+width: 100%;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+padding: 12px 16px;
+border-radius: 16px;
+color: white;
+outline: none;
+font-size: 13px;
 }
 .btn-search {
-  background: var(--primary); 
-  color: white; 
-  border: none;
-  padding: 0 20px; 
-  border-radius: 16px; 
-  font-weight: 900; 
-  cursor: pointer;
+background: var(--primary);
+color: white;
+border: none;
+padding: 0 20px;
+border-radius: 16px;
+font-weight: 900;
+cursor: pointer;
 }
 
 .zones-bar { display: flex; gap: 8px; margin: 0 14px 10px; }
 .zone-chip {
-  flex: 1; 
-  padding: 9px 4px; 
-  background: var(--bg-card);
-  border: 1px solid var(--border-color); 
-  border-radius: 14px;
-  color: var(--text-muted); 
-  font-size: 12px; 
-  font-weight: 800; 
-  text-align: center; 
-  cursor: pointer;
-  transition: all 0.2s ease;
+flex: 1;
+padding: 9px 4px;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+border-radius: 14px;
+color: var(--text-muted);
+font-size: 12px;
+font-weight: 800;
+text-align: center;
+cursor: pointer;
+transition: all 0.2s ease;
 }
 .zone-chip.active {
-  background: var(--primary); 
-  color: white; 
-  border-color: var(--primary);
-  box-shadow: 0 4px 15px var(--primary-glow);
+background: var(--primary);
+color: white;
+border-color: var(--primary);
+box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .horizontal-pills {
-  display: flex; 
-  gap: 8px; 
-  overflow-x: auto; 
-  white-space: nowrap;
-  padding: 0 14px 10px; 
-  scrollbar-width: none; 
-  -webkit-overflow-scrolling: touch;
+display: flex;
+gap: 8px;
+overflow-x: auto;
+white-space: nowrap;
+padding: 0 14px 10px;
+scrollbar-width: none;
+-webkit-overflow-scrolling: touch;
 }
 .horizontal-pills::-webkit-scrollbar { display: none; }
 .pill {
-  flex-shrink: 0; 
-  padding: 8px 16px; 
-  border-radius: 20px;
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  color: var(--text-muted); 
-  font-size: 12px; 
-  font-weight: 700; 
-  cursor: pointer;
-  transition: all 0.2s ease;
+flex-shrink: 0;
+padding: 8px 16px;
+border-radius: 20px;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+color: var(--text-muted);
+font-size: 12px;
+font-weight: 700;
+cursor: pointer;
+transition: all 0.2s ease;
 }
 .pill.active-white { background: #ffffff; color: #111; font-weight: 900; border-color: #fff; }
 .pill.active-green { background: var(--accent-green); color: #111; font-weight: 900; border-color: var(--accent-green); }
 
 .meals-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 4px 14px;
-  min-height: 200px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+padding: 4px 14px;
+min-height: 200px;
 }
 .meal-card-talabaty {
-  background: var(--bg-card);
-  border-radius: 18px;
-  border: 1px solid var(--border-color);
-  display: flex;
-  padding: 12px;
-  gap: 12px;
-  align-items: center;
-  position: relative;
-  transition: transform 0.15s ease;
+background: var(--bg-card);
+border-radius: 18px;
+border: 1px solid var(--border-color);
+display: flex;
+padding: 12px;
+gap: 12px;
+align-items: center;
+position: relative;
+transition: transform 0.15s ease;
 }
 .meal-card-talabaty.out-of-stock {
-  opacity: 0.65;
-  border-color: rgba(255, 42, 95, 0.35);
+opacity: 0.65;
+border-color: rgba(255, 42, 95, 0.35);
 }
 .meal-card-talabaty.out-of-stock .talabaty-img-box img {
-  filter: grayscale(0.9);
+filter: grayscale(0.9);
 }
 .talabaty-img-box {
-  width: 95px;
-  height: 95px;
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: #1a1c24;
+width: 95px;
+height: 95px;
+border-radius: 16px;
+position: relative;
+overflow: hidden;
+flex-shrink: 0;
+background: #1a1c24;
 }
 .talabaty-img-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+width: 100%;
+height: 100%;
+object-fit: cover;
 }
 .soldout-badge-overlay {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(220, 20, 60, 0.95);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 900;
-
+position: absolute;
+top: 6px;
+right: 6px;
+background: rgba(220, 20, 60, 0.95);
+color: #fff;
+font-size: 9px;
+font-weight: 900;
 padding: 2px 6px;
-  border-radius: 6px;
-  z-index: 5;
+border-radius: 6px;
+z-index: 5;
 }
 .btn-quick-add {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--primary);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+position: absolute;
+bottom: 6px;
+left: 6px;
+width: 28px;
+height: 28px;
+border-radius: 50%;
+background: #fff;
+color: var(--primary);
+border: none;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+font-weight: 900;
+cursor: pointer;
+box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 .btn-quick-add:active { transform: scale(0.9); }
 .talabaty-info-box {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+flex: 1;
+min-width: 0;
+display: flex;
+flex-direction: column;
+gap: 3px;
 }
 .talabaty-title { font-size: 14px; font-weight: 900; color: #ffffff; line-height: 1.3; }
 .talabaty-desc {
-  font-size: 11px;
-  color: #9aa1b5;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+font-size: 11px;
+color: #9aa1b5;
+line-height: 1.4;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
 }
 .talabaty-rest-tag { font-size: 10px; color: var(--accent-orange); font-weight: 800; }
 .talabaty-pricing {
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+margin-top: 4px;
+display: flex;
+align-items: center;
+gap: 8px;
+flex-wrap: wrap;
 }
 .talabaty-main-price { font-size: 14px; font-weight: 900; color: var(--accent-green); }
 .talabaty-old-price { font-size: 11px; color: #8c93a8; text-decoration: line-through; font-weight: 700; }
 .talabaty-pro-badge {
-  background: rgba(156, 39, 176, 0.25);
-  border: 1px solid #ab47bc;
-  color: #e1bee7;
-  padding: 2px 7px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 800;
+background: rgba(156, 39, 176, 0.25);
+border: 1px solid #ab47bc;
+color: #e1bee7;
+padding: 2px 7px;
+border-radius: 6px;
+font-size: 10px;
+font-weight: 800;
 }
 
 .wheel-pointer {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 26px;
-  color: #ff2a5f;
-  z-index: 10;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+position: absolute;
+top: -10px;
+left: 50%;
+transform: translateX(-50%);
+font-size: 26px;
+color: #ff2a5f;
+z-index: 10;
+text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
 .cuisines-drawer-box {
-  background: #14161f;
-  width: 100%;
-  max-width: 500px;
-  border-radius: 26px 26px 0 0;
-  border: 1.5px solid var(--border-color);
-  border-bottom: none;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  animation: slideUp 0.25s ease-out;
-  padding-bottom: 20px;
+background: #14161f;
+width: 100%;
+max-width: 500px;
+border-radius: 26px 26px 0 0;
+border: 1.5px solid var(--border-color);
+border-bottom: none;
+max-height: 85vh;
+display: flex;
+flex-direction: column;
+animation: slideUp 0.25s ease-out;
+padding-bottom: 20px;
 }
 .cuisines-header {
-  padding: 16px 18px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
+padding: 16px 18px 12px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid var(--border-color);
 }
 .cuisines-header-title { font-size: 17px; font-weight: 900; }
 .btn-clear-cuisines {
-  background: none;
-  border: none;
-  color: var(--accent-orange);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
+background: none;
+border: none;
+color: var(--accent-orange);
+font-size: 13px;
+font-weight: 800;
+cursor: pointer;
 }
 .cuisines-search-wrap { padding: 12px 18px 8px; }
 .cuisines-search-input {
-  width: 100%;
-  background: #1a1c26;
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 10px 14px;
-  color: #fff;
-  font-size: 13px;
-  outline: none;
+width: 100%;
+background: #1a1c26;
+border: 1px solid var(--border-color);
+border-radius: 14px;
+padding: 10px 14px;
+color: #fff;
+font-size: 13px;
+outline: none;
 }
 .cuisines-list-body { flex: 1; overflow-y: auto; padding: 4px 18px 12px; }
 .cuisine-row-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 12px 0;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+cursor: pointer;
 }
 .cuisine-row-label { font-size: 14px; font-weight: 800; color: #e0e4ef; }
 .cuisine-checkbox { width: 20px; height: 20px; border-radius: 6px; accent-color: var(--accent-orange); cursor: pointer; }
 .btn-apply-cuisines {
-  background: linear-gradient(135deg, #ff5722, #f4511e);
-  color: #fff;
-  border: none;
-  width: 100%;
-  padding: 14px;
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+background: linear-gradient(135deg, #ff5722, #f4511e);
+color: #fff;
+border: none;
+width: 100%;
+padding: 14px;
+border-radius: 16px;
+font-weight: 900;
+font-size: 15px;
+cursor: pointer;
+box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
 }
 
 .float-cart-bar {
-  position: fixed; 
-  bottom: 75px; 
-  left: 14px; 
-  right: 14px;
-  background: rgba(22, 25, 34, 0.95); 
-  border: 1.5px solid var(--primary);
-  border-radius: 20px; 
-  padding: 11px 16px; 
-  display: none;
-  justify-content: space-between; 
-  align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
-  z-index: 1000;
-  backdrop-filter: blur(12px);
+position: fixed;
+bottom: 75px;
+left: 14px;
+right: 14px;
+background: rgba(22, 25, 34, 0.95);
+border: 1.5px solid var(--primary);
+border-radius: 20px;
+padding: 11px 16px;
+display: none;
+justify-content: space-between;
+align-items: center;
+box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+z-index: 1000;
+backdrop-filter: blur(12px);
 }
 .float-cart-bar.show { display: flex; }
 .cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
 .btn-open-vip-cart {
-  background: var(--primary); 
-  color: white; 
-  border: none;
-  padding: 9px 18px; 
-  border-radius: 14px; 
-  font-weight: 900; 
-  font-size: 13px; 
-  cursor: pointer;
+background: var(--primary);
+color: white;
+border: none;
+padding: 9px 18px;
+border-radius: 14px;
+font-weight: 900;
+font-size: 13px;
+cursor: pointer;
 }
 
 .cart-drawer-backdrop {
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0, 0, 0, 0.78);
-
-backdrop-filter: blur(8px); 
-  display: none; 
-  align-items: flex-end;
-  justify-content: center; 
-  z-index: 2500;
+position: fixed;
+inset: 0;
+background: rgba(0, 0, 0, 0.78);
+backdrop-filter: blur(8px);
+display: none;
+align-items: flex-end;
+justify-content: center;
+z-index: 2500;
 }
 .cart-drawer-backdrop.show { display: flex; }
 .cart-drawer-box {
-  background: #14161f; 
-  width: 100%; 
-  max-width: 520px;
-  border-radius: 26px 26px 0 0; 
-  border: 1.5px solid var(--border-color);
-  border-bottom: none; 
-  max-height: 88vh; 
-  display: flex; 
-  flex-direction: column;
-  animation: slideUp 0.25s ease-out; 
-  padding-bottom: 25px;
+background: #14161f;
+width: 100%;
+max-width: 520px;
+border-radius: 26px 26px 0 0;
+border: 1.5px solid var(--border-color);
+border-bottom: none;
+max-height: 88vh;
+display: flex;
+flex-direction: column;
+animation: slideUp 0.25s ease-out;
+padding-bottom: 25px;
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .drawer-header {
-  padding: 16px 18px 12px; 
-  display: flex; 
-  justify-content: space-between;
-  align-items: center; 
-  border-bottom: 1px solid var(--border-color);
+padding: 16px 18px 12px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid var(--border-color);
 }
 .drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
 .btn-close-drawer {
-  background: rgba(255,255,255,0.08); 
-  border: none; 
-  color: #fff;
-  width: 32px; 
-  height: 32px; 
-  border-radius: 50%; 
-  font-size: 16px;
-  cursor: pointer;
+background: rgba(255,255,255,0.08);
+border: none;
+color: #fff;
+width: 32px;
+height: 32px;
+border-radius: 50%;
+font-size: 16px;
+cursor: pointer;
 }
 .drawer-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
 
 .cart-item-row {
-  background: var(--bg-card); 
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md); 
-  padding: 10px 12px; 
-  margin-bottom: 10px;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  gap: 10px;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+border-radius: var(--radius-md);
+padding: 10px 12px;
+margin-bottom: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
 }
 .cart-item-info { flex: 1; min-width: 0; }
 .cart-item-title { font-size: 13px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -553,399 +578,1230 @@ backdrop-filter: blur(8px);
 .cart-item-price { font-size: 13px; font-weight: 900; color: var(--accent-green); margin-top: 3px; }
 .cart-qty-ctrl { display: flex; align-items: center; gap: 8px; }
 .btn-qty {
-  width: 28px; 
-  height: 28px; 
-  border-radius: 8px; 
-  border: 1px solid var(--border-color);
-  background: var(--bg-elevated); 
-  color: #fff; 
-  font-size: 15px; 
-  font-weight: 900;
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
+width: 28px;
+height: 28px;
+border-radius: 8px;
+border: 1px solid var(--border-color);
+background: var(--bg-elevated);
+color: #fff;
+font-size: 15px;
+font-weight: 900;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 .qty-num { font-size: 14px; font-weight: 900; min-width: 18px; text-align: center; }
 
 .form-input {
-  width: 100%; 
-  background: #191c25; 
-  border: 1px solid var(--border-color);
-  padding: 12px 14px; 
-  border-radius: 14px; 
-  color: white; 
-  margin-bottom: 9px; 
-  font-size: 13px; 
-  outline: none;
+width: 100%;
+background: #191c25;
+border: 1px solid var(--border-color);
+padding: 12px 14px;
+border-radius: 14px;
+color: white;
+margin-bottom: 9px;
+font-size: 13px;
+outline: none;
 }
 .form-input:focus { border-color: var(--primary); }
 .btn-gps-loc {
-  width: 100%; 
-  background: rgba(0, 230, 118, 0.12); 
-  color: var(--accent-green);
-  border: 1px dashed var(--accent-green); 
-  border-radius: 14px; 
-  padding: 12px;
-  font-size: 13px; 
-  font-weight: 800; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
-  margin-bottom: 12px;
+width: 100%;
+background: rgba(0, 230, 118, 0.12);
+color: var(--accent-green);
+border: 1px dashed var(--accent-green);
+border-radius: 14px;
+padding: 12px;
+font-size: 13px;
+font-weight: 800;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+margin-bottom: 12px;
 }
 .bill-summary-card {
-  background: #0f1015; 
-  border-radius: 14px; 
-  padding: 12px 14px;
-  border: 1px solid var(--border-color); 
-  font-size: 12px; 
-  margin-bottom: 14px;
+background: #0f1015;
+border-radius: 14px;
+padding: 12px 14px;
+border: 1px solid var(--border-color);
+font-size: 12px;
+margin-bottom: 14px;
 }
 .bill-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
 .bill-row.total {
-  border-top: 1px dashed rgba(255,255,255,0.15); 
-  padding-top: 8px; 
-  margin-top: 8px;
-  font-size: 15px; 
-  font-weight: 900; 
-  color: var(--accent-green);
+border-top: 1px dashed rgba(255,255,255,0.15);
+padding-top: 8px;
+margin-top: 8px;
+font-size: 15px;
+font-weight: 900;
+color: var(--accent-green);
 }
 
 .btn-submit-order-wa {
-  width: 100%; 
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: white; 
-  border: none; 
-  padding: 14px; 
-  border-radius: 16px;
-  font-weight: 900; 
-  font-size: 15px; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35); 
+width: 100%;
+background: linear-gradient(135deg, #25D366, #128C7E);
+color: white;
+border: none;
+padding: 14px;
+border-radius: 16px;
+font-weight: 900;
+font-size: 15px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
 }
 
 .modal-backdrop {
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(8px); 
-  display: none; 
-  align-items: center;
-  justify-content: center; 
-  z-index: 3000; 
-  padding: 14px;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.8);
+backdrop-filter: blur(8px);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 3000;
+padding: 14px;
 }
 .modal-backdrop.show { display: flex; }
 .modal-box {
-  background: #161822; 
-  width: 100%; 
-  max-width: 460px;
-  border-radius: 24px; 
-  padding: 20px; 
-  border: 1.5px solid var(--border-color);
-  max-height: 92vh;
-  overflow-y: auto;
+background: #161822;
+width: 100%;
+max-width: 460px;
+border-radius: 24px;
+padding: 20px;
+border: 1.5px solid var(--border-color);
+max-height: 92vh;
+overflow-y: auto;
 }
 
 .admin-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 15px;
-
+display: flex;
+gap: 6px;
+margin-bottom: 15px;
 background: var(--bg-main);
-  padding: 5px;
-  border-radius: 16px;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none;
+padding: 5px;
+border-radius: 16px;
+overflow-x: auto;
+white-space: nowrap;
+scrollbar-width: none;
 }
 .admin-tabs::-webkit-scrollbar { display: none; }
 .admin-tab-btn {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  padding: 8px 12px;
-  font-size: 11px;
-  font-weight: 800;
-  border-radius: 12px;
-  cursor: pointer;
+flex-shrink: 0;
+background: none;
+border: none;
+color: var(--text-muted);
+padding: 8px 12px;
+font-size: 11px;
+font-weight: 800;
+border-radius: 12px;
+cursor: pointer;
 }
 .admin-tab-btn.active { background: var(--primary); color: #fff; }
 .admin-tab-content { display: none; }
 .admin-tab-content.active { display: block; }
 
 .btn-stock-toggle {
-  border: none;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
+border: none;
+padding: 6px 10px;
+border-radius: 10px;
+font-size: 11px;
+font-weight: 900;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 4px;
+transition: all 0.2s ease;
 }
 .btn-stock-toggle.in-stock { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
 .btn-stock-toggle.out-of-stock { background: rgba(255, 42, 95, 0.2); border: 1px solid var(--primary); color: #ff4d6d; }
 
 .admin-stat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+margin-bottom: 12px;
 }
 .admin-stat-card {
-  background: var(--bg-elevated);
-  padding: 10px;
-  border-radius: 14px;
-  text-align: center;
-  border: 1px solid var(--border-color);
+background: var(--bg-elevated);
+padding: 10px;
+border-radius: 14px;
+text-align: center;
+border: 1px solid var(--border-color);
 }
 .admin-stat-num { font-size: 16px; font-weight: 900; color: var(--accent-green); }
 .admin-stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 700; }
 
 .period-filter-bar {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
+display: flex;
+gap: 6px;
+margin-bottom: 12px;
 }
 .period-btn {
-  flex: 1;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  padding: 8px 4px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
+flex: 1;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+color: var(--text-muted);
+padding: 8px 4px;
+border-radius: 12px;
+font-size: 11px;
+font-weight: 800;
+cursor: pointer;
+text-align: center;
+transition: all 0.2s;
 }
 .period-btn.active {
-  background: var(--accent-blue);
-  color: #111;
-  border-color: var(--accent-blue);
-  font-weight: 900;
+background: var(--accent-blue);
+color: #111;
+border-color: var(--accent-blue);
+font-weight: 900;
 }
+</style>
+</head>
+<body>
+
+<div id="toastBox">✨ تم التحديث بنجاح</div>
+
+<!-- شريط الإشعار الحي المباشر الثابت -->
+<div id="liveAlertBar" class="live-alert-bar" style="display:none;" onclick="handleLiveAlertClick()">
+<div class="live-alert-content">
+<div class="live-alert-badge">🔔 عرض خاص</div>
+<div class="live-alert-text">
+<strong id="liveAlertTitle">...</strong>
+<span id="liveAlertDesc">...</span>
+</div>
+</div>
+<div style="display:flex; align-items:center; gap:8px;">
+<button class="btn-live-alert-action" id="liveAlertBtn">اطلب الآن 👈</button>
+<span class="live-alert-close" onclick="dismissLiveAlert(event)">✕</span>
+</div>
+</div>
+
+<div class="banner-slider-container" onclick="openDiscountsModal()">
+<div class="banner-slides-track" id="bannerTrack"></div>
+<div class="banner-dots" id="bannerDots"></div>
+</div>
+
+<div class="control-header">
+<div class="brand-pill" onclick="handleAdminDoubleTap()">
+<span class="brand-badge">Wj</span> وجباتي
+</div>
+<div class="header-actions">
+<button class="btn-wheel-header" id="btnWheelTrigger" onclick="openWheelModal()">🎡 الحظ</button>
+<button class="btn-cuisines-filter" onclick="openCuisinesModal()">المطابخ 🍕</button>
+<button class="btn-discount" onclick="openDiscountsModal()">خصومات 🏷️</button>
+<button class="btn-cart-top" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
+</div>
+</div>
+
+<div class="search-wrapper">
+<div class="search-input-box">
+<input type="text" id="searchInput" placeholder="ابحث عن اسم المطعم أو الوجبة أو المكونات..." oninput="renderMeals()">
+</div>
+<button class="btn-search" onclick="renderMeals()">بحث</button>
+</div>
+
+<div class="zones-bar">
+<div class="zone-chip active" onclick="setZone('الكل', this)">كل بغداد / All</div>
+<div class="zone-chip" onclick="setZone('الكرخ', this)">الكرخ / Karkh</div>
+<div class="zone-chip" onclick="setZone('الرصافة', this)">الرصافة / Rusafa</div>
+</div>
+
+<div class="horizontal-pills" id="restaurantsBar"></div>
+<div class="horizontal-pills" id="categoriesBar"></div>
+
+<div class="meals-grid" id="mealsGrid"></div>
+
+<div class="float-cart-bar" id="floatCartBar">
+<div>
+<span id="cartTotalItems" style="font-weight:900;">0</span> وجبات |
+<span class="cart-total-badge" id="cartTotalSum">0 د.ع</span>
+</div>
+<button class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
+</div>
+
+<div class="modal-backdrop" id="wheelModal" onclick="closeIfOutsideWheel(event)">
+<div class="modal-box" style="max-width:350px; text-align:center;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<h3 style="margin:0; font-size:16px;">🎡 عجلة الحظ والهدايا</h3>
+<span style="font-size:20px; cursor:pointer;" onclick="closeWheelModal()">✕</span>
+</div>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;" id="wheelSubtext">
+دور العجلة واربح جائزتك الفورية مع طلبك من <strong id="wheelRestBadge" style="color:var(--accent-orange);">مطعم سندريلا</strong>!
+</p>
 
 <div style="position:relative; width:260px; height:260px; margin:0 auto 15px;">
-  <div class="wheel-pointer">▼</div>
-  <canvas id="wheelCanvas" width="260" height="260" style="border-radius:50%; box-shadow:0 0 25px rgba(255,42,95,0.45);"></canvas>
+<div class="wheel-pointer">▼</div>
+<canvas id="wheelCanvas" width="260" height="260" style="border-radius:50%; box-shadow:0 0 25px rgba(255,42,95,0.45);"></canvas>
 </div>
 
 <button type="button" class="btn-discount" id="btnSpinWheel" style="width:100%; padding:13px; font-weight:900; font-size:14px; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111;" onclick="spinWheel()">
-  🎯 تدوير العجلة الآن!
+🎯 تدوير العجلة الآن!
 </button>
 
 <div id="wheelResultBox" style="display:none; margin-top:12px; padding:10px; border-radius:12px; background:rgba(0,230,118,0.15); border:1px solid var(--accent-green); font-size:12px; font-weight:800; line-height:1.5;"></div>
+</div>
+</div>
+
+<div class="cart-drawer-backdrop" id="cuisinesModal" onclick="closeIfOutsideCuisines(event)">
+<div class="cuisines-drawer-box">
+<div class="cuisines-header">
+<div style="display:flex; align-items:center; gap:8px;">
+<span style="font-size:20px; cursor:pointer;" onclick="closeCuisinesModal()">✕</span>
+<span class="cuisines-header-title">المطابخ والتصنيفات</span>
+</div>
+<button class="btn-clear-cuisines" onclick="clearAllSelectedCuisines()">حذف الكل</button>
+</div>
 
 <div class="cuisines-search-wrap">
-  <input type="text" id="cuisineFilterSearch" class="cuisines-search-input" placeholder="🔍 ابحث عن المطابخ (وجبات التوفير، عراقي، برجر...)" oninput="filterCuisinesList()">
+<input type="text" id="cuisineFilterSearch" class="cuisines-search-input" placeholder="🔍 ابحث عن المطابخ (وجبات التوفير، عراقي، برجر...)" oninput="filterCuisinesList()">
 </div>
 
 <div class="cuisines-list-body" id="cuisinesCheckList"></div>
 
 <div style="padding:10px 18px 0;">
-  <button class="btn-apply-cuisines" onclick="applyCuisinesFilter()">تطبيق الفلتر</button>
+<button class="btn-apply-cuisines" onclick="applyCuisinesFilter()">تطبيق الفلتر</button>
+</div>
+</div>
+</div>
+
+<div class="cart-drawer-backdrop" id="cartDrawer" onclick="closeIfOutsideDrawer(event)">
+<div class="cart-drawer-box">
+<div class="drawer-header">
+<h3 class="drawer-title">🛒 سلة وجباتي</h3>
+<button class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
 </div>
 
 <div class="drawer-body">
-  <div id="drawerItemsList" style="margin-bottom:14px;"></div>
+<div id="drawerItemsList" style="margin-bottom:14px;"></div>
 
-  <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-    <button type="button" onclick="confirmClearCart()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:800; cursor:pointer;">🗑️ تفريغ السلة بالكامل</button>
-  </div>
+<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+<button type="button" onclick="confirmClearCart()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:800; cursor:pointer;">🗑️ تفريغ السلة بالكامل</button>
+</div>
 
-  <div style="margin-bottom:12px;">
-    <input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" oninput="saveCustomerData()" required>
-    <input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" oninput="saveCustomerData()" required>
-    <input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" oninput="saveCustomerData()" required>
-    
-    <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك (لحساب كلفة التوصيل الدقيقة):</label>
+<div style="margin-bottom:12px;">
+<input type="text" id="custName" class="form-input" placeholder="اسم الزبون الكامل" oninput="saveCustomerData()" required>
+<input type="tel" id="custPhone" class="form-input" placeholder="رقم الهاتف (077XXXXXXXX)" oninput="saveCustomerData()" required>
+<input type="text" id="custAddress" class="form-input" placeholder="العنوان بالتفصيل - نقطة دالة" oninput="saveCustomerData()" required>
 
+<label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin:6px 2px 4px;">📍 منطقة سكنك (لحساب كلفة التوصيل الدقيقة):</label>
 <select id="custZoneSelect" class="form-input" onchange="saveCustomerData(); updateCartUI(); renderCartDrawerContent();">
-      <option value="الكرخ">جانب الكرخ</option>
-      <option value="الرصافة">جانب الرصافة</option>
-    </select>
-  </div>
+<option value="الكرخ">جانب الكرخ</option>
+<option value="الرصافة">جانب الرصافة</option>
+</select>
+</div>
 
-  <button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">
-    📍 تثبيت موقعي بالخريطة بدقة فيت (GPS)
-  </button>
-  <div id="gpsStatusText" style="font-size:12px; margin:-6px 0 12px 4px; font-weight:800;"></div>
+<button type="button" class="btn-gps-loc" id="btnGpsLoc" onclick="getExactGpsLocation()">
+📍 تثبيت موقعي بالخريطة بدقة فيت (GPS)
+</button>
+<div id="gpsStatusText" style="font-size:12px; margin:-6px 0 12px 4px; font-weight:800;"></div>
 
-  <div class="bill-summary-card" id="billSummaryCard"></div>
+<div class="bill-summary-card" id="billSummaryCard"></div>
 
-  <button type="button" class="btn-submit-order-wa" id="submitBtn" onclick="submitFullOrder()">
-    💬 إرسال الطلب لواتساب المطعم مباشرة
-  </button>
+<button type="button" class="btn-submit-order-wa" id="submitBtn" onclick="submitFullOrder()">
+💬 إرسال الطلب لواتساب المطعم مباشرة
+</button>
+</div>
+</div>
+</div>
+
+<div class="modal-backdrop" id="discountsModal" onclick="closeIfOutsideDiscounts(event)">
+<div class="modal-box" style="max-width:340px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+<h4 style="margin:0; font-size:16px;">🏷️ العروض والتخفيضات الفورية</h4>
+<span style="font-size:20px; cursor:pointer;" onclick="closeDiscountsModal()">✕</span>
+</div>
+<div id="couponModalContent" style="padding:10px 0; text-align:center;"></div>
+<button type="button" class="btn-discount" style="width:100%; margin-top:10px;" onclick="closeDiscountsModal()">إغلاق</button>
+</div>
+</div>
+
+<!-- شاشة طلب الرمز السري للدخول (تتفرغ تلقائياً عند الإغلاق للأمان) -->
+<div class="modal-backdrop" id="adminPinModal" onclick="closeIfOutsideAdminPin(event)">
+<div class="modal-box" style="max-width:320px; text-align:center;">
+<h3 style="margin-top:0; font-size:16px;">🔐 دخول الإدارة والمطاعم</h3>
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">أدخل الرمز السري الخاص بك للمتابعة</p>
+<input type="password" id="adminPinInput" class="form-input" placeholder="••••" maxlength="6" style="text-align:center; font-size:22px; letter-spacing:5px;" inputmode="numeric">
+<div style="display:flex; gap:8px;">
+<button type="button" class="btn-discount" style="flex:1; background:#333; color:#fff;" onclick="closeAdminPin()">إلغاء</button>
+<button type="button" class="btn-discount" style="flex:1;" onclick="checkAdminPin()">دخول</button>
+</div>
+</div>
+</div>
+
+<div class="modal-backdrop" id="restPortalModal" onclick="closeIfOutsideRestPortal(event)">
+<div class="modal-box" style="max-width:460px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+<div>
+<h3 style="margin:0; font-size:16px; color:#fff;">🏪 لوحة إدارة: <span id="portalRestTitle" style="color:var(--accent-orange);"></span></h3>
+<span style="font-size:11px; color:var(--text-muted);" id="portalSubStatusText">تحكم بوجباتك ومبيعاتك مباشرة</span>
+</div>
+<span style="font-size:22px; cursor:pointer; color:var(--text-muted);" onclick="closeRestPortal()">✕</span>
 </div>
 
 <div class="admin-stat-grid" style="margin-bottom:12px;">
-  <div class="admin-stat-card">
-    <div class="admin-stat-num" id="portalMealsCount">0</div>
-    <div class="admin-stat-lbl">وجبات المطعم</div>
-  </div>
-  <div class="admin-stat-card">
-    <div class="admin-stat-num" id="portalOrdersTotal">0 د.ع</div>
-    <div class="admin-stat-lbl">مبيعات الفترة</div>
-  </div>
+<div class="admin-stat-card">
+<div class="admin-stat-num" id="portalMealsCount">0</div>
+<div class="admin-stat-lbl">وجبات المطعم</div>
+</div>
+<div class="admin-stat-card">
+<div class="admin-stat-num" id="portalOrdersTotal">0 د.ع</div>
+<div class="admin-stat-lbl">مبيعات الفترة</div>
+</div>
 </div>
 
 <div class="admin-tabs" style="margin-bottom:12px;">
-  <button class="admin-tab-btn active" onclick="switchPortalTab('portalMealsTab', this)">🍔 وجباتي وقفل الحاجات</button>
-  <button class="admin-tab-btn" onclick="switchPortalTab('portalOrdersTab', this)">📋 كشف طلباتي</button>
+<button class="admin-tab-btn active" onclick="switchPortalTab('portalMealsTab', this)">🍔 وجباتي وقفل الحاجات</button>
+<button class="admin-tab-btn" onclick="switchPortalTab('portalOrdersTab', this)">📋 كشف طلباتي</button>
 </div>
 
 <div id="portalMealsTab" class="portal-tab-content" style="display:block;">
-  <input type="text" id="portalMealSearch" class="form-input" placeholder="ابحث عن وجبة لقفلها أو تفعيلها أو حذفها..." oninput="renderPortalMeals()">
-  <div id="portalMealsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+<input type="text" id="portalMealSearch" class="form-input" placeholder="ابحث عن وجبة لقفلها أو تفعيلها أو حذفها..." oninput="renderPortalMeals()">
+<div id="portalMealsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
 </div>
 
 <div id="portalOrdersTab" class="portal-tab-content" style="display:none;">
-  <div class="period-filter-bar">
-    <div class="period-btn active" onclick="setOrderPeriod('all', this, true)">الكل</div>
-    <div class="period-btn" onclick="setOrderPeriod('today', this, true)">اليوم</div>
-    <div class="period-btn" onclick="setOrderPeriod('yesterday', this, true)">البارحة</div>
-    <div class="period-btn" onclick="setOrderPeriod('week', this, true)">أسبوع</div>
-    <div class="period-btn" onclick="setOrderPeriod('month', this, true)">شهر</div>
-  </div>
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <span style="font-size:12px; color:var(--text-muted); font-weight:800;">سجل الطلبات المفلتر:</span>
-    <button type="button" class="btn-discount" style="padding:6px 12px; font-size:11px;" onclick="copyPortalRestaurantReport()">📋 نسخ الكشف للواتساب</button>
-  </div>
-  <div id="portalOrdersList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+<div class="period-filter-bar">
+<div class="period-btn active" onclick="setOrderPeriod('all', this, true)">الكل</div>
+<div class="period-btn" onclick="setOrderPeriod('today', this, true)">اليوم</div>
+<div class="period-btn" onclick="setOrderPeriod('yesterday', this, true)">البارحة</div>
+<div class="period-btn" onclick="setOrderPeriod('week', this, true)">أسبوع</div>
+<div class="period-btn" onclick="setOrderPeriod('month', this, true)">شهر</div>
+</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<span style="font-size:12px; color:var(--text-muted); font-weight:800;">سجل الطلبات المفلتر:</span>
+<button type="button" class="btn-discount" style="padding:6px 12px; font-size:11px;" onclick="copyPortalRestaurantReport()">📋 نسخ الكشف للواتساب</button>
+</div>
+<div id="portalOrdersList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
 </div>
 
 <button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeRestPortal()">إغلاق اللوحة</button>
+</div>
+</div>
+
+<div class="modal-backdrop" id="adminPanelModal" onclick="closeIfOutsideAdminPanel(event)">
+<div class="modal-box">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+<h3 style="margin:0; font-size:16px; color:#fff;">⚙️ إدارة وجباتي السحابية VIP</h3>
+<span style="font-size:20px; cursor:pointer; color:var(--text-muted);" onclick="closeAdminPanel()">✕</span>
+</div>
 
 <div class="admin-tabs">
-  <button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('subsAdminTab', this)">💳 الاشتراكات</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل والمناطق</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 عجلة الحظ</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 إشعار وتنبيه</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('serviceFeeTab', this)">🧾 خدمة وجباتي</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('restDiscountTab', this)">🔥 خصم المطاعم</button>
-
+<button class="admin-tab-btn active" onclick="switchAdminTab('aiScanTab', this)">📷 ماسح المنيو</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('subsAdminTab', this)">💳 الاشتراكات</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('ordersLogTab', this)">📋 كشف المبيعات</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل والمناطق</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('wheelAdminTab', this)">🎡 عجلة الحظ</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('flashAlertTab', this)">📢 إشعار وتنبيه</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('generalDiscountTab', this)">🎁 الخصم العام</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('serviceFeeTab', this)">🧾 خدمة وجباتي</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('restDiscountTab', this)">🔥 خصم المطاعم</button>
 <button class="admin-tab-btn" onclick="switchAdminTab('discountCodesTab', this)">🎟️ رموز الخصم</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار وقفل الوجبات</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
-  <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('editMealsTab', this)">✏️ الأسعار وقفل الوجبات</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
+<button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
 </div>
 
 <div id="aiScanTab" class="admin-tab-content active">
-  <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-    اختر المطعم وارفع صورة قائمته؛ سيقوم الذكاء الاصطناعي باستخراج الوجبات وتنزيلها باسم المطعم ورقم هاتفه فوراً:
-  </p>
-  
-  <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
-    <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">🔑 مفتاح الذكاء الاصطناعي (Gemini API Key):</label>
-    <input type="password" id="geminiApiKey" class="form-input" placeholder="ألصق مفتاح Gemini هنا (يُحفظ بأمان في هاتفك)" oninput="saveGeminiApiKey()">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+اختر المطعم وارفع صورة قائمته؛ سيقوم الذكاء الاصطناعي باستخراج الوجبات وتنزيلها باسم المطعم ورقم هاتفه فوراً:
+</p>
 
-    <label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">🏪 اختر المطعم المستهدف:</label>
-    <select id="aiScanRestSelect" class="form-input"></select>
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">🔑 مفتاح الذكاء الاصطناعي (Gemini API Key):</label>
+<input type="password" id="geminiApiKey" class="form-input" placeholder="ألصق مفتاح Gemini هنا (يُحفظ بأمان في هاتفك)" oninput="saveGeminiApiKey()">
 
-    <label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">📍 المنطقة:</label>
-    <select id="aiScanZoneSelect" class="form-input">
-      <option value="الكرخ">الكرخ</option>
-      <option value="الرصافة">الرصافة</option>
-    </select>
+<label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">🏪 اختر المطعم المستهدف:</label>
+<select id="aiScanRestSelect" class="form-input"></select>
 
-    <label for="aiMenuFileInput" style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--accent-orange); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer; margin-top:8px;">
-      📷 التقاط أو اختيار صورة المنيو
-    </label>
-    <input type="file" id="aiMenuFileInput" accept="image/*" style="position:absolute; opacity:0; width:1px; height:1px; z-index:-1;" onchange="handleMenuFileSelect(this)">
-    
-    <div id="aiMenuPreviewText" style="font-size:11px; text-align:center; margin-top:5px; font-weight:700; color:var(--accent-green);"></div>
-  </div>
+<label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">📍 المنطقة:</label>
+<select id="aiScanZoneSelect" class="form-input">
+<option value="الكرخ">الكرخ</option>
+<option value="الرصافة">الرصافة</option>
+</select>
 
-  <button type="button" class="btn-discount" id="btnRunAiScan" style="width:100%; padding:13px; font-weight:900; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111; margin-bottom:12px;" onclick="runAiMenuScan()">
-    ⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي
-  </button>
+<label for="aiMenuFileInput" style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--accent-orange); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer; margin-top:8px;">
+📷 التقاط أو اختيار صورة المنيو
+</label>
+<input type="file" id="aiMenuFileInput" accept="image/*" style="position:absolute; opacity:0; width:1px; height:1px; z-index:-1;" onchange="handleMenuFileSelect(this)">
 
-  <div id="aiScanLoading" style="display:none; text-align:center; padding:15px; color:var(--accent-orange); font-size:12px; font-weight:800;">
-    ⏳ جاري قراءة صورة المنيو واستخراج الوجبات والأسعار بدقة... انتظر لحظات
-  </div>
+<div id="aiMenuPreviewText" style="font-size:11px; text-align:center; margin-top:5px; font-weight:700; color:var(--accent-green);"></div>
+</div>
 
-  <div id="aiScanResultsBox" style="display:none; border:1px solid var(--border-color); border-radius:14px; padding:10px; background:var(--bg-main); margin-bottom:12px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <span style="font-size:12px; font-weight:900; color:#fff;">الوجبات المستخرجة (<span id="aiExtractedCount">0</span>):</span>
-      <button type="button" onclick="clearAiResults()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:800; cursor:pointer;">مسح</button>
-    </div>
-    <div id="aiExtractedList" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
-    <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAllAiMealsToCloud()">
-      🚀 حفظ كل الوجبات المستخرجة بالسحابة فوراً
-    </button>
-  </div>
+<button type="button" class="btn-discount" id="btnRunAiScan" style="width:100%; padding:13px; font-weight:900; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111; margin-bottom:12px;" onclick="runAiMenuScan()">
+⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي
+</button>
+
+<div id="aiScanLoading" style="display:none; text-align:center; padding:15px; color:var(--accent-orange); font-size:12px; font-weight:800;">
+⏳ جاري قراءة صورة المنيو واستخراج الوجبات والأسعار بدقة... انتظر لحظات
+</div>
+
+<div id="aiScanResultsBox" style="display:none; border:1px solid var(--border-color); border-radius:14px; padding:10px; background:var(--bg-main); margin-bottom:12px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<span style="font-size:12px; font-weight:900; color:#fff;">الوجبات المستخرجة (<span id="aiExtractedCount">0</span>):</span>
+<button type="button" onclick="clearAiResults()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:800; cursor:pointer;">مسح</button>
+</div>
+<div id="aiExtractedList" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAllAiMealsToCloud()">
+🚀 حفظ كل الوجبات المستخرجة بالسحابة فوراً
+</button>
+</div>
 </div>
 
 <div id="subsAdminTab" class="admin-tab-content">
-
 <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">إدارة الاشتراكات الشهرية للمطاعم، وتحديد أرباحك وتواريخ الانتهاء:</p>
-  
-  <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
-    <label style="font-size:11px; color:#fff; display:block; margin-bottom:4px; font-weight:800;">اختر المطعم لتجديد اشتراكه:</label>
-    <select id="admSubRestSelect" class="form-input"></select>
 
-    <div style="display:flex; gap:8px; margin-bottom:8px;">
-      <div style="flex:1;">
-        <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">مبلغ الاشتراك (د.ع):</label>
-        <input type="number" id="admSubAmount" class="form-input" placeholder="مثال: 50000" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
-      </div>
-      <div style="flex:1;">
-        <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">تاريخ انتهاء الاشتراك:</label>
-        <input type="date" id="admSubExpiry" class="form-input" style="margin-bottom:0;">
-      </div>
-    </div>
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<label style="font-size:11px; color:#fff; display:block; margin-bottom:4px; font-weight:800;">اختر المطعم لتجديد اشتراكه:</label>
+<select id="admSubRestSelect" class="form-input"></select>
 
-    <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #00b0ff, #00e676); color:#111;" onclick="saveSubscription()">
-      💾 حفظ وتوثيق الاشتراك سحابياً
-    </button>
-  </div>
+<div style="display:flex; gap:8px; margin-bottom:8px;">
+<div style="flex:1;">
+<label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">مبلغ الاشتراك (د.ع):</label>
+<input type="number" id="admSubAmount" class="form-input" placeholder="مثال: 50000" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+</div>
+<div style="flex:1;">
+<label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">تاريخ انتهاء الاشتراك:</label>
+<input type="date" id="admSubExpiry" class="form-input" style="margin-bottom:0;">
+</div>
+</div>
 
-  <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">حالة اشتراكات المطاعم الحالية:</div>
-  <div id="admSubsList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #00b0ff, #00e676); color:#111;" onclick="saveSubscription()">
+💾 حفظ وتوثيق الاشتراك سحابياً
+</button>
+</div>
+
+<div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">حالة اشتراكات المطاعم الحالية:</div>
+<div id="admSubsList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
 </div>
 
 <div id="ordersLogTab" class="admin-tab-content">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية الكشف حسب المطعم:</label>
-    <button type="button" onclick="syncOrdersFromCloud()" style="background:none; border:none; color:var(--accent-green); font-size:11px; font-weight:800; cursor:pointer;">🔄 تحديث الكشف</button>
-  </div>
-  <select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<label style="font-size:12px; color:var(--text-muted); font-weight:800;">تصفية الكشف حسب المطعم:</label>
+<button type="button" onclick="syncOrdersFromCloud()" style="background:none; border:none; color:var(--accent-green); font-size:11px; font-weight:800; cursor:pointer;">🔄 تحديث الكشف</button>
+</div>
+<select id="ordersRestFilter" class="form-input" onchange="renderOrdersLog()"></select>
 
-  <div class="period-filter-bar">
-    <div class="period-btn active" onclick="setOrderPeriod('all', this, false)">الكل</div>
-    <div class="period-btn" onclick="setOrderPeriod('today', this, false)">اليوم</div>
-    <div class="period-btn" onclick="setOrderPeriod('yesterday', this, false)">البارحة</div>
-    <div class="period-btn" onclick="setOrderPeriod('week', this, false)">أسبوع</div>
-    <div class="period-btn" onclick="setOrderPeriod('month', this, false)">شهر</div>
-  </div>
+<div class="period-filter-bar">
+<div class="period-btn active" onclick="setOrderPeriod('all', this, false)">الكل</div>
+<div class="period-btn" onclick="setOrderPeriod('today', this, false)">اليوم</div>
+<div class="period-btn" onclick="setOrderPeriod('yesterday', this, false)">البارحة</div>
+<div class="period-btn" onclick="setOrderPeriod('week', this, false)">أسبوع</div>
+<div class="period-btn" onclick="setOrderPeriod('month', this, false)">شهر</div>
+</div>
 
-  <div class="admin-stat-grid" style="margin-bottom:10px;">
-    <div class="admin-stat-card">
-      <div class="admin-stat-num" id="filteredOrdersCount">0</div>
-      <div class="admin-stat-lbl">طلبات الفترة</div>
-    </div>
-    <div class="admin-stat-card">
-      <div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
-      <div class="admin-stat-lbl">مبيعات الفترة</div>
-    </div>
-  </div>
+<div class="admin-stat-grid" style="margin-bottom:10px;">
+<div class="admin-stat-card">
+<div class="admin-stat-num" id="filteredOrdersCount">0</div>
+<div class="admin-stat-lbl">طلبات الفترة</div>
+</div>
+<div class="admin-stat-card">
+<div class="admin-stat-num" id="filteredOrdersTotal">0 د.ع</div>
+<div class="admin-stat-lbl">مبيعات الفترة</div>
+</div>
+</div>
 
-  <div style="display:flex; gap:6px; margin-bottom:
+<div style="display:flex; gap:6px; margin-bottom:10px;">
+<button type="button" class="btn-discount" style="flex:1; padding:10px; font-size:11px; background:var(--primary); color:#fff;" onclick="copyCurrentRestaurantReport()">
+📋 نسخ الكشف المفلتر
+</button>
+<button type="button" onclick="clearOrdersLog()" style="background:#33151f; border:1px solid #ff4d6d; color:#ff4d6d; padding:0 12px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer;">
+مسح السجل
+</button>
+</div>
+
+<div id="ordersListContainer" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+</div>
+
+<div id="deliveryTab" class="admin-tab-content">
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
+<span style="font-weight:900; color:var(--accent-orange); font-size:13px;">1. السعر الافتراضي العام (لأي مطعم غير مخصص):</span>
+<input type="number" id="admDeliveryFee" class="form-input" placeholder="المبلغ بالدينار (مثال: 1000)" style="font-size:15px; font-weight:900; color:var(--accent-green); margin-top:8px;">
+<button type="button" class="btn-discount" style="width:100%; padding:10px; font-weight:900; background:#333; color:#fff;" onclick="saveDeliveryFee()">
+💾 حفظ السعر الافتراضي العام
+</button>
+</div>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
+<span style="font-weight:900; color:var(--accent-green); font-size:13px;">2. تخصيص سعر التوصيل لكل مطعم حسب المنطقة:</span>
+<label style="font-size:11px; color:#fff; display:block; margin:8px 0 4px; font-weight:800;">اختر المطعم للتحكم بأجور توصيله:</label>
+<select id="admRestDelivSelect" class="form-input" onchange="loadSelectedRestDelivery()"></select>
+
+<div style="display:flex; gap:8px; margin-bottom:10px;">
+<div style="flex:1;">
+<label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">توصيل الكرخ (د.ع):</label>
+<input type="number" id="admRestKarkhFee" class="form-input" placeholder="مثال: 1500" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+</div>
+<div style="flex:1;">
+<label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:2px;">توصيل الرصافة (د.ع):</label>
+<input type="number" id="admRestRusafaFee" class="form-input" placeholder="مثال: 2500" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+</div>
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #ff5722, #ff9800); color:#fff;" onclick="saveRestaurantSpecificDelivery()">
+🚀 حفظ وتثبيت أجور توصيل المطعم سحابياً
+</button>
+</div>
+</div>
+
+<div id="wheelAdminTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">التحكم بعجلة الحظ، تشغيلها أو إيقافها، وتحديد المطعم الراعي والجوائز:</p>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">1. حالة عجلة الحظ:</label>
+<select id="admWheelActive" class="form-input">
+<option value="1">مفعّلة وشغّالة للزبائن ✅</option>
+<option value="0">متوقفة ومغلقة حالياً ❌</option>
+</select>
+
+<label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">2. المطعم الراعي للجوائز:</label>
+<select id="admWheelRest" class="form-input"></select>
+</div>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<label style="font-size:12px; font-weight:800; color:var(--accent-green); display:block; margin-bottom:6px;">3. جوائز عجلة الحظ الحالية:</label>
+<div id="admWheelItemsList" style="max-height:160px; overflow-y:auto; margin-bottom:8px;"></div>
+
+<div style="display:flex; gap:6px;">
+<input type="text" id="newWheelPrizeInput" class="form-input" placeholder="اسم جائزة جديدة (مثال: لفة صاج، فنكر...)" style="margin-bottom:0; flex:1;">
+<button type="button" class="btn-discount" style="padding:0 14px; background:var(--accent-green); color:#111; font-weight:900;" onclick="addNewWheelPrize()">➕ إضافة</button>
+</div>
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:linear-gradient(135deg, #9c27b0, #e91e63); color:#fff;" onclick="saveWheelConfigToCloud()">
+💾 حفظ وتعميم إعدادات عجلة الحظ سحابياً
+</button>
+</div>
+
+<!-- تبويب الإشعار الحي المباشر (ثابت ودائمي سحابياً) -->
+<div id="flashAlertTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">إرسال شريط إشعار تفاعلي فوري يظهر لكل زبائن التطبيق وينقلهم للمطعم بنقرة واحدة (محفوظ وثابت سحابياً):</p>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">1. اختر المطعم المستهدف بالعرض:</label>
+<select id="admAlertRestSelect" class="form-input" onchange="updateAlertDeepLinkPreview()"></select>
+
+<label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">2. عنوان الإشعار الملفت:</label>
+<input type="text" id="admAlertTitle" class="form-input" placeholder="مثال: 🔥 عرض ناري من مطعم سندريلا!">
+
+<label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">3. نص وتفاصيل التخفيض:</label>
+<input type="text" id="admAlertBody" class="form-input" placeholder="مثال: خصم 1,000 د.ع فوري عند الطلب الآن لفترة محدودة 🍔">
+
+<div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+<label style="font-size:12px; font-weight:800;">حالة الإشعار:</label>
+<select id="admAlertStatus" class="form-input" style="margin-bottom:0; flex:1;">
+<option value="1">مفعّل (يظهر للزبائن الآن) ✅</option>
+<option value="0">إيقاف الإشعار ❌</option>
+</select>
+</div>
+</div>
+
+<div style="display:flex; gap:6px; margin-bottom:12px;">
+<button type="button" class="btn-discount" style="flex:1; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveFlashAlert()">
+🚀 حفظ وتعميم الإشعار الحي سحابياً
+</button>
+<button type="button" onclick="clearFlashAlert()" style="background:#4a1525; color:#ff4d6d; border:none; padding:0 14px; border-radius:14px; font-size:11px; font-weight:800; cursor:pointer;">
+إلغاء الإشعار
+</button>
+</div>
+
+<div style="background:var(--bg-main); border:1px dashed var(--accent-orange); border-radius:14px; padding:12px;">
+<span style="font-size:12px; font-weight:900; color:var(--accent-orange); display:block; margin-bottom:4px;">📲 الرابط المباشر للإشعار الخارجي (OneSignal / واتساب):</span>
+<div id="alertDeepLinkBox" style="font-size:11px; color:#fff; word-break:break-all; background:#191c25; padding:8px 10px; border-radius:8px; border:1px solid #333; margin-bottom:8px; direction:ltr; text-align:left;"></div>
+<button type="button" class="btn-discount" style="width:100%; padding:10px; font-size:11px;" onclick="copyAlertDeepLink()">
+📋 نسخ رابط الإشعار المباشر للمطعم
+</button>
+</div>
+</div>
+
+<div id="generalDiscountTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">تحديد خصم عام لكل مطاعم التطبيق يُحسم تلقائياً عند وصول الطلب لحد معين:</p>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
+<span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🌟 الشريحة الأولى (مثلاً: طلبات من 3,000 د.ع):</span>
+<div style="display:flex; gap:8px; margin-top:8px;">
+<input type="number" id="admTier1Min" class="form-input" placeholder="الحد الأدنى (مثال: 3000)" style="margin-bottom:0; flex:1;">
+<input type="number" id="admTier1Discount" class="form-input" placeholder="مبلغ الخصم (مثال: 500)" style="margin-bottom:0; flex:1; color:var(--accent-green); font-weight:900;">
+</div>
+</div>
+
+<div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:12px;">
+<span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🔥 الشريحة الثانية (مثلاً: طلبات من 5,000 د.ع فما فوق):</span>
+<div style="display:flex; gap:8px; margin-top:8px;">
+<input type="number" id="admTier2Min" class="form-input" placeholder="الحد الأدنى (مثال: 5000)" style="margin-bottom:0; flex:1;">
+<input type="number" id="admTier2Discount" class="form-input" placeholder="مبلغ الخصم (مثال: 1000)" style="margin-bottom:0; flex:1; color:var(--accent-green); font-weight:900;">
+</div>
+</div>
+
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+<label style="font-size:12px; font-weight:800;">حالة الخصم العام:</label>
+<select id="admGeneralDiscountStatus" class="form-input" style="margin-bottom:0; flex:1;">
+<option value="1">مفعّل للجميع تلقائياً ✅</option>
+<option value="0">معطّل (إيقاف الخصم العام) ❌</option>
+</select>
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveGeneralDiscountTiers()">
+💾 حفظ وتعميم الخصم العام سحابياً
+</button>
+</div>
+
+<div id="serviceFeeTab" class="admin-tab-content">
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">رسم خدمة وجباتي يظهر لجميع المستخدمين ويُضاف للسلة بصورة مستقلة عن أجور التوصيل.</p>
+<div style="background:var(--bg-card);padding:12px;border-radius:14px;border:1px solid var(--border-color);margin-bottom:10px;">
+<label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px;">رسم الخدمة (د.ع) — 250 ديناراً أو أكثر:</label>
+<input type="number" id="admServiceFeeAmount" class="form-input" min="250" step="50" placeholder="250 أو أكثر">
+<label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px;">حالة رسم الخدمة:</label>
+<select id="admServiceFeeStatus" class="form-input"><option value="1">مفعّل للجميع ✅</option><option value="0">معطّل للجميع ❌</option></select>
+<button type="button" class="btn-discount" style="width:100%;padding:12px;background:var(--accent-green);color:#111;" onclick="saveWajabatyServiceFee()">💾 حفظ وتعميم رسم الخدمة سحابياً</button>
+<div id="serviceFeeAdminStatus" style="font-size:11px;color:var(--text-muted);margin-top:8px;">الإعداد المحفوظ سحابياً يطبق على الجميع.</div>
+</div>
+</div>
+
+<div id="restDiscountTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">تحديد خصم خاص لمطعم معين بمبلغ مقطوع (مثال: 500 أو 1,000 د.ع):</p>
+<select id="admDiscountRestSelect" class="form-input"></select>
+
+<div style="display:flex; gap:8px; margin-bottom:10px;">
+<input type="number" id="admDiscountAmount" class="form-input" placeholder="مبلغ الخصم د.ع (500 أو 1000)" style="margin-bottom:0; flex:1; font-weight:900; color:var(--accent-green);">
+<input type="number" id="admDiscountMinOrder" class="form-input" placeholder="الحد الأدنى للطلب (مثال: 3000)" style="margin-bottom:0; flex:1;">
+</div>
+
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+<label style="font-size:12px; font-weight:800;">الحالة:</label>
+<select id="admDiscountStatus" class="form-input" style="margin-bottom:0; flex:1;">
+<option value="1">مفعّل للمطعم ✅</option>
+<option value="0">معطّل ❌</option>
+</select>
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111; margin-bottom:14px;" onclick="saveRestaurantDiscount()">
+💾 حفظ وتعميم خصم المطعم سحابياً
+</button>
+
+<div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:6px;">الخصومات النشطة حالياً للمطاعم:</div>
+<div id="activeRestDiscountsList" style="max-height:160px; overflow-y:auto; border:1px solid var(--border-color); border-radius:12px; padding:6px; background:var(--bg-main);"></div>
+</div>
+
+<div id="discountCodesTab" class="admin-tab-content">
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">أنشئ رموزاً يدوياً وشاركها مع الزبائن. يمكن تخصيص الرمز لكل المطاعم أو لمطعم محدد.</p>
+<div style="background:var(--bg-card);padding:12px;border-radius:14px;border:1px solid var(--border-color);margin-bottom:12px;">
+<label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">رمز الخصم</label>
+<input id="admCouponCode" class="form-input" maxlength="32" placeholder="مثال: WJ500" style="text-transform:uppercase;">
+<label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">نطاق الرمز</label>
+<select id="admCouponScope" class="form-input" onchange="toggleCouponRestaurantField()"><option value="general">عام — جميع المطاعم</option><option value="restaurant">مطعم محدد</option></select>
+<select id="admCouponRest" class="form-input" style="display:none;"></select>
+<div style="display:flex;gap:8px;">
+<select id="admCouponType" class="form-input" style="flex:1;"><option value="fixed">مبلغ ثابت (د.ع)</option><option value="percent">نسبة مئوية (%)</option></select>
+<input id="admCouponValue" type="number" min="1" class="form-input" placeholder="قيمة الخصم" style="flex:1;">
+</div>
+<div style="display:flex;gap:8px;">
+<input id="admCouponMin" type="number" min="0" class="form-input" placeholder="الحد الأدنى للطلب (0 = بلا حد)" style="flex:1;">
+<input id="admCouponLimit" type="number" min="0" class="form-input" placeholder="عدد الاستخدامات (0 = غير محدود)" style="flex:1;">
+</div>
+<label style="font-size:11px;font-weight:800;display:block;margin-bottom:4px;">تاريخ الانتهاء (اختياري)</label>
+<input id="admCouponExpiry" type="date" class="form-input">
+<button type="button" class="btn-discount" onclick="createDiscountCode()" style="width:100%;padding:12px;background:var(--accent-green);color:#111;font-weight:900;">💾 إنشاء وحفظ الرمز سحابياً</button>
+</div>
+<div style="font-size:12px;font-weight:800;margin-bottom:6px;">الرموز الحالية</div>
+<div id="adminDiscountCodesList" style="max-height:230px;overflow-y:auto;border:1px solid var(--border-color);border-radius:12px;padding:6px;background:var(--bg-main);"></div>
+</div>
+
+<!-- تبويب قفل وحذف الوجبات -->
+<div id="editMealsTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">قفل أي وجبة تنفد بالمطعم، تعديل الأسعار، أو حذف الوجبات نهائياً:</p>
+<input type="text" id="quickSearchMeal" class="form-input" placeholder="ابحث باسم الوجبة أو المطعم..." oninput="filterQuickMeals()">
+<div id="quickMealsList" style="max-height:280px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+</div>
+
+<div id="restPinsTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">الرموز السرية لكل مطعم للدخول للوحة الخاصة به وقفل وجباته:</p>
+<div id="restPinsList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:14px; padding:6px; background:var(--bg-main);"></div>
+</div>
+
+<div id="bannerTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">التحكم في العروض في البنر العلوي (يدعم الصور وصيغ الفيديو MP4 كإعلانات للمطاعم):</p>
+
+<div style="background:var(--bg-card); padding:10px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:10px;">
+<span style="font-weight:900; color:var(--accent-orange); font-size:12px;">🌟 العرض الأول:</span>
+<input type="text" id="admB1Title" class="form-input" style="margin-top:6px;" placeholder="عنوان العرض">
+<input type="text" id="admB1Desc" class="form-input" placeholder="تفاصيل العرض">
+<label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">🖼️ اختر صورة البنر من الهاتف</label>
+<input type="file" id="admB1ImageFile" class="form-input" accept="image/*" onchange="previewBannerImage(this)" style="padding:9px;">
+<img id="admB1ImagePreview" alt="معاينة صورة البنر" style="display:none;width:100%;max-height:150px;object-fit:cover;border-radius:12px;margin:5px 0 10px;">
+<label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">🎬 فيديو من الهاتف (مدة دقيقة كحد أقصى)</label>
+<input type="file" id="admB1VideoFile" class="form-input" accept="video/*" onchange="inspectBannerVideo(this)" style="padding:9px;">
+<div id="admB1VideoStatus" style="font-size:11px;color:var(--text-muted);margin:4px 0 8px;"></div>
+<label style="display:block;font-size:12px;font-weight:800;margin:8px 0 5px;color:#fff;">أو رابط صورة / فيديو مباشر</label>
+<input type="url" id="admB1Img" class="form-input" placeholder="رابط فيديو مباشر MP4 أو رابط Drive (اختياري)">
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; padding:13px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAdminBanners()">
+💾 حفظ وتعميم عروض البنر والفيديو سحابياً
+</button>
+</div>
+
+<div id="addMealTab" class="admin-tab-content">
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">أنشئ وجبة عادية أو وجبة توفير مخصصة بنفسك:</p>
+<input type="text" id="newMealName" class="form-input" placeholder="اسم الوجبة (مثال: وجبة كرسبي توفير)">
+<input type="text" id="newMealDesc" class="form-input" placeholder="مكونات وتفاصيل الوجبة (مثال: 3 قطع كنتاكي + ستربس)">
+<select id="newMealRest" class="form-input"></select>
+<input type="text" id="newMealCatCustom" class="form-input" placeholder="المطبخ / التصنيف (مثال: وجبات التوفير)">
+<input type="number" id="newMealPrice" class="form-input" placeholder="السعر الأصلي بالدينار (مثال: 17750)">
+
+<div style="background:#191c25; border:1px dashed var(--accent-orange); padding:10px; border-radius:14px; margin-bottom:9px;">
+<label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">🔥 سعر التوفير / العرض (اختياري - لتفعيل ميزة التوفير):</label>
+<input type="number" id="newMealSavingPrice" class="form-input" placeholder="سعر التوفير المخفض (مثال: 9750)" style="margin-bottom:0; font-weight:900; color:var(--accent-green);">
+</div>
+
+<select id="newMealZone" class="form-input">
+<option value="الكرخ">الكرخ</option>
+<option value="الرصافة">الرصافة</option>
+</select>
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="addNewMealLocally()">
+➕ إضافة الوجبة وحفظها بالسحابة
+</button>
+</div>
+
+<div id="addRestTab" class="admin-tab-content">
+<input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد (عربي أو English)">
+<input type="tel" id="newRestPhone" class="form-input" placeholder="رقم واتساب المطعم (مثال: 07701234567)">
+<button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="addNewRestaurant()">
+➕ إضافة المطعم وحفظه سحابياً للأبد
+</button>
+</div>
+
+<button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
+</div>
+</div>
+
+<div id="bannerVideoModal" role="dialog" aria-modal="true" aria-hidden="true" onclick="if(event.target===this)closeBannerVideo()" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:18px;">
+<div style="width:100%;max-width:560px;background:#151720;border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:12px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#fff;font-weight:900"><span>🎬 فيديو وجباتي</span><button type="button" onclick="closeBannerVideo()" style="border:0;border-radius:50%;width:36px;height:36px;background:#333;color:#fff;font-size:22px">×</button></div>
+<video id="bannerVideoPlayer" controls playsinline preload="none" style="display:block;width:100%;max-height:65vh;background:#000;border-radius:12px"></video>
+<a id="bannerVideoExternalLink" href="#" target="_blank" rel="noopener noreferrer" style="display:none;margin-top:12px;background:#ff2a5f;color:white;text-decoration:none;padding:12px 16px;border-radius:12px;justify-content:center;font-weight:900">فتح الفيديو في المتصفح</a>
+</div>
+</div>
+
+<script>
+const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
+const FIREBASE_DISCOUNTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_discounts.json";
+const FIREBASE_GENERAL_DISCOUNT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/general_discount.json";
+const FIREBASE_SERVICE_FEE_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wajabaty_service_fee.json";
+const FIREBASE_DISCOUNT_CODES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/discount_codes.json";
+const FIREBASE_BANNERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/app_banners.json";
+const FIREBASE_FLASH_ALERT_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/flash_alert.json";
+const FIREBASE_ORDERS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/orders.json";
+const FIREBASE_WHEEL_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wheel_config.json";
+const FIREBASE_RESTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/restaurants.json";
+const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_phones.json";
+const FIREBASE_PINS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_pins.json";
+const FIREBASE_DELIVERY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_delivery_fees.json";
+const FIREBASE_SUBS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_subscriptions.json";
+
+const ALL_TALABATY_CUISINES = [
+"وجبات التوفير", "وجبات سريعة", "عراقي", "برجر", "بيتزا", "دجاج ومقرمش", "ريزو",
+"شاورما وصاج", "ساندويشات", "مشويات وشرقي", "فلافل", "معجنات", "فطائر", "حلويات",
+"حلويات عربية", "كيك", "شوكولاتة", "كريب", "ايس كريم", "قهوة", "كافيه", "عصائر",
+"المشروبات", "فواكه", "صحي", "عالمي", "تركي", "ياباني", "مخبوزات"
+];
+
+let selectedCuisinesFilters = [];
+let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
+let restDiscounts = {};
+let discountCodes = {};
+let activeCoupon = null;
+let cloudOrders = [];
+let restDeliveryFees = {};
+let restSubscriptions = {};
+let selectedOrderPeriod = 'all';
+
+let generalDiscountConfig = { active: false, tier1: { min: 3000, discount: 500 }, tier2: { min: 5000, discount: 1000 } };
+let generalDiscountConfigUpdatedAt = 0;
+let wajabatyServiceFee = { active: true, amount: 250 };
+let currentFlashAlert = null;
+let currentMenuBase64 = "";
+let tempAiExtractedMeals = [];
+
+let wheelConfig = {
+active: false,
+restaurant: "مطعم سندريلا",
+items: ["لفة صاج 🌯", "صحن فنكر 🍟", "قوطية ببسي 🥤", "وجبة أطفال 🎁", "خصم 1,000 د.ع 🏷️", "حظ أوفر المره الجاية ⏳"]
+};
+
+let userWonPrize = null;
+let isSpinning = false;
+let currentWheelAngle = 0;
+const WHEEL_COLORS = ["#ff2a5f", "#ff9800", "#00e676", "#00b0ff", "#9c27b0", "#e91e63"];
+
+const DEFAULT_REST_PINS = {
+"مطعم سندريلا": "1100", "جيكي بركر": "1101", "بوراك": "1102", "اهل الكرم": "1103",
+"دجاج الباشا الشهير": "1104", "زعتر وزيتون": "1105", "بوكس بركر": "1106", "جكن عمو ناجي": "1107",
+"Riz": "1108", "شاورما ابو العبد": "1109", "صاج البديع": "1114"
+};
+let REST_PINS = { ...DEFAULT_REST_PINS };
+let currentPortalRest = "";
+
+const BASE_RESTS = ["مطعم سندريلا", "Riz", "اهل الكرم", "بوراك", "بوكس بركر", "جكن عمو ناجي", "جيكي بركر", "دجاج الباشا الشهير", "زعتر وزيتون", "شاورما ابو العبد", "فلافل لبنان", "صاج البديع", "ورق عنب بغداد"];
+let RESTS = [...BASE_RESTS];
+
+let REST_PHONES = {
+"مطعم سندريلا": "9647708111561", "جيكي بركر": "9647771919118", "بوراك": "9647733967744",
+"اهل الكرم": "9647780188831", "دجاج الباشا الشهير": "9647746078333", "زعتر وزيتون": "9647714777444",
+"بوكس بركر": "9647737770783", "جكن عمو ناجي": "9647783281472", "Riz": "9647731881881", "صاج البديع": "9647708111561"
+};
+
+const PERMANENT_CUSTOM_MEALS = [
+{ id: 9001, name: "بوكس طلبات", desc: "ساندويش زنجر، ساندويش بركر، ساندويش تويستر", rest: "مطعم سندريلا", cat: "وجبات التوفير", price: 11250, savingPrice: 5625, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600", phone: "9647708111561", zone: "الكرخ", available: true },
+{ id: 9002, name: "وجبة كرسبي توفير", desc: "3 قطع كنتاكي، 4 قطع ستربس وسندويتش زنجر", rest: "مطعم سندريلا", cat: "وجبات التوفير", price: 17750, savingPrice: 9750, img: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600", phone: "9647708111561", zone: "الكرخ", available: true }
+];
+
+const RAW_DATA = "1|بركر لحم كلاسيك|5|0|2500|0;2|بركر دجاج مقرمش|5|0|2500|1;7|صاج لحم|5|7|3000|3;8|صاج دجاج|5|7|2500|3;9|سندويش زنجر حار|5|0|3000|4";
+const IMGS = ["https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600", "https://images.unsplash.com/photo-1550547660-d9450f859349?w=600"];
+
+function normalizeCategory(cat) {
+if (!cat) return 'عراقي';
+const c = String(cat).trim();
+if (c.includes('برجر') || c.includes('بركر')) return 'برجر';
+if (c.includes('بيتزا') || c.includes('فطائر')) return 'بيتزا';
+return 'عراقي';
+}
+
+let allMeals = [
+...PERMANENT_CUSTOM_MEALS,
+...RAW_DATA.split(';').map(str => {
+if (!str || !str.includes('|')) return null;
+const parts = str.split('|');
+if(parts.length < 6) return null;
+const restName = BASE_RESTS[Number(parts[2])] || "صاج البديع";
+return {
+id: Number(parts[0]), name: parts[1], rest: restName, cat: normalizeCategory("وجبات أخرى"),
+price: Number(parts[4]), img: IMGS[0], phone: REST_PHONES[restName] || "9647708111561", zone: "الكرخ", available: true
+};
+}).filter(Boolean)
+];
+
+let cart = [];
+let selectedZone = "الكل";
+let selectedRest = "الكل";
+let selectedCat = "الكل";
+let currentGpsLocation = "";
+let appBanners = [{ title: "🍔 وجباتي VIP", desc: "أقوى المطاعم وأشهى عروض التوفير", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" }];
+
+function money(num) { return Number(num || 0).toLocaleString('ar-IQ') + " د.ع"; }
+function showToast(msg) {
+const t = document.getElementById("toastBox");
+if (!t) return;
+t.innerText = msg;
+t.classList.add("show");
+setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function getDeliveryFeeForRestaurant(restName, targetZone = null) {
+const zone = targetZone || document.getElementById("custZoneSelect")?.value || (selectedZone !== "الكل" ? selectedZone : "الكرخ");
+if (restName && restDeliveryFees) {
+const matchedKey = Object.keys(restDeliveryFees).find(k => k.toLowerCase().trim() === restName.toLowerCase().trim());
+if (matchedKey && restDeliveryFees[matchedKey]) {
+const config = restDeliveryFees[matchedKey];
+if (zone === "الرصافة" && config.rusafa) return Number(config.rusafa);
+if (zone === "الكرخ" && config.karkh) return Number(config.karkh);
+}
+}
+return orderDeliveryFee;
+}
+
+function renderBanners() {
+const track = document.getElementById("bannerTrack");
+const dotsBox = document.getElementById("bannerDots");
+if (!track || !dotsBox) return;
+track.innerHTML = appBanners.map(b => `<div class="banner-slide"><img src="${b.img}" alt=""><div class="banner-overlay"><h2>${b.title}</h2><p>${b.desc}</p></div></div>`).join('');
+dotsBox.innerHTML = appBanners.map((_,i)=>`<div class="banner-dot ${i===0?'active':''}"></div>`).join('');
+}
+
+function renderMeals() {
+const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+const grid = document.getElementById("mealsGrid");
+if (!grid) return;
+
+const filtered = allMeals.filter(m => {
+const matchZone = selectedZone === "الكل" || m.zone === selectedZone;
+const matchRest = selectedRest === "الكل" || (m.rest && m.rest.toLowerCase().trim() === selectedRest.toLowerCase().trim());
+const matchCat = selectedCat === "الكل" || m.cat === selectedCat;
+const matchQuery = !query || m.name.toLowerCase().includes(query) || (m.rest && m.rest.toLowerCase().includes(query));
+return matchZone && matchRest && matchCat && matchQuery;
+});
+
+if (filtered.length === 0) {
+grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:13px;">لا توجد وجبات مطابقة</div>';
+return;
+}
+
+grid.innerHTML = filtered.map(m => {
+const isAvailable = (m.available !== false);
+const hasSaving = (m.savingPrice && Number(m.savingPrice) > 0 && Number(m.savingPrice) < Number(m.price));
+return `
+<div class="meal-card-talabaty ${!isAvailable ? 'out-of-stock' : ''}">
+<div class="talabaty-img-box">
+<img src="${m.img || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600'}" alt="">
+${!isAvailable ? `<span class="soldout-badge-overlay">نفدت 🚫</span>` : ''}
+${isAvailable ? `<button class="btn-quick-add" onclick="addToCart('${m.id}')">+</button>` : ''}
+</div>
+<div class="talabaty-info-box">
+<div class="talabaty-title">${m.name}</div>
+<div class="talabaty-desc">${m.desc || 'وجبة شهية ومميزة'}</div>
+<div class="talabaty-rest-tag">🏪 ${m.rest}</div>
+<div class="talabaty-pricing">
+${hasSaving ? `<span class="talabaty-main-price">${money(m.savingPrice)}</span><span class="talabaty-old-price">${money(m.price)}</span>` : `<span class="talabaty-main-price">${money(m.price)}</span>`}
+</div>
+</div>
+</div>
+`;
+}).join('');
+}
+
+function buildRestaurantsBar() {
+const rests = ["الكل", ...new Set([...RESTS, ...allMeals.map(m => m.rest)])];
+const rBar = document.getElementById("restaurantsBar");
+if (!rBar) return;
+rBar.innerHTML = rests.map(r => `<div class="pill ${r === selectedRest ? 'active-white' : ''}" onclick="setRestaurant('${r}', this)">${r === 'الكل' ? 'كل المطاعم' : r}</div>`).join('');
+}
+
+function buildCategoriesBar() {
+const cBar = document.getElementById("categoriesBar");
+if (!cBar) return;
+const cats = ["الكل", ...new Set(allMeals.map(m => m.cat).filter(Boolean))];
+cBar.innerHTML = cats.map(c => `<div class="pill ${c === selectedCat ? 'active-green' : ''}" onclick="setCategory('${c}', this)">${c === 'الكل' ? 'كل الأصناف' : c}</div>`).join('');
+}
+
+function setZone(zone, el) {
+selectedZone = zone;
+document.querySelectorAll('.zone-chip').forEach(c => c.classList.remove('active'));
+el.classList.add('active');
+renderMeals();
+}
+
+function setRestaurant(rest, el) {
+selectedRest = rest;
+document.querySelectorAll('#restaurantsBar .pill').forEach(c => c.classList.remove('active-white'));
+if (el) el.classList.add('active-white');
+renderMeals();
+}
+
+function setCategory(cat, el) {
+selectedCat = cat;
+document.querySelectorAll('#categoriesBar .pill').forEach(c => c.classList.remove('active-green'));
+el.classList.add('active-green');
+renderMeals();
+}
+
+function addToCart(mealId) {
+const meal = allMeals.find(item => String(item.id) === String(mealId));
+if (!meal || meal.available === false) return;
+const finalPrice = meal.savingPrice || meal.price;
+const existing = cart.find(item => String(item.id) === String(mealId));
+if (existing) existing.qty += 1;
+else cart.push({ ...meal, actualPrice: finalPrice, qty: 1 });
+updateCartUI();
+showToast(`🍔 أضيفت: ${meal.name}`);
+}
+
+function updateCartUI() {
+const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
+document.getElementById("cartCountTop").innerText = totalCount;
+document.getElementById("cartTotalItems").innerText = totalCount;
+document.getElementById("cartTotalSum").innerText = money(subtotal);
+const bar = document.getElementById("floatCartBar");
+if (bar) bar.style.display = totalCount > 0 ? "flex" : "none";
+}
+
+function openCartDrawer() {
+if (cart.length === 0) { showToast("⚠️ السلة فارغة!"); return; }
+renderCartDrawerContent();
+document.getElementById("cartDrawer").classList.add("show");
+}
+function closeCartDrawer() { document.getElementById("cartDrawer").classList.remove("show"); }
+function closeIfOutsideDrawer(e) { if (e.target.id === 'cartDrawer') closeCartDrawer(); }
+
+function renderCartDrawerContent() {
+const box = document.getElementById("drawerItemsList");
+const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
+if (box) box.innerHTML = cart.map(i => `<div class="cart-item-row"><div class="cart-item-info"><strong>${i.name}</strong><br>${money(i.actualPrice * i.qty)}</div><span>${i.qty}x</span></div>`).join('');
+const bill = document.getElementById("billSummaryCard");
+if (bill) bill.innerHTML = `<div class="bill-row total"><span>المجموع الكلي:</span><strong>${money(subtotal)}</strong></div>`;
+}
+
+function submitFullOrder() {
+const name = document.getElementById("custName").value.trim();
+const phone = document.getElementById("custPhone").value.trim();
+if (!name || !phone) { alert("أدخل الاسم ورقم الهاتف!"); return; }
+cart = [];
+updateCartUI();
+closeCartDrawer();
+showToast("✅ تم إرسال الطلب بنجاح");
+}
+
+/* الميزات المُحدثة والخاصة بالإدارة */
+let lastTap = 0;
+function handleAdminDoubleTap() {
+const now = Date.now();
+if (now - lastTap < 500) {
+// تصفير خانة الرمز السري عند الفتح لضمان الأمان
+const pinInput = document.getElementById("adminPinInput");
+if (pinInput) pinInput.value = "";
+document.getElementById("adminPinModal").classList.add("show");
+}
+lastTap = now;
+}
+
+function closeAdminPin() {
+const pinInput = document.getElementById("adminPinInput");
+if (pinInput) pinInput.value = ""; // تنظيف وتفريغ الباسورد فوراً عند الإغلاق
+document.getElementById("adminPinModal").classList.remove("show");
+}
+
+function checkAdminPin() {
+const enteredPin = document.getElementById("adminPinInput").value.trim();
+closeAdminPin(); // تفريغ الخانة وإغلاق النافذة بأمان
+if (enteredPin === "198722") {
+openAdminPanel();
+showToast("👑 مرحباً بك في لوحة الإدارة");
+return;
+}
+alert("الرمز غير صحيح!");
+}
+
+function openAdminPanel() {
+document.getElementById("adminPanelModal").classList.add("show");
+filterQuickMeals();
+}
+function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
+function closeIfOutsideAdminPanel(e) { if (e.target.id === 'adminPanelModal') closeAdminPanel(); }
+
+function switchAdminTab(tabId, btn) {
+document.querySelectorAll('#adminPanelModal .admin-tab-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('#adminPanelModal .admin-tab-content').forEach(c => c.classList.remove('active'));
+btn.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+if (tabId === 'editMealsTab') filterQuickMeals();
+}
+
+/* إشعار حي ثابت ودائمي سحابياً */
+function saveFlashAlert() {
+const rest = document.getElementById("admAlertRestSelect")?.value || "مطعم سندريلا";
+const title = document.getElementById("admAlertTitle")?.value.trim() || "";
+const body = document.getElementById("admAlertBody")?.value.trim() || "";
+const active = document.getElementById("admAlertStatus")?.value === "1";
+
+currentFlashAlert = { active, title, body, rest };
+fetch(FIREBASE_FLASH_ALERT_URL, {
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(currentFlashAlert)
+});
+updateLiveAlertUI();
+showToast("📢 تم حفظ وتعميم الإشعار الحي بنجاح");
+}
+
+function clearFlashAlert() {
+currentFlashAlert = { active: false, title: "", body: "", rest: "" };
+fetch(FIREBASE_FLASH_ALERT_URL, {
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({})
+});
+updateLiveAlertUI();
+showToast("🗑️ تم إلغاء الإشعار الحي");
+}
+
+function updateLiveAlertUI() {
+const bar = document.getElementById("liveAlertBar");
+if (!bar) return;
+if (currentFlashAlert && currentFlashAlert.active && currentFlashAlert.title) {
+document.getElementById("liveAlertTitle").innerText = currentFlashAlert.title;
+document.getElementById("liveAlertDesc").innerText = currentFlashAlert.body || "";
+bar.style.display = "flex";
+} else {
+bar.style.display = "none";
+}
+}
+function dismissLiveAlert(e) { e.stopPropagation(); document.getElementById("liveAlertBar").style.display = "none"; }
+
+/* ميزة قفل وحذف الوجبات والمطاعم */
+function toggleMealAvailability(mealId) {
+const item = allMeals.find(m => String(m.id) === String(mealId));
+if (!item) return;
+item.available = (item.available === false) ? true : false;
+fetch(FIREBASE_MEALS_URL, {
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(allMeals)
+});
+renderMeals();
+filterQuickMeals();
+showToast(item.available ? `✅ متوفرة: ${item.name}` : `🚫 مقفولة: ${item.name}`);
+}
+
+function deleteMeal(mealId) {
+const item = allMeals.find(m => String(m.id) === String(mealId));
+if (!item) return;
+if (confirm(`هل أنت متأكد من حذف (${item.name}) نهائياً؟`)) {
+allMeals = allMeals.filter(m => String(m.id) !== String(mealId));
+fetch(FIREBASE_MEALS_URL, {
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(allMeals)
+});
+renderMeals();
+filterQuickMeals();
+showToast(`🗑️ تم الحذف: ${item.name}`);
+}
+}
+
+function filterQuickMeals() {
+const q = (document.getElementById("quickSearchMeal")?.value || "").toLowerCase().trim();
+const box = document.getElementById("quickMealsList");
+if (!box) return;
+const filtered = allMeals.filter(m => !q || m.name.toLowerCase().includes(q)).slice(0, 30);
+box.innerHTML = filtered.map(m => `
+<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #292d38; font-size:11px;">
+<div><strong>${m.name}</strong> (${m.rest})<br><span style="color:var(--accent-green);">${money(m.price)}</span></div>
+<div style="display:flex; gap:4px;">
+<button type="button" class="btn-stock-toggle ${m.available !== false ? 'in-stock' : 'out-of-stock'}" onclick="toggleMealAvailability('${m.id}')">
+${m.available !== false ? 'متوفرة ✅' : 'قفل ❌'}
+</button>
+<button type="button" onclick="deleteMeal('${m.id}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:5px 7px; border-radius:8px; cursor:pointer;">حذف 🗑️</button>
+</div>
+</div>
+`).join('');
+}
+
+/* المزامنة والبدء */
+async function syncQuietlyWithCloud() {
+try {
+const resAlert = await fetch(FIREBASE_FLASH_ALERT_URL + "?_t=" + Date.now());
+const dataAlert = await resAlert.json();
+if (dataAlert && typeof dataAlert === 'object') {
+currentFlashAlert = dataAlert;
+updateLiveAlertUI();
+}
+} catch(e) {}
+}
+
+window.onload = () => {
+renderBanners();
+buildRestaurantsBar();
+buildCategoriesBar();
+renderMeals();
+syncQuietlyWithCloud();
+};
+</script>
+</body>
+</html>
