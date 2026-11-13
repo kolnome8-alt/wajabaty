@@ -1001,7 +1001,10 @@
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
       <h3 style="margin:0; font-size:16px; color:#fff;">⚙️ إدارة وجباتي السحابية VIP</h3>
-      <span style="font-size:20px; cursor:pointer; color:var(--text-muted);" onclick="closeAdminPanel()">✕</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button type="button" onclick="adminLogout()" style="background:#4a1525;color:#ff4d6d;border:1px solid #ff4d6d;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:900;">خروج 🔒</button>
+        <span style="font-size:20px; cursor:pointer; color:var(--text-muted);" onclick="closeAdminPanel()">✕</span>
+      </div>
     </div>
 
     <div class="admin-tabs">
@@ -1020,6 +1023,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('deleteRestTab', this)">🗑️ حذف مطعم</button>
     </div>
 
     <!-- 📷 ماسح المنيو بالذكاء الاصطناعي -->
@@ -1212,6 +1216,8 @@
         <label style="font-size:12px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">3. نص وتفاصيل التخفيض:</label>
         <input type="text" id="admAlertBody" class="form-input" placeholder="مثال: خصم 1,000 د.ع فوري عند الطلب الآن لفترة محدودة 🍔">
 
+        <label style="font-size:11px;font-weight:800;display:block;margin:8px 0 4px;">مدة ظهور الإشعار بالساعات (24 ساعة افتراضياً):</label>
+        <input type="number" id="admAlertDurationHours" class="form-input" min="1" max="720" value="24" placeholder="24" style="margin-bottom:8px;">
         <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
           <label style="font-size:12px; font-weight:800;">حالة الإشعار:</label>
           <select id="admAlertStatus" class="form-input" style="margin-bottom:0; flex:1;">
@@ -1294,6 +1300,8 @@
         <input type="number" id="admDiscountMinOrder" class="form-input" placeholder="الحد الأدنى للطلب (مثال: 3000)" style="margin-bottom:0; flex:1;">
       </div>
 
+      <label style="font-size:11px;font-weight:800;display:block;margin:0 0 4px;">تاريخ انتهاء خصم المطعم (يبقى محفوظاً حتى هذا التاريخ):</label>
+      <input type="date" id="admDiscountExpiry" class="form-input">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
         <label style="font-size:12px; font-weight:800;">الحالة:</label>
         <select id="admDiscountStatus" class="form-input" style="margin-bottom:0; flex:1;">
@@ -1405,6 +1413,12 @@
       </button>
     </div>
 
+    <div id="deleteRestTab" class="admin-tab-content">
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:10px;">حذف المطعم نهائياً مع وجباته وأسعاره ورموزه وخصوماته وإعدادات التوصيل والاشتراك وسجل طلباته المرتبط به. لا يمكن التراجع بعد التأكيد.</p>
+      <select id="deleteRestSelect" class="form-input"></select>
+      <button type="button" class="btn-discount" style="width:100%;padding:12px;background:#4a1525;color:#ff4d6d;border:1px solid #ff4d6d;font-weight:900;" onclick="deleteRestaurantCompletely()">🗑️ حذف المطعم وكل بياناته نهائياً</button>
+    </div>
+
     <button type="button" class="btn-discount" style="width:100%; background:#333; color:#fff; margin-top:14px;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
   </div>
 </div>
@@ -1502,6 +1516,8 @@ const DEFAULT_REST_PINS = {
 };
 let REST_PINS = { ...DEFAULT_REST_PINS };
 let currentPortalRest = "";
+let adminAuthenticated = sessionStorage.getItem("wj_admin_session") === "1";
+
 
 const BASE_RESTS = ["مطعم سندريلا", "Riz", "اهل الكرم", "بوراك", "بوكس بركر", "جكن عمو ناجي", "جيكي بركر", "دجاج الباشا الشهير", "زعتر وزيتون", "شاورما ابو العبد", "فلافل لبنان", "صاج البديع", "ورق عنب بغداد"];
 let RESTS = [...BASE_RESTS];
@@ -1830,11 +1846,25 @@ function renderCustomerDiscountsModal(){
  const box=document.getElementById('couponModalContent');if(!box)return;
  const d=window._wajabatyCustomerDiscounts;if(!d){box.innerHTML='<div style="padding:12px">تعذر تحميل الخصومات. حاول مرة أخرى.</div>';return;}
  let html='';
- if(d.items?.length) html+=d.items.map(c=>`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:right"><strong style="color:var(--accent-green);font-size:15px">${String(c.code||'').replace(/</g,'&lt;')}</strong><div style="font-size:12px;margin-top:4px">${c.type==='percent'?`خصم ${Number(c.value)||0}%`:`خصم ${money(c.value)}`} ${c.scope==='restaurant'?'— '+String(c.restaurant||'مطعم محدد').replace(/</g,'&lt;'):'— عام لجميع المطاعم'}</div>${Number(c.minOrder)>0?`<small>الحد الأدنى: ${money(c.minOrder)}</small>`:''}</div>`).join('');
+ if(d.items?.length) html+=d.items.map(c=>`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:right"><strong style="color:var(--accent-green);font-size:15px">${String(c.code||'').replace(/</g,'&lt;')}</strong><div style="font-size:12px;margin-top:4px">${c.type==='percent'?`خصم ${Number(c.value)||0}%`:`خصم ${money(c.value)}`} ${c.scope==='restaurant'?'— '+String(c.restaurant||'مطعم محدد').replace(/</g,'&lt;'):'— عام لجميع المطاعم'}</div>${Number(c.minOrder)>0?`<small>الحد الأدنى: ${money(c.minOrder)}</small>`:''}${c.expiry?`<small style="display:block;color:var(--text-muted);margin-top:3px;">صالح لغاية: ${c.expiry}</small>`:''}<button type="button" onclick="copyDiscountCode('${String(c.code||'').replace(/'/g,"\\'")}')" style="margin-top:8px;background:#252a36;color:#fff;border:1px solid var(--accent-green);padding:7px 12px;border-radius:9px;font-weight:900;">📋 نسخ كود الخصم</button></div>`).join('');
  if(d.general&&d.general.active!==false)html+=`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border-radius:12px;text-align:right"><strong>🎁 الخصم العام</strong><div style="font-size:12px">${d.general.tier1?`خصم ${money(d.general.tier1.discount)} عند طلب ${money(d.general.tier1.min)}`:''} ${d.general.tier2?` — خصم ${money(d.general.tier2.discount)} عند طلب ${money(d.general.tier2.min)}`:''}</div></div>`;
- if(d.rests&&Object.keys(d.rests).length)html+=Object.entries(d.rests).map(([name,c])=>c&&c.active!==false?`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border-radius:12px;text-align:right"><strong>🔥 ${String(name).replace(/</g,'&lt;')}</strong><div style="font-size:12px">خصم ${money(c.discount||c.value||0)}</div></div>`:'').join('');
+ if(d.rests&&Object.keys(d.rests).length)html+=Object.entries(d.rests).map(([name,c])=>c&&c.active!==false&&(!c.expiry||new Date(c.expiry+'T23:59:59').getTime()>=Date.now())?`<div style="padding:10px;margin:7px 0;background:var(--bg-card);border-radius:12px;text-align:right"><strong>🔥 ${String(name).replace(/</g,'&lt;')}</strong><div style="font-size:12px">خصم ${money(c.discount||c.value||0)}</div>${c.expiry?`<small style="display:block;color:var(--text-muted);margin-top:3px;">صالح لغاية: ${c.expiry}</small>`:''}</div>`:'').join('');
  if(!html)html='<div style="padding:16px;color:var(--text-muted)">لا توجد خصومات فعّالة حالياً.</div>';
  box.innerHTML=html;
+}
+
+async function copyDiscountCode(code) {
+  const value = String(code || "").trim();
+  if (!value) return;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(value);
+    else {
+      const field = document.createElement("textarea");
+      field.value = value; document.body.appendChild(field); field.select();
+      document.execCommand("copy"); field.remove();
+    }
+    showToast("📋 تم نسخ كود الخصم: " + value);
+  } catch (e) { prompt("انسخ كود الخصم:", value); }
 }
 
 function normalizeDiscountCode(code) { return String(code || "").trim().toUpperCase().replace(/\s+/g, ""); }
@@ -1865,6 +1895,7 @@ async function createDiscountCode() {
   if (!code || !/^[A-Z0-9_-]{2,32}$/.test(code)) { alert("اكتب رمزاً من 2 إلى 32 حرفاً/رقماً، دون مسافات أو رموز خاصة."); return; }
   if (!(value > 0) || (type === "percent" && value > 100)) { alert("تحقق من قيمة الخصم؛ النسبة يجب ألا تتجاوز 100%."); return; }
   if (scope === "restaurant" && !document.getElementById("admCouponRest").value) { alert("اختر المطعم المستفيد."); return; }
+  if (scope === "restaurant" && !expiry) { alert("حدد تاريخ انتهاء لرمز خصم المطعم حتى يبقى محفوظاً وفعالاً إلى ذلك التاريخ."); return; }
   const key = code.replace(/[.#$\[\]\/]/g, "_");
   if (discountCodes[key]) { alert("هذا الرمز موجود مسبقاً. استخدم رمزاً آخر أو احذف القديم أولاً."); return; }
   const record = { code, scope, restaurant: scope === "restaurant" ? document.getElementById("admCouponRest").value : "", type, value, minOrder, usageLimit, usedCount: 0, expiry, active: true, createdAt: Date.now() };
@@ -1894,7 +1925,7 @@ function renderDiscountCodesAdmin() {
   if (!box) return;
   const entries = Object.entries(discountCodes || {});
   if (!entries.length) { box.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-muted);font-size:11px;">لا توجد رموز محفوظة حالياً</div>'; return; }
-  box.innerHTML = entries.map(([key,c]) => `<div style="padding:8px;border-bottom:1px solid var(--border-color);font-size:11px;display:flex;gap:8px;align-items:center;justify-content:space-between;"><div><strong style="color:var(--accent-green);font-size:13px;">${c.code || key}</strong><br>${c.scope === "restaurant" ? `مطعم: ${c.restaurant}` : "عام"} — ${c.type === "percent" ? `${c.value}%` : money(c.value)}<br><span style="color:var(--text-muted);">استخدام: ${Number(c.usedCount)||0}${Number(c.usageLimit)>0 ? "/"+c.usageLimit : "/∞"}${c.expiry ? " — ينتهي "+c.expiry : ""} — ${c.active ? "فعّال" : "متوقف"}</span></div><button type="button" onclick="deleteDiscountCode('${key}')" style="background:#4a1525;color:#ff4d6d;border:0;padding:6px 8px;border-radius:8px;">حذف</button></div>`).join("");
+  box.innerHTML = entries.map(([key,c]) => `<div style="padding:8px;border-bottom:1px solid var(--border-color);font-size:11px;display:flex;gap:8px;align-items:center;justify-content:space-between;"><div><strong style="color:var(--accent-green);font-size:13px;">${c.code || key}</strong><br>${c.scope === "restaurant" ? `مطعم: ${c.restaurant}` : "عام"} — ${c.type === "percent" ? `${c.value}%` : money(c.value)}<br><span style="color:var(--text-muted);">استخدام: ${Number(c.usedCount)||0}${Number(c.usageLimit)>0 ? "/"+c.usageLimit : "/∞"}${c.expiry ? " — ينتهي "+c.expiry : " — بلا تاريخ انتهاء"} — ${c.active ? "فعّال" : "متوقف"}</span><br><button type="button" onclick="copyDiscountCode('${String(c.code||key).replace(/'/g,"\\'")}')" style="background:#252a36;color:#fff;border:1px solid var(--accent-green);padding:5px 9px;border-radius:8px;margin-top:5px;">📋 نسخ الكود</button></div><button type="button" onclick="deleteDiscountCode('${key}')" style="background:#4a1525;color:#ff4d6d;border:0;padding:6px 8px;border-radius:8px;">حذف</button></div>`).join("");
 }
 function getCouponDiscount(subtotal, targetRest) {
   if (!activeCoupon || !activeCoupon.record) return {amount:0,label:"",key:""};
@@ -1954,6 +1985,9 @@ function calculateCartDiscount(subtotal, targetRest) {
 
   if (targetRest && restDiscounts[targetRest] && restDiscounts[targetRest].active) {
     const rd = restDiscounts[targetRest];
+    if (rd.expiry && new Date(rd.expiry + "T23:59:59").getTime() < Date.now()) {
+      // يبقى سجل الخصم محفوظاً في Firebase، لكنه يتوقف تلقائياً بعد تاريخ الانتهاء.
+    } else {
     const minRequired = Number(rd.minOrder) || 0;
     const discVal = Number(rd.amount) || 0;
 
@@ -1961,6 +1995,7 @@ function calculateCartDiscount(subtotal, targetRest) {
       discountAmount = discVal;
       discountLabel = `🔥 خصم خاص لمطعم (${targetRest})`;
       return { discountAmount, discountLabel };
+    }
     }
   }
 
@@ -2811,6 +2846,8 @@ function closeAdminPin() { document.getElementById("adminPinModal").classList.re
 function checkAdminPin() {
   const enteredPin = document.getElementById("adminPinInput").value.trim();
   if (enteredPin === "198722") {
+    adminAuthenticated = true;
+    sessionStorage.setItem("wj_admin_session", "1");
     closeAdminPin();
     openAdminPanel();
     showToast("👑 مرحباً بك في لوحة الإدارة العامة");
@@ -2830,6 +2867,11 @@ function checkAdminPin() {
 }
 
 function openAdminPanel() {
+  if (!adminAuthenticated || sessionStorage.getItem("wj_admin_session") !== "1") {
+    document.getElementById("adminPanelModal")?.classList.remove("show");
+    alert("يجب تسجيل الدخول إلى الإدارة أولاً.");
+    return;
+  }
   populateAdminDropdowns();
   loadAdminBannersFromCloud();
   populateFlashAlertInputs();
@@ -2848,6 +2890,13 @@ function openAdminPanel() {
   document.getElementById("adminPanelModal").classList.add("show");
 }
 function closeAdminPanel() { document.getElementById("adminPanelModal").classList.remove("show"); }
+function adminLogout() {
+  adminAuthenticated = false;
+  sessionStorage.removeItem("wj_admin_session");
+  closeAdminPanel();
+  closeAdminPin();
+  showToast("تم تسجيل الخروج من لوحة الإدارة 🔒");
+}
 function closeIfOutsideAdminPanel(e) { if (e.target.id === 'adminPanelModal') closeAdminPanel(); }
 
 function switchAdminTab(tabId, btn) {
@@ -2867,7 +2916,8 @@ function populateFlashAlertInputs() {
   if (sel && currentFlashAlert?.rest) sel.value = currentFlashAlert.rest;
   if (document.getElementById("admAlertTitle")) document.getElementById("admAlertTitle").value = currentFlashAlert?.title || "";
   if (document.getElementById("admAlertBody")) document.getElementById("admAlertBody").value = currentFlashAlert?.body || "";
-  if (document.getElementById("admAlertStatus")) document.getElementById("admAlertStatus").value = currentFlashAlert?.active ? "1" : "0";
+  if (document.getElementById("admAlertStatus")) document.getElementById("admAlertStatus").value = currentFlashAlert?.active && (!currentFlashAlert.expiresAt || Number(currentFlashAlert.expiresAt) > Date.now()) ? "1" : "0";
+  if (document.getElementById("admAlertDurationHours")) document.getElementById("admAlertDurationHours").value = currentFlashAlert?.durationHours || 24;
   updateAlertDeepLinkPreview();
 }
 
@@ -2886,8 +2936,10 @@ function saveFlashAlert() {
   const title = document.getElementById("admAlertTitle").value.trim();
   const body = document.getElementById("admAlertBody").value.trim();
   const active = document.getElementById("admAlertStatus").value === "1";
+  const durationHours = Math.min(720, Math.max(1, Number(document.getElementById("admAlertDurationHours")?.value) || 24));
+  const now = Date.now();
 
-  currentFlashAlert = { id: Date.now(), rest, title, body, active };
+  currentFlashAlert = { id: now, rest, title, body, active, durationHours, createdAt: now, expiresAt: active ? now + durationHours * 60 * 60 * 1000 : null };
   fetch(FIREBASE_FLASH_ALERT_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(currentFlashAlert) });
   updateLiveAlertUI();
   showToast(active ? "📢 تم تعميم الإشعار الحي!" : "❌ تم إيقاف الإشعار");
@@ -2904,7 +2956,7 @@ function clearFlashAlert() {
 function updateLiveAlertUI() {
   const bar = document.getElementById("liveAlertBar");
   if (!bar) return;
-  if (currentFlashAlert && currentFlashAlert.active && currentFlashAlert.title) {
+  if (currentFlashAlert && currentFlashAlert.active && currentFlashAlert.title && (!currentFlashAlert.expiresAt || Number(currentFlashAlert.expiresAt) > Date.now())) {
     document.getElementById("liveAlertTitle").innerText = currentFlashAlert.title;
     document.getElementById("liveAlertDesc").innerText = currentFlashAlert.body || "اطلب الآن واستفد من العرض!";
     bar.style.display = "flex";
@@ -2977,8 +3029,9 @@ function saveRestaurantDiscount() {
   const amount = Number(document.getElementById("admDiscountAmount").value) || 0;
   const minOrder = Number(document.getElementById("admDiscountMinOrder").value) || 0;
   const active = document.getElementById("admDiscountStatus").value === "1";
+  const expiry = document.getElementById("admDiscountExpiry")?.value || "";
 
-  restDiscounts[rest] = { amount, minOrder, active };
+  restDiscounts[rest] = { amount, minOrder, active, expiry, updatedAt: Date.now() };
   fetch(FIREBASE_DISCOUNTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(restDiscounts) });
   renderActiveDiscountsList();
   renderMeals();
@@ -3002,7 +3055,7 @@ function renderActiveDiscountsList() {
   if (keys.length === 0) { box.innerHTML = '<div style="color:var(--text-muted); font-size:11px; text-align:center;">لا توجد خصومات نشطة</div>'; return; }
   box.innerHTML = keys.map(r => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #292d38; font-size:11px;">
-      <div><strong style="color:#fff;">${r}</strong>: <span style="color:var(--accent-green);">${money(restDiscounts[r].amount)}</span></div>
+      <div><strong style="color:#fff;">${r}</strong>: <span style="color:var(--accent-green);">${money(restDiscounts[r].amount)}</span><div style="color:var(--text-muted);font-size:10px;">${restDiscounts[r].expiry ? "ينتهي "+restDiscounts[r].expiry : "بلا تاريخ انتهاء"} — ${restDiscounts[r].active ? "مفعّل" : "متوقف"}</div></div>
       <button type="button" onclick="removeRestDiscount('${r}')" style="background:#4a1525; color:#ff4d6d; border:none; padding:4px 8px; border-radius:8px; cursor:pointer;">إلغاء</button>
     </div>
   `).join('');
@@ -3233,6 +3286,109 @@ function addNewRestaurant() {
   showToast(`🏪 أضيف وحفظ سحابياً للأبد: ${nameInput}`);
 }
 
+async function deleteRestaurantCompletely() {
+  if (!adminAuthenticated) { alert("انتهت جلسة الإدارة. سجل الدخول من جديد."); return; }
+  const rest = document.getElementById("deleteRestSelect")?.value || "";
+  if (!rest) { alert("اختر المطعم المراد حذفه."); return; }
+  const phrase = `حذف (${rest}) نهائياً مع كل وجباته وأسعاره وخصوماته ورموزه واشتراكه وتوصيله وسجل طلباته؟`;
+  if (!confirm(phrase)) return;
+  if (!confirm("تأكيد أخير: هذا الحذف نهائي ولا يمكن التراجع عنه.")) return;
+
+  const resources = [
+    ["meals", FIREBASE_MEALS_URL],
+    ["restaurants", FIREBASE_RESTS_URL],
+    ["phones", FIREBASE_PHONES_URL],
+    ["pins", FIREBASE_PINS_URL],
+    ["delivery", FIREBASE_DELIVERY_URL],
+    ["subscriptions", FIREBASE_SUBS_URL],
+    ["discounts", FIREBASE_DISCOUNTS_URL],
+    ["codes", FIREBASE_DISCOUNT_CODES_URL],
+    ["orders", FIREBASE_ORDERS_URL],
+    ["alert", FIREBASE_FLASH_ALERT_URL],
+    ["wheel", FIREBASE_WHEEL_URL]
+  ];
+  const snapshots = {};
+  try {
+    for (const [key, url] of resources) {
+      const response = await fetch(url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now(), {cache:"no-store"});
+      if (!response.ok) throw new Error("تعذرت قراءة بيانات " + key);
+      snapshots[key] = await response.json();
+    }
+
+    const sameRest = value => String(value || "").trim().toLowerCase() === rest.trim().toLowerCase();
+    const rawMeals = snapshots.meals == null ? allMeals : snapshots.meals;
+    const meals = Array.isArray(rawMeals) ? rawMeals : Object.values(rawMeals || {});
+    const nextMeals = meals.filter(m => m && !sameRest(m.rest));
+    const nextRests = (Array.isArray(snapshots.restaurants) ? snapshots.restaurants : RESTS).filter(r => !sameRest(r));
+    const nextPhones = {...REST_PHONES, ...(snapshots.phones || {})}; delete nextPhones[rest];
+    const nextPins = {...REST_PINS, ...(snapshots.pins || {})}; delete nextPins[rest];
+    const nextDelivery = {...restDeliveryFees, ...(snapshots.delivery || {})}; delete nextDelivery[rest];
+    const nextSubs = {...restSubscriptions, ...(snapshots.subscriptions || {})}; delete nextSubs[rest];
+    const nextDiscounts = {...restDiscounts, ...(snapshots.discounts || {})}; delete nextDiscounts[rest];
+    const nextCodes = {...discountCodes, ...(snapshots.codes || {})};
+    Object.keys(nextCodes).forEach(k => { if (nextCodes[k] && nextCodes[k].scope === "restaurant" && sameRest(nextCodes[k].restaurant)) delete nextCodes[k]; });
+    const rawOrders = snapshots.orders == null ? cloudOrders : snapshots.orders;
+    const nextOrders = Array.isArray(rawOrders)
+      ? rawOrders.filter(o => !o || !sameRest(o.restaurant))
+      : Object.fromEntries(Object.entries(rawOrders).filter(([k,o]) => !o || !sameRest(o.restaurant)));
+    const alertSnapshot = snapshots.alert == null ? currentFlashAlert : snapshots.alert;
+    const wheelSnapshot = snapshots.wheel == null ? wheelConfig : snapshots.wheel;
+    const nextAlert = alertSnapshot && sameRest(alertSnapshot.rest) ? {} : (alertSnapshot || {});
+    const nextWheel = wheelSnapshot && sameRest(wheelSnapshot.restaurant) ? {...wheelSnapshot, active:false} : (wheelSnapshot || {});
+    const updates = [
+      [FIREBASE_MEALS_URL, nextMeals],
+      [FIREBASE_RESTS_URL, nextRests],
+      [FIREBASE_PHONES_URL, nextPhones],
+      [FIREBASE_PINS_URL, nextPins],
+      [FIREBASE_DELIVERY_URL, nextDelivery],
+      [FIREBASE_SUBS_URL, nextSubs],
+      [FIREBASE_DISCOUNTS_URL, nextDiscounts],
+      [FIREBASE_DISCOUNT_CODES_URL, nextCodes],
+      [FIREBASE_ORDERS_URL, nextOrders],
+      [FIREBASE_FLASH_ALERT_URL, nextAlert],
+      [FIREBASE_WHEEL_URL, nextWheel]
+    ];
+    for (const [url, data] of updates) {
+      const response = await fetch(url, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)});
+      if (!response.ok) throw new Error("فشل حفظ أحد تحديثات الحذف في Firebase.");
+    }
+
+    RESTS = RESTS.filter(r => !sameRest(r));
+    REST_PHONES = nextPhones;
+    REST_PINS = nextPins;
+    restDeliveryFees = nextDelivery;
+    restSubscriptions = nextSubs;
+    restDiscounts = nextDiscounts;
+    discountCodes = nextCodes;
+    cloudOrders = Array.isArray(nextOrders) ? nextOrders : Object.values(nextOrders);
+    allMeals = nextMeals;
+    if (currentFlashAlert && sameRest(currentFlashAlert.rest)) currentFlashAlert = {active:false};
+    if (wheelConfig && sameRest(wheelConfig.restaurant)) wheelConfig.active = false;
+    if (currentPortalRest && sameRest(currentPortalRest)) closeRestPortal();
+
+    localStorage.setItem("wj_custom_rests", JSON.stringify(RESTS));
+    localStorage.setItem("wj_custom_rest_phones", JSON.stringify(REST_PHONES));
+    localStorage.setItem("wj_rest_pins", JSON.stringify(REST_PINS));
+    localStorage.setItem("wj_rest_delivery_fees", JSON.stringify(restDeliveryFees));
+    if (activeCoupon && activeCoupon.record && activeCoupon.record.scope === "restaurant" && sameRest(activeCoupon.record.restaurant)) activeCoupon = null;
+
+    buildRestaurantsBar(); buildCategoriesBar(); renderMeals();
+    populateAdminDropdowns(); renderRestPinsList(); renderActiveDiscountsList();
+    renderDiscountCodesAdmin(); renderSubsAdminUI(); renderOrdersLog(); updateLiveAlertUI();
+    showToast(`🗑️ تم حذف ${rest} وكل بياناته المرتبطة من السحابة`);
+  } catch (error) {
+    // محاولة إعادة كل نسخة سابقة إذا فشل تحديث أحد المسارات، لتقليل احتمال بقاء حذف جزئي.
+    for (const [key, url] of resources) {
+      if (Object.prototype.hasOwnProperty.call(snapshots, key)) {
+        try {
+          await fetch(url, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(snapshots[key])});
+        } catch (rollbackError) {}
+      }
+    }
+    alert("لم يكتمل الحذف. حاول مرة أخرى بعد التأكد من اتصال Firebase وصلاحيات الكتابة. التفاصيل: " + (error.message || error));
+  }
+}
+
 function populateAdminDropdowns() {
   const rSel = document.getElementById("aiScanRestSelect");
   const rSel2 = document.getElementById("newMealRest");
@@ -3241,6 +3397,7 @@ function populateAdminDropdowns() {
   const rSelFilter = document.getElementById("ordersRestFilter");
   const rSelDeliv = document.getElementById("admRestDelivSelect");
   const rSelSub = document.getElementById("admSubRestSelect");
+  const rSelDelete = document.getElementById("deleteRestSelect");
 
   const uniqueRests = [];
   RESTS.forEach(r => {
@@ -3257,6 +3414,7 @@ function populateAdminDropdowns() {
   if (rSelDisc) rSelDisc.innerHTML = optionsHtml;
   if (rSelDeliv) rSelDeliv.innerHTML = optionsHtml;
   if (rSelSub) rSelSub.innerHTML = optionsHtml;
+  if (rSelDelete) rSelDelete.innerHTML = uniqueRests.map(r => `<option value="${String(r).replace(/"/g,"&quot;")}">${r}</option>`).join("");
   if (rSelFilter) rSelFilter.innerHTML = `<option value="الكل">كل المطاعم (كشف عام)</option>` + optionsHtml;
 
   renderWheelAdminUI();
@@ -3319,14 +3477,11 @@ function saveWheelConfigToCloud() {
 // المزامنة السحابية
 async function syncQuietlyWithCloud() {
   try {
-    const resRests = await fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now());
+    const resRests = await fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now(), {cache:"no-store"});
     const dataRests = await resRests.json();
-    if (dataRests && Array.isArray(dataRests)) {
-      dataRests.forEach(r => {
-        if (r && !RESTS.some(x => x.toLowerCase().trim() === r.toLowerCase().trim())) {
-          RESTS.push(r.trim());
-        }
-      });
+    if (Array.isArray(dataRests)) {
+      RESTS = dataRests.filter(r => typeof r === "string" && r.trim()).map(r => r.trim());
+      allMeals = allMeals.filter(m => !m || RESTS.some(r => r.toLowerCase().trim() === String(m.rest||"").toLowerCase().trim()));
       localStorage.setItem('wj_custom_rests', JSON.stringify(RESTS));
       buildRestaurantsBar();
     }
@@ -3363,7 +3518,7 @@ async function syncQuietlyWithCloud() {
     if (dataM && typeof dataM === 'object') {
       const list = Array.isArray(dataM) ? dataM : Object.values(dataM);
       if (list.length > 0) {
-        allMeals = list.filter(m => m && m.name);
+        allMeals = list.filter(m => m && m.name && (!RESTS.length || RESTS.some(r => r.toLowerCase().trim() === String(m.rest||"").toLowerCase().trim())));
         renderMeals();
         buildRestaurantsBar();
         buildCategoriesBar();
@@ -3433,12 +3588,9 @@ function loadInitialLocalData() {
     const savedR = localStorage.getItem('wj_custom_rests');
     if (savedR) {
       const arr = JSON.parse(savedR);
-      arr.forEach(r => {
-        if (r && !RESTS.some(x => x.toLowerCase().trim() === r.toLowerCase().trim())) {
-          RESTS.push(r.trim());
-        }
-      });
+      if (Array.isArray(arr) && arr.length) RESTS = arr.filter(r => typeof r === "string" && r.trim()).map(r => r.trim());
     }
+    allMeals = allMeals.filter(m => !m || RESTS.some(r => r.toLowerCase().trim() === String(m.rest||"").toLowerCase().trim()));
     const savedPh = localStorage.getItem('wj_custom_rest_phones');
     if (savedPh) REST_PHONES = { ...REST_PHONES, ...JSON.parse(savedPh) };
 
