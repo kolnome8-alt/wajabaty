@@ -41,7 +41,7 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(-100px);
-      background: rgba(20, 22, 29, 0.95);
+      background: rgba(20, 22, 29, 0.96);
       border: 1px solid var(--accent-green);
       color: #fff;
       padding: 12px 24px;
@@ -52,9 +52,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       pointer-events: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     #toastBox.show { transform: translateX(-50%) translateY(0); }
 
@@ -107,6 +104,7 @@
       align-items: center;
       padding: 6px 14px 12px;
       gap: 6px;
+      flex-wrap: wrap;
     }
     .brand-pill {
       display: flex;
@@ -128,18 +126,18 @@
       font-size: 11px;
       font-weight: 900;
     }
-    .header-actions { display: flex; gap: 6px; }
+    .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .btn-wheel-header {
       background: linear-gradient(135deg, #9c27b0, #e91e63);
       color: #fff;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 11px;
       border-radius: 14px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
-      display: none;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
     }
@@ -147,12 +145,12 @@
       background: linear-gradient(135deg, #ff5722, #ff9800);
       color: #fff;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 11px;
       border-radius: 14px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
     }
@@ -160,7 +158,7 @@
       background: linear-gradient(135deg, #ff9800, #ffb300);
       color: #111;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 11px;
       border-radius: 14px;
       font-size: 12px;
       font-weight: 900;
@@ -170,7 +168,7 @@
       background: rgba(255, 42, 95, 0.15);
       color: var(--primary);
       border: 1px solid var(--primary);
-      padding: 8px 12px;
+      padding: 8px 11px;
       border-radius: 14px;
       font-size: 12px;
       font-weight: 900;
@@ -296,7 +294,27 @@
     .talabaty-info-box { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .talabaty-title { font-size: 14px; font-weight: 900; color: #ffffff; }
     .talabaty-desc { font-size: 11px; color: #9aa1b5; }
+    .talabaty-rest-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
     .talabaty-rest-tag { font-size: 10px; color: var(--accent-orange); font-weight: 800; }
+    .rest-link-btn {
+      background: rgba(0, 176, 255, 0.14);
+      color: var(--accent-blue);
+      border: 1px solid rgba(0, 176, 255, 0.35);
+      border-radius: 8px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
     .rest-status-pill {
       display: inline-block;
       margin-top: 2px;
@@ -324,10 +342,10 @@
 
     .float-cart-bar {
       position: fixed;
-      bottom: 75px;
+      bottom: 20px;
       left: 14px;
       right: 14px;
-      background: rgba(22, 25, 34, 0.95);
+      background: rgba(22, 25, 34, 0.96);
       border: 1.5px solid var(--primary);
       border-radius: 20px;
       padding: 11px 16px;
@@ -335,6 +353,7 @@
       justify-content: space-between;
       align-items: center;
       z-index: 1000;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.75);
     }
     .float-cart-bar.show { display: flex; }
     .cart-total-badge { color: var(--accent-green); font-weight: 900; font-size: 15px; }
@@ -401,6 +420,13 @@
       font-size: 13px;
       outline: none;
     }
+    .form-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
     .bill-summary-card {
       background: #0f1015;
       border-radius: 14px;
@@ -445,7 +471,7 @@
     .modal-box {
       background: #161822;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       border-radius: 24px;
       padding: 20px;
       border: 1.5px solid var(--border-color);
@@ -479,6 +505,49 @@
     .admin-tab-btn.active { background: var(--primary); color: #fff; }
     .admin-tab-content { display: none; }
     .admin-tab-content.active { display: block; }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .choice-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .choice-btn.active {
+      border-color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.14);
+      color: var(--accent-green);
+    }
+
+    .manage-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -495,10 +564,10 @@
     <span class="brand-badge">Wj</span> وجباتي
   </div>
   <div class="header-actions">
-    <button class="btn-wheel-header" id="btnWheelTrigger" onclick="openWheelModal()">🎡 الحظ</button>
-    <button class="btn-cuisines-filter" onclick="openCuisinesModal()">المطابخ 🍕</button>
-    <button class="btn-discount" onclick="openDiscountsModal()">خصومات 🏷️</button>
-    <button class="btn-cart-top" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
+    <button type="button" class="btn-wheel-header" id="btnWheelTrigger" onclick="openWheelModal()">🎡 الحظ</button>
+    <button type="button" class="btn-cuisines-filter" onclick="openCuisinesModal()">المطابخ 🍕</button>
+    <button type="button" class="btn-discount" onclick="openDiscountsModal()">خصومات 🏷️</button>
+    <button type="button" class="btn-cart-top" onclick="openCartDrawer()">🛒 (<span id="cartCountTop">0</span>)</button>
   </div>
 </div>
 
@@ -506,7 +575,7 @@
   <div class="search-input-box">
     <input type="text" id="searchInput" placeholder="ابحث عن اسم المطعم أو الوجبة أو المكونات..." oninput="renderMeals()">
   </div>
-  <button class="btn-search" onclick="renderMeals()">بحث</button>
+  <button type="button" class="btn-search" onclick="renderMeals()">بحث</button>
 </div>
 
 <div class="zones-bar">
@@ -524,7 +593,7 @@
     <span id="cartTotalItems" style="font-weight:900;">0</span> وجبات |
     <span class="cart-total-badge" id="cartTotalSum">0 د.ع</span>
   </div>
-  <button class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
+  <button type="button" class="btn-open-vip-cart" onclick="openCartDrawer()">معاينة سلة وجباتي 👈</button>
 </div>
 
 <!-- سلة المشتريات -->
@@ -532,7 +601,7 @@
   <div class="cart-drawer-box">
     <div class="drawer-header">
       <h3 class="drawer-title">🛒 سلة وجباتي</h3>
-      <button class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
+      <button type="button" class="btn-close-drawer" onclick="closeCartDrawer()">✕</button>
     </div>
     <div class="drawer-body">
       <div id="drawerItemsList" style="margin-bottom:14px;"></div>
@@ -548,6 +617,40 @@
         💬 إرسال الطلب لواتساب مباشرة
       </button>
     </div>
+  </div>
+</div>
+
+<!-- نافذة المطابخ -->
+<div class="modal-backdrop" id="cuisinesModal" onclick="if(event.target.id==='cuisinesModal')closeModal('cuisinesModal')">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="font-size:16px;">🍕 اختر المطبخ / التصنيف</h3>
+      <button type="button" class="btn-close-drawer" onclick="closeModal('cuisinesModal')">✕</button>
+    </div>
+    <div id="cuisinesModalList" class="choice-grid"></div>
+  </div>
+</div>
+
+<!-- نافذة الخصومات والعروض -->
+<div class="modal-backdrop" id="discountsModal" onclick="if(event.target.id==='discountsModal')closeModal('discountsModal')">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="font-size:16px;">🏷️ وجبات التوفير والخصومات</h3>
+      <button type="button" class="btn-close-drawer" onclick="closeModal('discountsModal')">✕</button>
+    </div>
+    <div id="discountsModalList"></div>
+  </div>
+</div>
+
+<!-- نافذة عجلة الحظ -->
+<div class="modal-backdrop" id="wheelModal" onclick="if(event.target.id==='wheelModal')closeModal('wheelModal')">
+  <div class="modal-box" style="text-align:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="font-size:16px;">🎡 عجلة الحظ وجباتي</h3>
+      <button type="button" class="btn-close-drawer" onclick="closeModal('wheelModal')">✕</button>
+    </div>
+    <p id="wheelPrizeText" style="font-size:14px; font-weight:800; color:var(--accent-green); margin:16px 0;">اضغط لتجربة حظك اليوم على وجبة مميزة!</p>
+    <button type="button" class="btn-discount" style="width:100%; padding:12px;" onclick="spinLuckWheel()">🎯 لف العجلة الآن</button>
   </div>
 </div>
 
@@ -576,31 +679,41 @@
     </div>
 
     <div class="admin-tabs">
-      <button class="admin-tab-btn active" onclick="switchAdminTab('deleteRestTab', this)">🗑️ حذف مطعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('editRestTab', this)">✏️ تعديل مطعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('privacyPhoneTab', this)">🙈 إخفاء رقم المطعم</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة</button>
-      <button class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل</button>
+      <button type="button" class="admin-tab-btn active" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('editRestTab', this)">✏️ تعديل وصور المطاعم</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('manageMealsTab', this)">🍽️ إدارة الوجبات</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('deleteRestTab', this)">🗑️ حذف مطعم</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('privacyPhoneTab', this)">🙈 إخفاء الرقم</button>
+      <button type="button" class="admin-tab-btn" onclick="switchAdminTab('deliveryTab', this)">🛵 التوصيل</button>
     </div>
 
-    <div id="deleteRestTab" class="admin-tab-content active">
-      <label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:6px;">اختر المطعم لحذفه نهائياً:</label>
-      <select id="deleteRestSelect" class="form-input"></select>
-      <button type="button" class="btn-discount" style="width:100%;padding:12px;background:#4a1525;color:#ff4d6d;border:1px solid #ff4d6d;" onclick="deleteRestaurantCompletely()">🗑️ حذف المطعم نهائياً</button>
-      <div id="deletedRestsBox" style="margin-top:12px; font-size:11px; color:var(--text-muted);"></div>
-    </div>
-
-    <div id="addRestTab" class="admin-tab-content">
-      <input type="text" id="newRestName" class="form-input" placeholder="اسم المطعم الجديد (مثال: الاصيل أو بلسم حي العامل)">
-      <input type="tel" id="newRestPhone" class="form-input" placeholder="رقم واتساب المطعم (077XXXXXXXX)">
+    <!-- إضافة مطعم جديد مع صورة ورابط -->
+    <div id="addRestTab" class="admin-tab-content active">
+      <label class="form-label">اسم المطعم الجديد</label>
+      <input type="text" id="newRestName" class="form-input" placeholder="مثال: الاصيل أو بلسم حي العامل">
+      <label class="form-label">رقم واتساب المطعم</label>
+      <input type="tel" id="newRestPhone" class="form-input" placeholder="077XXXXXXXX">
+      <label class="form-label">رابط صورة المطعم (اختياري)</label>
+      <input type="url" id="newRestImg" class="form-input" placeholder="https://example.com/restaurant.jpg">
+      <label class="form-label">رابط المطعم أو موقع الخريطة (اختياري)</label>
+      <input type="url" id="newRestLink" class="form-input" placeholder="https://maps.google.com/... أو رابط صفحة المطعم">
       <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111;" onclick="addNewRestaurant()">➕ إضافة وحفظ المطعم سحابياً</button>
     </div>
 
+    <!-- تعديل مطعم وصورته ورابطه -->
     <div id="editRestTab" class="admin-tab-content">
+      <label class="form-label">اختر المطعم لتعديله</label>
       <select id="editRestSelect" class="form-input" onchange="loadSelectedRestaurantForEdit()"></select>
+      <label class="form-label">اسم المطعم</label>
       <input type="text" id="editRestNameInput" class="form-input" placeholder="اسم المطعم">
+      <label class="form-label">رقم الهاتف / واتساب</label>
       <input type="tel" id="editRestPhoneInput" class="form-input" placeholder="رقم الهاتف / واتساب">
+      <label class="form-label">رابط صورة المطعم</label>
+      <input type="url" id="editRestImgInput" class="form-input" placeholder="https://example.com/restaurant.jpg">
+      <label class="form-label">رابط المطعم أو الخريطة</label>
+      <input type="url" id="editRestLinkInput" class="form-input" placeholder="https://...">
+      <label class="form-label">حالة المطعم</label>
       <select id="editRestStatusSelect" class="form-input">
         <option value="active">مشترك وفعال ✅</option>
         <option value="maintenance">في صيانة 🔧</option>
@@ -610,6 +723,46 @@
       <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111;" onclick="saveEditedRestaurant()">💾 حفظ تعديلات المطعم</button>
     </div>
 
+    <!-- إضافة وجبة أو أكلة -->
+    <div id="addMealTab" class="admin-tab-content">
+      <label class="form-label">اسم الوجبة / الأكلة</label>
+      <input type="text" id="newMealName" class="form-input" placeholder="اسم الوجبة">
+      <label class="form-label">مكونات الوجبة</label>
+      <input type="text" id="newMealDesc" class="form-input" placeholder="مكونات الوجبة">
+      <label class="form-label">المطعم</label>
+      <select id="newMealRest" class="form-input"></select>
+      <label class="form-label">المطبخ / التصنيف</label>
+      <input type="text" id="newMealCatCustom" class="form-input" placeholder="مثال: مقبلات وسناك / مشويات / بركر">
+      <label class="form-label">رابط صورة الوجبة (اختياري)</label>
+      <input type="url" id="newMealImg" class="form-input" placeholder="https://example.com/meal.jpg">
+      <label class="form-label">السعر الأصلي (د.ع)</label>
+      <input type="number" id="newMealPrice" class="form-input" placeholder="8000">
+      <label class="form-label">سعر التوفير (اختياري)</label>
+      <input type="number" id="newMealSavingPrice" class="form-input" placeholder="6500">
+      <label class="form-label">الجانب</label>
+      <select id="newMealZone" class="form-input">
+        <option value="الكرخ">الكرخ</option>
+        <option value="الرصافة">الرصافة</option>
+      </select>
+      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111;" onclick="addNewMealLocally()">➕ إضافة الوجبة وحفظها</button>
+    </div>
+
+    <!-- إدارة الوجبات الموجودة -->
+    <div id="manageMealsTab" class="admin-tab-content">
+      <label class="form-label">تصفية حسب المطعم</label>
+      <select id="manageMealsRestFilter" class="form-input" onchange="renderAdminMealsManager()"></select>
+      <div id="adminMealsManageList"></div>
+    </div>
+
+    <!-- حذف مطعم -->
+    <div id="deleteRestTab" class="admin-tab-content">
+      <label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:6px;">اختر المطعم لحذفه نهائياً:</label>
+      <select id="deleteRestSelect" class="form-input"></select>
+      <button type="button" class="btn-discount" style="width:100%;padding:12px;background:#4a1525;color:#ff4d6d;border:1px solid #ff4d6d;" onclick="deleteRestaurantCompletely()">🗑️ حذف المطعم نهائياً</button>
+      <div id="deletedRestsBox" style="margin-top:12px; font-size:11px; color:var(--text-muted);"></div>
+    </div>
+
+    <!-- إخفاء رقم المطعم -->
     <div id="privacyPhoneTab" class="admin-tab-content">
       <label style="font-size:12px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:6px;">طريقة إرسال الطلبات والهدايا عبر واتساب:</label>
       <select id="admHidePhoneMode" class="form-input" onchange="toggleRelayPhoneInput()">
@@ -623,21 +776,9 @@
       <button type="button" class="btn-discount" style="width:100%; padding:12px; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111;" onclick="saveWhatsappPrivacySettings()">💾 حفظ إعدادات إخفاء الرقم سحابياً</button>
     </div>
 
-    <div id="addMealTab" class="admin-tab-content">
-      <input type="text" id="newMealName" class="form-input" placeholder="اسم الوجبة">
-      <input type="text" id="newMealDesc" class="form-input" placeholder="مكونات الوجبة">
-      <select id="newMealRest" class="form-input"></select>
-      <input type="text" id="newMealCatCustom" class="form-input" placeholder="المطبخ / التصنيف">
-      <input type="number" id="newMealPrice" class="form-input" placeholder="السعر الأصلي">
-      <input type="number" id="newMealSavingPrice" class="form-input" placeholder="سعر التوفير (اختياري)">
-      <select id="newMealZone" class="form-input">
-        <option value="الكرخ">الكرخ</option>
-        <option value="الرصافة">الرصافة</option>
-      </select>
-      <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111;" onclick="addNewMealLocally()">➕ إضافة الوجبة</button>
-    </div>
-
+    <!-- سعر التوصيل -->
     <div id="deliveryTab" class="admin-tab-content">
+      <label class="form-label">سعر التوصيل الافتراضي (د.ع)</label>
       <input type="number" id="admDeliveryFee" class="form-input" placeholder="1000">
       <button type="button" class="btn-discount" style="width:100%; padding:12px; background:var(--accent-green); color:#111;" onclick="saveDeliveryFee()">💾 حفظ سعر التوصيل</button>
     </div>
@@ -650,6 +791,9 @@
 const MASTER_ADMIN_PIN = "1987221";
 let isAdminUnlocked = false;
 
+const FALLBACK_MEAL_IMG = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600";
+const FALLBACK_REST_IMG = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600";
+
 const FIREBASE_MEALS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/meals.json";
 const FIREBASE_WHEEL_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wheel_config.json";
 const FIREBASE_RESTS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/restaurants.json";
@@ -657,10 +801,12 @@ const FIREBASE_DELETED_RESTS_URL = "https://wajbati159-490e0-default-rtdb.fireba
 const FIREBASE_PHONES_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_phones.json";
 const FIREBASE_REST_STATUS_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_statuses.json";
 const FIREBASE_WA_PRIVACY_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/wa_privacy.json";
+const FIREBASE_REST_META_URL = "https://wajbati159-490e0-default-rtdb.firebaseio.com/rest_meta.json";
 
 const LOCAL_DELETED_KEY = "wj_deleted_restaurants_v1";
 const LOCAL_RESTS_KEY = "wj_restaurants_v1";
 const LOCAL_PHONES_KEY = "wj_phones_v1";
+const LOCAL_META_KEY = "wj_rest_meta_v1";
 
 let waPrivacyConfig = { mode: "hide_number_text", relayPhone: "9647708111561" };
 let orderDeliveryFee = Number(localStorage.getItem('wj_delivery_fee')) || 1000;
@@ -693,6 +839,12 @@ try {
   if (savedPh && typeof savedPh === "object") REST_PHONES = { ...REST_PHONES, ...savedPh };
 } catch (e) {}
 
+let REST_META = {};
+try {
+  const savedMeta = JSON.parse(localStorage.getItem(LOCAL_META_KEY) || "null");
+  if (savedMeta && typeof savedMeta === "object") REST_META = savedMeta;
+} catch (e) {}
+
 let allMeals = [];
 let cart = [];
 let selectedZone = "الكل";
@@ -706,6 +858,11 @@ function isRestaurantDeleted(name) {
   if (!n) return true;
   if (n === "مطعم سندريلا" || n === "سندريلا" || n === "جيكي بركر") return true;
   return deletedRestaurants.some(d => normName(d) === n);
+}
+
+function getRestaurantMeta(restName) {
+  const key = Object.keys(REST_META || {}).find(k => normName(k) === normName(restName));
+  return (key && REST_META[key]) ? REST_META[key] : { img: "", link: "" };
 }
 
 function cleanRestaurantsState() {
@@ -725,6 +882,7 @@ function cleanRestaurantsState() {
     localStorage.setItem(LOCAL_DELETED_KEY, JSON.stringify(deletedRestaurants));
     localStorage.setItem(LOCAL_RESTS_KEY, JSON.stringify(RESTS));
     localStorage.setItem(LOCAL_PHONES_KEY, JSON.stringify(REST_PHONES));
+    localStorage.setItem(LOCAL_META_KEY, JSON.stringify(REST_META));
   } catch (e) {}
 }
 
@@ -751,6 +909,9 @@ function resolveWhatsappTargetPhone(restName) {
   return normalizePhoneIraq(key ? REST_PHONES[key] : "9647708111561") || "9647708111561";
 }
 
+function openModal(id) { document.getElementById(id)?.classList.add("show"); }
+function closeModal(id) { document.getElementById(id)?.classList.remove("show"); }
+
 function openAdminPinModal() {
   isAdminUnlocked = false;
   document.getElementById("adminPanelModal")?.classList.remove("show");
@@ -773,8 +934,12 @@ function checkAdminPin() {
     isAdminUnlocked = true;
     document.getElementById("adminPinModal")?.classList.remove("show");
     document.getElementById("adminPanelModal")?.classList.add("show");
+    if (document.getElementById("admDeliveryFee")) {
+      document.getElementById("admDeliveryFee").value = orderDeliveryFee;
+    }
     populateAllAdminSelects();
     populatePrivacySettingsUI();
+    renderAdminMealsManager();
     showToast("🔓 تم فتح لوحة الإدارة");
   } else {
     isAdminUnlocked = false;
@@ -804,6 +969,10 @@ function populateAllAdminSelects() {
     const el = document.getElementById(id);
     if (el) el.innerHTML = optionsHtml;
   });
+  const mgrFilter = document.getElementById("manageMealsRestFilter");
+  if (mgrFilter) {
+    mgrFilter.innerHTML = `<option value="الكل">كل المطاعم</option>` + optionsHtml;
+  }
   const delBox = document.getElementById("deletedRestsBox");
   if (delBox) {
     delBox.innerHTML = deletedRestaurants.length
@@ -817,24 +986,31 @@ async function addNewRestaurant() {
   if (!isAdminUnlocked) return openAdminPinModal();
   const name = (document.getElementById("newRestName")?.value || "").trim();
   const phone = normalizePhoneIraq(document.getElementById("newRestPhone")?.value || "");
+  const img = (document.getElementById("newRestImg")?.value || "").trim();
+  const link = (document.getElementById("newRestLink")?.value || "").trim();
   if (!name) { showToast("⚠️ اكتب اسم المطعم أولاً"); return; }
 
   deletedRestaurants = deletedRestaurants.filter(d => normName(d) !== normName(name));
   if (!RESTS.some(r => normName(r) === normName(name))) RESTS.push(name);
   if (phone) REST_PHONES[name] = phone;
+  REST_META[name] = { img, link };
   cleanRestaurantsState();
 
   try {
     await Promise.all([
       fetch(FIREBASE_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(RESTS) }),
       fetch(FIREBASE_DELETED_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(deletedRestaurants) }),
-      fetch(FIREBASE_PHONES_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PHONES) })
+      fetch(FIREBASE_PHONES_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PHONES) }),
+      fetch(FIREBASE_REST_META_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_META) })
     ]);
   } catch (e) {}
 
   document.getElementById("newRestName").value = "";
   document.getElementById("newRestPhone").value = "";
+  document.getElementById("newRestImg").value = "";
+  document.getElementById("newRestLink").value = "";
   buildRestaurantsBar();
+  renderMeals();
   populateAllAdminSelects();
   showToast(`✅ تم إضافة مطعم "${name}"`);
 }
@@ -847,6 +1023,7 @@ async function deleteRestaurantCompletely() {
   if (!deletedRestaurants.some(d => normName(d) === normName(name))) deletedRestaurants.push(name);
   RESTS = RESTS.filter(r => normName(r) !== normName(name));
   delete REST_PHONES[name];
+  delete REST_META[name];
   allMeals = allMeals.filter(m => normName(m.rest) !== normName(name));
   if (normName(selectedRest) === normName(name)) selectedRest = "الكل";
   cleanRestaurantsState();
@@ -856,6 +1033,7 @@ async function deleteRestaurantCompletely() {
       fetch(FIREBASE_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(RESTS) }),
       fetch(FIREBASE_DELETED_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(deletedRestaurants) }),
       fetch(FIREBASE_PHONES_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PHONES) }),
+      fetch(FIREBASE_REST_META_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_META) }),
       fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals) })
     ]);
   } catch (e) {}
@@ -864,14 +1042,18 @@ async function deleteRestaurantCompletely() {
   buildCategoriesBar();
   renderMeals();
   populateAllAdminSelects();
+  renderAdminMealsManager();
   showToast(`🗑️ تم حذف "${name}" نهائياً`);
 }
 
 function loadSelectedRestaurantForEdit() {
   const restName = document.getElementById("editRestSelect")?.value;
   if (!restName) return;
+  const meta = getRestaurantMeta(restName);
   document.getElementById("editRestNameInput").value = restName;
   document.getElementById("editRestPhoneInput").value = REST_PHONES[restName] || "";
+  document.getElementById("editRestImgInput").value = meta.img || "";
+  document.getElementById("editRestLinkInput").value = meta.link || "";
   document.getElementById("editRestStatusSelect").value = getRestaurantStatusInfo(restName).code;
 }
 
@@ -880,16 +1062,20 @@ async function saveEditedRestaurant() {
   const oldName = document.getElementById("editRestSelect")?.value;
   const newName = (document.getElementById("editRestNameInput")?.value || "").trim();
   const phone = normalizePhoneIraq(document.getElementById("editRestPhoneInput")?.value || "");
+  const img = (document.getElementById("editRestImgInput")?.value || "").trim();
+  const link = (document.getElementById("editRestLinkInput")?.value || "").trim();
   const status = document.getElementById("editRestStatusSelect")?.value || "active";
   if (!oldName || !newName) return;
 
   RESTS = RESTS.map(r => r === oldName ? newName : r);
   if (oldName !== newName) {
     delete REST_PHONES[oldName];
+    delete REST_META[oldName];
     delete restStatuses[oldName];
     allMeals = allMeals.map(m => m.rest === oldName ? { ...m, rest: newName } : m);
   }
   REST_PHONES[newName] = phone || REST_PHONES[newName] || "9647708111561";
+  REST_META[newName] = { img, link };
   restStatuses[newName] = status;
   cleanRestaurantsState();
 
@@ -897,6 +1083,7 @@ async function saveEditedRestaurant() {
     await Promise.all([
       fetch(FIREBASE_RESTS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(RESTS) }),
       fetch(FIREBASE_PHONES_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_PHONES) }),
+      fetch(FIREBASE_REST_META_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(REST_META) }),
       fetch(FIREBASE_REST_STATUS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(restStatuses) }),
       fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals) })
     ]);
@@ -905,6 +1092,7 @@ async function saveEditedRestaurant() {
   buildRestaurantsBar();
   renderMeals();
   populateAllAdminSelects();
+  renderAdminMealsManager();
   showToast(`✅ تم حفظ تعديلات "${newName}"`);
 }
 
@@ -937,6 +1125,13 @@ function getRestaurantStatusInfo(restName) {
   return { code: "active", label: "مشترك وفعال ✅", cssClass: "", blockOrder: false };
 }
 
+function getMealImageSrc(meal) {
+  if (meal && meal.img && String(meal.img).trim()) return String(meal.img).trim();
+  const meta = getRestaurantMeta(meal?.rest);
+  if (meta && meta.img && String(meta.img).trim()) return String(meta.img).trim();
+  return FALLBACK_MEAL_IMG;
+}
+
 function renderMeals() {
   cleanRestaurantsState();
   const query = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
@@ -948,25 +1143,37 @@ function renderMeals() {
     const matchZone = selectedZone === "الكل" || m.zone === selectedZone;
     const matchRest = selectedRest === "الكل" || normName(m.rest) === normName(selectedRest);
     const matchCat = selectedCat === "الكل" || m.cat === selectedCat;
-    const matchQuery = !query || m.name.toLowerCase().includes(query) || (m.rest && m.rest.toLowerCase().includes(query));
+    const matchQuery = !query || m.name.toLowerCase().includes(query) || (m.rest && m.rest.toLowerCase().includes(query)) || (m.desc && m.desc.toLowerCase().includes(query));
     return matchZone && matchRest && matchCat && matchQuery;
   });
 
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="text-align:center; padding:30px 14px; color:var(--text-muted); font-size:13px;">لا توجد وجبات مطابقة للاختيار الحالي حالياً.</div>`;
+    return;
+  }
+
   grid.innerHTML = filtered.map(m => {
     const st = getRestaurantStatusInfo(m.rest);
+    const meta = getRestaurantMeta(m.rest);
     const isAvailable = (m.available !== false) && !st.blockOrder;
     const hasSaving = (m.savingPrice && Number(m.savingPrice) > 0 && Number(m.savingPrice) < Number(m.price)) && st.code !== "no_offers";
+    const imgSrc = getMealImageSrc(m);
+    const safeLink = meta.link && /^https?:\/\//i.test(meta.link.trim()) ? meta.link.trim() : "";
+
     return `
       <div class="meal-card-talabaty ${!isAvailable ? 'out-of-stock' : ''}">
         <div class="talabaty-img-box">
-          <img src="${m.img}" alt="${m.name}" loading="lazy">
+          <img src="${imgSrc}" alt="${m.name}" loading="lazy" onerror="this.onerror=null;this.src='${FALLBACK_REST_IMG}'">
           ${!isAvailable ? `<span class="soldout-badge-overlay">${st.blockOrder ? st.label : 'نفدت 🚫'}</span>` : ''}
-          ${isAvailable ? `<button class="btn-quick-add" onclick="addToCart('${m.id}')">+</button>` : ''}
+          ${isAvailable ? `<button type="button" class="btn-quick-add" onclick="addToCart('${m.id}')">+</button>` : ''}
         </div>
         <div class="talabaty-info-box">
           <div class="talabaty-title">${m.name}</div>
           <div class="talabaty-desc">${m.desc || ''}</div>
-          <div class="talabaty-rest-tag">🏪 ${m.rest}</div>
+          <div class="talabaty-rest-row">
+            <span class="talabaty-rest-tag">🏪 ${m.rest}</span>
+            ${safeLink ? `<a href="${safeLink}" target="_blank" rel="noopener" class="rest-link-btn">🔗 رابط المطعم</a>` : ''}
+          </div>
           ${st.code !== "active" ? `<span class="rest-status-pill ${st.cssClass}">${st.label}</span>` : ''}
           <div class="talabaty-pricing">
             ${hasSaving ? `<span class="talabaty-main-price">${money(m.savingPrice)}</span><span class="talabaty-old-price">${money(m.price)}</span><span class="talabaty-pro-badge">توفير 🔥</span>` : `<span class="talabaty-main-price">${money(m.price)}</span>`}
@@ -992,6 +1199,71 @@ function buildCategoriesBar() {
 function setZone(zone, el) { selectedZone = zone; document.querySelectorAll('.zone-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderMeals(); }
 function setRestaurant(rest, el) { selectedRest = rest; document.querySelectorAll('#restaurantsBar .pill').forEach(c => c.classList.remove('active-white')); el.classList.add('active-white'); renderMeals(); }
 function setCategory(cat, el) { selectedCat = cat; document.querySelectorAll('#categoriesBar .pill').forEach(c => c.classList.remove('active-green')); el.classList.add('active-green'); renderMeals(); }
+
+function openCuisinesModal() {
+  const cats = ["الكل", ...new Set(allMeals.filter(m => !isRestaurantDeleted(m.rest)).map(m => m.cat).filter(Boolean))];
+  const listEl = document.getElementById("cuisinesModalList");
+  if (!listEl) return;
+  listEl.innerHTML = cats.map(c => `
+    <button type="button" class="choice-btn ${c === selectedCat ? 'active' : ''}" onclick="selectCuisineFromModal('${c.replace(/'/g, "\\'")}')">
+      ${c === 'الكل' ? '🍽️ كل المطابخ' : '🍴 ' + c}
+    </button>
+  `).join('');
+  openModal('cuisinesModal');
+}
+
+function selectCuisineFromModal(cat) {
+  selectedCat = cat;
+  document.querySelectorAll('#categoriesBar .pill').forEach(p => {
+    p.classList.toggle('active-green', p.innerText.trim() === (cat === 'الكل' ? 'كل الأصناف' : cat));
+  });
+  renderMeals();
+  closeModal('cuisinesModal');
+  showToast(cat === 'الكل' ? '🍽️ تم عرض كل الأصناف' : `🍴 تم التصفية حسب: ${cat}`);
+}
+
+function openDiscountsModal() {
+  const listEl = document.getElementById("discountsModalList");
+  if (!listEl) return;
+  const discountedMeals = allMeals.filter(m => {
+    if (!m || isRestaurantDeleted(m.rest)) return false;
+    const st = getRestaurantStatusInfo(m.rest);
+    return m.savingPrice && Number(m.savingPrice) > 0 && Number(m.savingPrice) < Number(m.price) && st.code !== "no_offers";
+  });
+  if (!discountedMeals.length) {
+    listEl.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px 0; font-size:13px;">لا توجد خصومات مفعلة حالياً.</p>`;
+  } else {
+    listEl.innerHTML = discountedMeals.map(m => `
+      <div class="manage-item-card">
+        <div>
+          <div style="font-size:13px; font-weight:900;">${m.name}</div>
+          <div style="font-size:11px; color:var(--accent-orange);">${m.rest}</div>
+          <div style="font-size:12px; color:var(--accent-green); font-weight:800; margin-top:2px;">
+            ${money(m.savingPrice)} <span style="color:var(--text-muted); text-decoration:line-through; font-size:10px;">${money(m.price)}</span>
+          </div>
+        </div>
+        <button type="button" class="mini-btn" style="background:var(--primary); color:#fff;" onclick="addToCart('${m.id}'); closeModal('discountsModal');">أضف +</button>
+      </div>
+    `).join('');
+  }
+  openModal('discountsModal');
+}
+
+function openWheelModal() {
+  document.getElementById("wheelPrizeText").innerText = "اضغط لتجربة حظك اليوم على وجبة مميزة!";
+  openModal('wheelModal');
+}
+
+function spinLuckWheel() {
+  const availableMeals = allMeals.filter(m => m && !isRestaurantDeleted(m.rest) && !getRestaurantStatusInfo(m.rest).blockOrder && m.available !== false);
+  const el = document.getElementById("wheelPrizeText");
+  if (!availableMeals.length) {
+    el.innerText = "لا توجد وجبات متاحة حالياً للدوران.";
+    return;
+  }
+  const picked = availableMeals[Math.floor(Math.random() * availableMeals.length)];
+  el.innerHTML = `🎉 حظك اليوم: <strong>${picked.name}</strong> من <strong>${picked.rest}</strong><br><button type="button" class="btn-discount" style="margin-top:10px;" onclick="addToCart('${picked.id}'); closeModal('wheelModal');">إضافة الوجبة للسلة</button>`;
+}
 
 function addToCart(mealId) {
   const meal = allMeals.find(item => String(item.id) === String(mealId));
@@ -1023,13 +1295,17 @@ function renderCartDrawerContent() {
   const listEl = document.getElementById("drawerItemsList");
   const billEl = document.getElementById("billSummaryCard");
   if (!listEl || !billEl) return;
-  listEl.innerHTML = cart.map(item => `<div style="background:var(--bg-card); padding:10px 12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>${item.name} × ${item.qty}</strong><div style="font-size:11px; color:var(--accent-orange);">${item.rest}</div></div><strong style="color:var(--accent-green);">${money(item.actualPrice * item.qty)}</strong></div>`).join('');
+  if (!cart.length) {
+    listEl.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:16px 0; font-size:13px;">السلة فارغة حالياً.</p>`;
+  } else {
+    listEl.innerHTML = cart.map(item => `<div style="background:var(--bg-card); padding:10px 12px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>${item.name} × ${item.qty}</strong><div style="font-size:11px; color:var(--accent-orange);">${item.rest}</div></div><strong style="color:var(--accent-green);">${money(item.actualPrice * item.qty)}</strong></div>`).join('');
+  }
   const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
-  billEl.innerHTML = `<div class="bill-row"><span>المجموع:</span><span>${money(subtotal)}</span></div><div class="bill-row"><span>التوصيل:</span><span>${money(orderDeliveryFee)}</span></div><div class="bill-row total"><span>الإجمالي:</span><span>${money(subtotal + orderDeliveryFee)}</span></div>`;
+  billEl.innerHTML = `<div class="bill-row"><span>المجموع:</span><span>${money(subtotal)}</span></div><div class="bill-row"><span>التوصيل:</span><span>${money(subtotal > 0 ? orderDeliveryFee : 0)}</span></div><div class="bill-row total"><span>الإجمالي:</span><span>${money(subtotal > 0 ? subtotal + orderDeliveryFee : 0)}</span></div>`;
 }
 
 function submitFullOrder() {
-  if (!cart.length) return;
+  if (!cart.length) { showToast("⚠️ السلة فارغة"); return; }
   const custName = document.getElementById("custName")?.value.trim() || "زبون وجباتي";
   const custPhone = document.getElementById("custPhone")?.value.trim() || "غير محدد";
   const custAddr = document.getElementById("custAddress")?.value.trim() || "غير محدد";
@@ -1049,6 +1325,7 @@ function switchAdminTab(tabId, btnEl) {
   document.querySelectorAll(".admin-tab-btn").forEach(el => el.classList.remove("active"));
   document.getElementById(tabId)?.classList.add("active");
   btnEl?.classList.add("active");
+  if (tabId === "manageMealsTab") renderAdminMealsManager();
 }
 
 function addNewMealLocally() {
@@ -1056,48 +1333,113 @@ function addNewMealLocally() {
   const name = document.getElementById("newMealName")?.value.trim();
   const rest = document.getElementById("newMealRest")?.value;
   const price = Number(document.getElementById("newMealPrice")?.value || 0);
-  if (!name || !rest || !price || isRestaurantDeleted(rest)) return;
-  allMeals.unshift({ id: Date.now(), name, desc: document.getElementById("newMealDesc")?.value || "", rest, cat: document.getElementById("newMealCatCustom")?.value || "وجبات", price, savingPrice: Number(document.getElementById("newMealSavingPrice")?.value || 0), img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600", zone: document.getElementById("newMealZone")?.value || "الكرخ", available: true });
+  const customImg = (document.getElementById("newMealImg")?.value || "").trim();
+  if (!name || !rest || !price || isRestaurantDeleted(rest)) {
+    showToast("⚠️ أدخل اسم الوجبة والمطعم والسعر");
+    return;
+  }
+  const restImg = getRestaurantMeta(rest).img;
+  allMeals.unshift({
+    id: Date.now(),
+    name,
+    desc: document.getElementById("newMealDesc")?.value.trim() || "",
+    rest,
+    cat: document.getElementById("newMealCatCustom")?.value.trim() || "وجبات",
+    price,
+    savingPrice: Number(document.getElementById("newMealSavingPrice")?.value || 0),
+    img: customImg || restImg || FALLBACK_MEAL_IMG,
+    zone: document.getElementById("newMealZone")?.value || "الكرخ",
+    available: true
+  });
+  fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals) });
+  document.getElementById("newMealName").value = "";
+  document.getElementById("newMealDesc").value = "";
+  document.getElementById("newMealImg").value = "";
+  document.getElementById("newMealPrice").value = "";
+  document.getElementById("newMealSavingPrice").value = "";
+  buildCategoriesBar();
+  renderMeals();
+  renderAdminMealsManager();
+  showToast("✅ تم إضافة الوجبة");
+}
+
+function renderAdminMealsManager() {
+  if (!isAdminUnlocked) return;
+  const listEl = document.getElementById("adminMealsManageList");
+  if (!listEl) return;
+  const filterRest = document.getElementById("manageMealsRestFilter")?.value || "الكل";
+  const items = allMeals.filter(m => m && !isRestaurantDeleted(m.rest) && (filterRest === "الكل" || normName(m.rest) === normName(filterRest)));
+  if (!items.length) {
+    listEl.innerHTML = `<p style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px;">لا توجد وجبات لعرضها.</p>`;
+    return;
+  }
+  listEl.innerHTML = items.map(m => `
+    <div class="manage-item-card">
+      <div>
+        <div style="font-size:12px; font-weight:900;">${m.name}</div>
+        <div style="font-size:10px; color:var(--accent-orange);">${m.rest} • ${money(m.price)}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="mini-btn" style="background:rgba(0,230,118,0.18); color:var(--accent-green);" onclick="toggleMealAvailability('${m.id}')">${m.available !== false ? 'متوفرة' : 'نفدت'}</button>
+        <button type="button" class="mini-btn" style="background:rgba(255,42,95,0.2); color:#ff6b8b;" onclick="deleteMealById('${m.id}')">حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleMealAvailability(mealId) {
+  if (!isAdminUnlocked) return openAdminPinModal();
+  allMeals = allMeals.map(m => String(m.id) === String(mealId) ? { ...m, available: m.available === false ? true : false } : m);
+  fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals) });
+  renderMeals();
+  renderAdminMealsManager();
+  showToast("✅ تم تحديث توفر الوجبة");
+}
+
+function deleteMealById(mealId) {
+  if (!isAdminUnlocked) return openAdminPinModal();
+  allMeals = allMeals.filter(m => String(m.id) !== String(mealId));
   fetch(FIREBASE_MEALS_URL, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(allMeals) });
   buildCategoriesBar();
   renderMeals();
-  showToast("✅ تم إضافة الوجبة");
+  renderAdminMealsManager();
+  showToast("🗑️ تم حذف الوجبة");
 }
 
 function saveDeliveryFee() {
   if (!isAdminUnlocked) return openAdminPinModal();
   orderDeliveryFee = Number(document.getElementById("admDeliveryFee")?.value || 1000);
   localStorage.setItem('wj_delivery_fee', orderDeliveryFee);
+  updateCartUI();
+  renderCartDrawerContent();
   showToast("🛵 تم حفظ التوصيل");
 }
-
-function openCuisinesModal() {}
-function openDiscountsModal() {}
-function openWheelModal() {}
 
 function renderBanners() {
   const track = document.getElementById("bannerTrack");
   const dots = document.getElementById("bannerDots");
   if (!track || !dots) return;
-  track.innerHTML = `<div class="banner-slide"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" alt="وجباتي"><div class="banner-overlay"><h2>🍔 وجباتي VIP</h2><p>أقوى المطاعم وأشهى عروض التوفير</p></div></div>`;
+  track.innerHTML = `<div class="banner-slide"><img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200" alt="وجباتي" onerror="this.onerror=null;this.src='${FALLBACK_REST_IMG}'"><div class="banner-overlay"><h2>🍔 وجباتي VIP</h2><p>أقوى المطاعم وأشهى عروض التوفير</p></div></div>`;
   dots.innerHTML = `<div class="banner-dot active"></div>`;
 }
 
 async function syncQuietlyWithCloud() {
   try {
-    const [resPr, resSt, resPh, resR, resDel, resW, resM] = await Promise.all([
+    const [resPr, resSt, resPh, resR, resDel, resW, resM, resMeta] = await Promise.all([
       fetch(FIREBASE_WA_PRIVACY_URL + "?_t=" + Date.now(), { cache: "no-store" }),
       fetch(FIREBASE_REST_STATUS_URL + "?_t=" + Date.now(), { cache: "no-store" }),
       fetch(FIREBASE_PHONES_URL + "?_t=" + Date.now(), { cache: "no-store" }),
       fetch(FIREBASE_RESTS_URL + "?_t=" + Date.now(), { cache: "no-store" }),
       fetch(FIREBASE_DELETED_RESTS_URL + "?_t=" + Date.now(), { cache: "no-store" }),
       fetch(FIREBASE_WHEEL_URL + "?_t=" + Date.now(), { cache: "no-store" }),
-      fetch(FIREBASE_MEALS_URL + "?_t=" + Date.now(), { cache: "no-store" })
+      fetch(FIREBASE_MEALS_URL + "?_t=" + Date.now(), { cache: "no-store" }),
+      fetch(FIREBASE_REST_META_URL + "?_t=" + Date.now(), { cache: "no-store" })
     ]);
 
     const pr = await resPr.json(); if (pr && typeof pr === "object") waPrivacyConfig = { ...waPrivacyConfig, ...pr };
     const st = await resSt.json(); if (st && typeof st === "object") restStatuses = st;
     const ph = await resPh.json(); if (ph && typeof ph === "object") REST_PHONES = { ...REST_PHONES, ...ph };
+    const metaCloud = await resMeta.json(); if (metaCloud && typeof metaCloud === "object") REST_META = { ...REST_META, ...metaCloud };
     const del = await resDel.json(); if (Array.isArray(del)) deletedRestaurants = Array.from(new Set([...deletedRestaurants, ...del]));
     const rCloud = await resR.json(); if (Array.isArray(rCloud)) RESTS = Array.from(new Set([...RESTS, ...rCloud]));
     const w = await resW.json(); if (w && typeof w === "object") wheelConfig = { ...wheelConfig, ...w };
@@ -1114,7 +1456,10 @@ async function syncQuietlyWithCloud() {
     cleanRestaurantsState();
     buildRestaurantsBar();
     buildCategoriesBar();
-    if (isAdminUnlocked) populateAllAdminSelects();
+    if (isAdminUnlocked) {
+      populateAllAdminSelects();
+      renderAdminMealsManager();
+    }
     renderMeals();
   } catch (e) {}
 }
