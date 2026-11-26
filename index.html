@@ -1024,6 +1024,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('quickAddMealTab', this)">⚡ إضافة سريعة (أكلة + صورة + رابط)</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('bulkImportTab', this)">📥 استيراد منيو (نص / CSV)</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editRestaurantsTab', this)">🛠️ تعديل المطاعم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('orderModeTab', this)">📲 طريقة استقبال الطلبات</button>
@@ -1441,6 +1442,48 @@
         </button>
       </div>
     </div>
+
+    <!-- 📥 استيراد منيو جماعي دفعة واحدة (نص أو ملف CSV) -->
+    <div id="bulkImportTab" class="admin-tab-content">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;line-height:1.6;">
+        ألصق قائمة المنيو كاملة أو ارفع ملف CSV وسيتم توزيعها تلقائياً على أقسام المطعم وحفظها بالسحابة دفعة واحدة:
+      </p>
+      <div style="background:var(--bg-card);padding:12px;border-radius:14px;border:1px solid var(--border-color);margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">🏪 اختر المطعم المستهدف:</label>
+        <select id="bulkImportRest" class="form-input"></select>
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">📍 المنطقة:</label>
+        <select id="bulkImportZone" class="form-input">
+          <option value="الكرخ">الكرخ</option>
+          <option value="الرصافة">الرصافة</option>
+        </select>
+
+        <label style="font-size:11px;font-weight:800;color:var(--accent-orange);display:block;margin-bottom:4px;">📄 رفع ملف CSV / TXT (اختياري):</label>
+        <input type="file" id="bulkImportFile" class="form-input" accept=".csv,.txt" onchange="loadBulkMenuFile(this)" style="padding:9px;">
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">📝 أو ألصق القائمة هنا (كل سطر وجبة):</label>
+        <div style="font-size:10px;color:var(--text-muted);background:#101218;padding:7px 9px;border-radius:8px;margin-bottom:6px;line-height:1.6;">
+          الصيغة: <strong>القسم | اسم الوجبة | السعر | الوصف (اختياري) | رابط الصورة (اختياري)</strong><br>
+          مثال:<br>
+          برجر | برجر لحم كلاسيك | 3500 | لحم صافي مع جبن<br>
+          شاورما وصاج | صاج دجاج كبير | 3000<br>
+          المشروبات | بيبسي بارد | 500
+        </div>
+        <textarea id="bulkImportText" class="form-input" rows="7" placeholder="برجر | برجر لحم | 3500 | لحم صافي&#10;بيتزا | بيتزا خضار وسط | 7000&#10;شاورما وصاج | صاج دجاج | 2500" style="resize:vertical;line-height:1.6;font-family:inherit;"></textarea>
+
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button type="button" class="btn-discount" style="flex:1;padding:10px;background:#263238;color:#fff;border:1px solid var(--accent-blue);" onclick="previewBulkMenuImport()">
+            👁️ معاينة وتوزيع الأقسام
+          </button>
+          <button type="button" class="btn-discount" style="flex:1;padding:10px;background:var(--accent-green);color:#111;font-weight:900;" onclick="importBulkMenuToCloud()">
+            🚀 تنزيل الكل للمطعم الآن
+          </button>
+        </div>
+
+        <div id="bulkImportPreviewBox" style="display:none;background:#101218;border:1px solid var(--border-color);border-radius:12px;padding:8px;max-height:200px;overflow-y:auto;font-size:11px;"></div>
+      </div>
+    </div>
+
 
 
     <!-- 🏪 إضافة مطعم جديد -->
@@ -3460,7 +3503,7 @@ function populateAdminDropdowns() {
     }
   });
 
-  ['newMealRest', 'quickMealRest', 'admDiscountRestSelect', 'admAlertRestSelect', 'admRestDelivSelect', 'admSubRestSelect'].forEach(id => {
+  ['newMealRest', 'quickMealRest', 'bulkImportRest', 'admDiscountRestSelect', 'admAlertRestSelect', 'admRestDelivSelect', 'admSubRestSelect'].forEach(id => {
     const sel = document.getElementById(id);
     if (sel) sel.innerHTML = uniqueRests.map(r => `<option value="${r}">${r}</option>`).join('');
   });
@@ -3472,6 +3515,156 @@ function populateAdminDropdowns() {
   if (ordFilter) ordFilter.innerHTML = `<option value="الكل">كل المطاعم</option>` + uniqueRests.map(r => `<option value="${r}">${r}</option>`).join('');
 }
 
+
+
+function loadBulkMenuFile(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const area = document.getElementById("bulkImportText");
+    if (area) area.value = String(reader.result || "").trim();
+    previewBulkMenuImport();
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function parseBulkMenuLines(rawText) {
+  const lines = String(rawText || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const parsed = [];
+  let currentSection = "عراقي";
+
+  for (const line of lines) {
+    // Support section header lines like: [برجر] or # برجر or === برجر ===
+    const headerMatch = line.match(/^(?:\[(.+?)\]|#+\s*(.+)|={2,}\s*(.+?)\s*={2,})$/);
+    if (headerMatch) {
+      const secName = (headerMatch[1] || headerMatch[2] || headerMatch[3] || "").trim();
+      if (secName) currentSection = secName;
+      continue;
+    }
+
+    const sep = line.includes("|") ? "|" : (line.includes("\t") ? "\t" : (line.includes(",") ? "," : null));
+    let parts = sep ? line.split(sep).map(p => p.trim()) : [line];
+
+    // Skip header row if user pasted CSV column names
+    if (parts.length >= 2 && /^(القسم|الصنف|category|cat)$/i.test(parts[0]) && /^(الوجبة|الاسم|name|meal)$/i.test(parts[1])) {
+      continue;
+    }
+
+    let cat = currentSection;
+    let name = "";
+    let price = 0;
+    let desc = "";
+    let imgUrl = "";
+
+    if (parts.length >= 3 && !isNaN(Number(parts[2].replace(/[^\d.]/g, ""))) && parts[2].replace(/[^\d.]/g, "") !== "") {
+      cat = parts[0] || currentSection;
+      name = parts[1] || "";
+      price = Number(parts[2].replace(/[^\d.]/g, "")) || 0;
+      desc = parts[3] || "";
+      imgUrl = parts[4] || "";
+      currentSection = cat;
+    } else if (parts.length === 2) {
+      name = parts[0] || "";
+      price = Number(parts[1].replace(/[^\d.]/g, "")) || 0;
+    } else {
+      // Fallback: "اسم الوجبة 5000"
+      const m = line.match(/^(.+?)\s+(\d{3,6})$/);
+      if (m) {
+        name = m[1].trim();
+        price = Number(m[2]) || 0;
+      }
+    }
+
+    if (!name || price <= 0) continue;
+    const validImg = /^https?:\/\//i.test(imgUrl) ? imgUrl : getSmartFoodImage(name, cat);
+    parsed.push({
+      cat: cat,
+      name: name,
+      price: price,
+      desc: desc,
+      img: validImg
+    });
+  }
+  return parsed;
+}
+
+function previewBulkMenuImport() {
+  const raw = document.getElementById("bulkImportText")?.value || "";
+  const box = document.getElementById("bulkImportPreviewBox");
+  if (!box) return;
+  const items = parseBulkMenuLines(raw);
+  if (!items.length) {
+    box.style.display = "block";
+    box.innerHTML = '<div style="color:#ff4d6d;text-align:center;padding:8px;">⚠️ لم يتم التعرف على أي وجبة صالحة. تأكد من كتابة الاسم والسعر.</div>';
+    return;
+  }
+  const sectionsCount = new Set(items.map(i => i.cat)).size;
+  box.style.display = "block";
+  box.innerHTML = `
+    <div style="color:var(--accent-green);font-weight:900;margin-bottom:6px;">
+      ✅ جاهز للتنزيل: (${items.length}) وجبة موزعة على (${sectionsCount}) أقسام
+    </div>
+    ${items.map((it, i) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 4px;border-bottom:1px solid #222530;gap:6px;">
+        <span style="color:#fff;font-weight:700;">${i + 1}. ${it.name} <small style="color:var(--accent-orange);">[${it.cat}]</small></span>
+        <strong style="color:var(--accent-green);">${money(it.price)}</strong>
+      </div>
+    `).join("")}
+  `;
+}
+
+function importBulkMenuToCloud() {
+  const rest = document.getElementById("bulkImportRest")?.value || "";
+  const zone = document.getElementById("bulkImportZone")?.value || "الكرخ";
+  const raw = document.getElementById("bulkImportText")?.value || "";
+  const items = parseBulkMenuLines(raw);
+
+  if (!rest) {
+    alert("يرجى اختيار المطعم أولاً.");
+    return;
+  }
+  if (!items.length) {
+    alert("يرجى لصق قائمة المنيو أو رفع ملف CSV يحتوي على الوجبات والأسعار.");
+    return;
+  }
+
+  const baseId = Date.now();
+  const phone = REST_PHONES[rest] || "9647708111561";
+  const newMeals = items.map((it, idx) => ({
+    id: baseId + idx,
+    name: it.name,
+    desc: it.desc || "وجبة طازجة",
+    rest: rest,
+    cat: it.cat,
+    price: it.price,
+    img: it.img,
+    phone: phone,
+    zone: zone,
+    available: true
+  }));
+
+  allMeals = [...newMeals, ...allMeals];
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals.filter(m => m && m.name))
+  });
+
+  buildCategoriesBar();
+  renderMeals();
+
+  document.getElementById("bulkImportText").value = "";
+  const fileInp = document.getElementById("bulkImportFile");
+  if (fileInp) fileInp.value = "";
+  const box = document.getElementById("bulkImportPreviewBox");
+  if (box) {
+    box.innerHTML = "";
+    box.style.display = "none";
+  }
+
+  showToast(`🚀 تم تنزيل (${newMeals.length}) وجبة على أقسام ${rest} فوراً!`);
+}
 
 let quickMealUploadedImageData = "";
 
