@@ -2153,6 +2153,10 @@ function setRestaurant(rest, el = null) {
 
 function setCategory(cat, el) {
   selectedCat = cat;
+  if (Array.isArray(selectedCuisinesFilters) && selectedCuisinesFilters.length > 0) {
+    selectedCuisinesFilters = [];
+    document.querySelectorAll('.cuisine-checkbox').forEach(cb => cb.checked = false);
+  }
   document.querySelectorAll('#categoriesBar .pill').forEach(c => c.classList.remove('active-green'));
   el.classList.add('active-green');
   renderMeals();
@@ -2410,6 +2414,12 @@ function spinWheel() {
 function addToCart(mealId) {
   const meal = allMeals.find(item => item && String(item.id) === String(mealId));
   if (!meal) return;
+  const restaurantStatus = restStatuses[meal.rest]?.status || "open";
+  if (restaurantStatus !== "open") {
+    const statusText = restaurantStatus === "maintenance" ? "تحت الصيانة حالياً" : (restaurantStatus === "off" ? "غير متاح للطلب حالياً" : "مغلق مؤقتاً");
+    showToast(`⚠️ عذراً، مطعم (${meal.rest}) ${statusText}!`);
+    return;
+  }
   if (meal.available === false) {
     showToast("⚠️ عذراً، هذه الوجبة مقفولة حالياً لنفاد الكمية!");
     return;
@@ -2579,6 +2589,17 @@ async function submitFullOrder() {
   if (!name || !phone || !address) {
     alert("يرجى ملء جميع الحقول المطلوبة!");
     return;
+  }
+
+  if (cart.length === 0) {
+    alert("السلة فارغة! أضف وجبة واحدة على الأقل.");
+    return;
+  }
+
+  const uniqueRests = [...new Set(cart.map(item => String(item.rest || "").trim()).filter(Boolean))];
+  if (uniqueRests.length > 1) {
+    const proceed = confirm(`تنبيه: السلة تحتوي على وجبات من أكثر من مطعم (${uniqueRests.join(" + ")}).\nسيتم إرسال الطلب وحساب التوصيل على المطعم الرئيسي (${uniqueRests[0]}). هل تريد المتابعة؟`);
+    if (!proceed) return;
   }
 
   const subtotal = cart.reduce((sum, item) => sum + (item.actualPrice * item.qty), 0);
@@ -3911,6 +3932,13 @@ function handleMenuFileSelect(input) {
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
+      if (!img.width || !img.height) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.innerText = "⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي";
+        previewText.innerText = "⚠️ تعذر قراءة أبعاد الصورة، جرّب صورة أخرى.";
+        return;
+      }
       const canvas = document.createElement("canvas");
       let w = img.width, h = img.height;
       if (w > 1200 || h > 1200) {
@@ -3960,7 +3988,7 @@ async function runAiMenuScan() {
 [{"name": "بوكس طلبات", "desc": "ساندويش زنجر، ساندويش بركر، ساندويش تويستر", "cat": "وجبات التوفير", "price": 11250, "savingPrice": 5625}]`;
 
   // الأسماء الصحيحة والرسمية من Google
-  const models = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3-flash", "gemini-2.5-flash"];
+  const models = ["gemini-3.8-flash", "gemini-3-flash", "gemini-2.5-flash"];
   let textResponse = "";
   let lastErrorMsg = "";
 
