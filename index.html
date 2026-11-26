@@ -1023,6 +1023,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('restPinsTab', this)">🔐 رموز المطاعم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('bannerTab', this)">📢 البنر والفيديو</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addMealTab', this)">➕ إضافة وجبة وتوفير</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('quickAddMealTab', this)">⚡ إضافة سريعة (أكلة + صورة + رابط)</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('addRestTab', this)">🏪 مطعم جديد</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('editRestaurantsTab', this)">🛠️ تعديل المطاعم</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('orderModeTab', this)">📲 طريقة استقبال الطلبات</button>
@@ -1406,6 +1407,41 @@
         ➕ إضافة الوجبة وحفظها بالسحابة
       </button>
     </div>
+
+    <!-- ⚡ لوحة داخلية لإضافة أكلة سريعة مع صورة ورابط -->
+    <div id="quickAddMealTab" class="admin-tab-content">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+        إضافة سريعة لأكلة داخل أي مطعم مع رفع صورة ورابط دون انتظار أو تغيير في باقي النظام:
+      </p>
+      <div style="background:var(--bg-card);padding:12px;border-radius:14px;border:1px solid var(--border-color);margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">🏪 اختر المطعم:</label>
+        <select id="quickMealRest" class="form-input"></select>
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">🍽️ اسم الأكلة:</label>
+        <input type="text" id="quickMealName" class="form-input" placeholder="مثال: برجر دبل، صاج شاورما...">
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">💰 السعر (د.ع):</label>
+        <input type="number" id="quickMealPrice" class="form-input" placeholder="مثال: 5000">
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">🔗 رابط (اختياري - رابط صورة أو رابط خارجي):</label>
+        <input type="url" id="quickMealLink" class="form-input" placeholder="https://example.com/meal-or-image">
+
+        <label style="font-size:11px;font-weight:800;color:var(--accent-orange);display:block;margin-bottom:4px;">📷 رفع صورة الأكلة من الجهاز:</label>
+        <input type="file" id="quickMealImageFile" class="form-input" accept="image/*" onchange="previewQuickMealImage(this)" style="padding:9px;">
+        <img id="quickMealImagePreview" alt="معاينة صورة الأكلة" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:12px;margin:4px 0 8px;">
+
+        <label style="font-size:11px;font-weight:800;color:#fff;display:block;margin-bottom:4px;">📍 المنطقة:</label>
+        <select id="quickMealZone" class="form-input">
+          <option value="الكرخ">الكرخ</option>
+          <option value="الرصافة">الرصافة</option>
+        </select>
+
+        <button type="button" class="btn-discount" style="width:100%;padding:12px;font-weight:900;background:var(--accent-green);color:#111;" onclick="saveQuickMealWithImageAndLink()">
+          ⚡ حفظ الأكلة فوراً في المطعم والسحابة
+        </button>
+      </div>
+    </div>
+
 
     <!-- 🏪 إضافة مطعم جديد -->
     <div id="addRestTab" class="admin-tab-content">
@@ -3424,7 +3460,7 @@ function populateAdminDropdowns() {
     }
   });
 
-  ['newMealRest', 'admDiscountRestSelect', 'admAlertRestSelect', 'admRestDelivSelect', 'admSubRestSelect'].forEach(id => {
+  ['newMealRest', 'quickMealRest', 'admDiscountRestSelect', 'admAlertRestSelect', 'admRestDelivSelect', 'admSubRestSelect'].forEach(id => {
     const sel = document.getElementById(id);
     if (sel) sel.innerHTML = uniqueRests.map(r => `<option value="${r}">${r}</option>`).join('');
   });
@@ -3434,6 +3470,94 @@ function populateAdminDropdowns() {
 
   const ordFilter = document.getElementById("ordersRestFilter");
   if (ordFilter) ordFilter.innerHTML = `<option value="الكل">كل المطاعم</option>` + uniqueRests.map(r => `<option value="${r}">${r}</option>`).join('');
+}
+
+
+let quickMealUploadedImageData = "";
+
+function previewQuickMealImage(input) {
+  const file = input?.files?.[0];
+  const preview = document.getElementById("quickMealImagePreview");
+  quickMealUploadedImageData = "";
+  if (!file || !preview) return;
+  if (!file.type.startsWith("image/")) {
+    alert("يرجى اختيار ملف صورة فقط.");
+    input.value = "";
+    preview.style.display = "none";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.src = String(reader.result);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const maxWidth = 800;
+      const scale = Math.min(1, maxWidth / (img.width || maxWidth));
+      canvas.width = Math.max(1, Math.round((img.width || maxWidth) * scale));
+      canvas.height = Math.max(1, Math.round((img.height || maxWidth) * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      quickMealUploadedImageData = canvas.toDataURL("image/jpeg", 0.75);
+      preview.src = quickMealUploadedImageData;
+      preview.style.display = "block";
+    };
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveQuickMealWithImageAndLink() {
+  const rest = document.getElementById("quickMealRest")?.value || "";
+  const name = (document.getElementById("quickMealName")?.value || "").trim();
+  const price = Number(document.getElementById("quickMealPrice")?.value);
+  const link = (document.getElementById("quickMealLink")?.value || "").trim();
+  const zone = document.getElementById("quickMealZone")?.value || "الكرخ";
+
+  if (!rest || !name || isNaN(price) || price <= 0) {
+    alert("يرجى اختيار المطعم وكتابة اسم الأكلة والسعر الصحيح.");
+    return;
+  }
+
+  const validHttpLink = /^https?:\/\//i.test(link) ? link : "";
+  const chosenImage = quickMealUploadedImageData || validHttpLink || getSmartFoodImage(name, "عراقي");
+
+  const newMeal = {
+    id: Date.now(),
+    name: name,
+    desc: validHttpLink ? `رابط: ${validHttpLink}` : "وجبة مضافة يدوياً",
+    link: validHttpLink,
+    rest: rest,
+    cat: "عراقي",
+    price: price,
+    img: chosenImage,
+    phone: REST_PHONES[rest] || "9647708111561",
+    zone: zone,
+    available: true
+  };
+
+  allMeals.unshift(newMeal);
+  fetch(FIREBASE_MEALS_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(allMeals.filter(m => m && m.name))
+  });
+
+  buildCategoriesBar();
+  renderMeals();
+
+  document.getElementById("quickMealName").value = "";
+  document.getElementById("quickMealPrice").value = "";
+  document.getElementById("quickMealLink").value = "";
+  const fileInp = document.getElementById("quickMealImageFile");
+  if (fileInp) fileInp.value = "";
+  const preview = document.getElementById("quickMealImagePreview");
+  if (preview) {
+    preview.src = "";
+    preview.style.display = "none";
+  }
+  quickMealUploadedImageData = "";
+
+  showToast(`⚡ تمت إضافة الأكلة (${name}) إلى ${rest}`);
 }
 
 function addNewMealLocally() {
@@ -3691,7 +3815,7 @@ const models = ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"]
   let successData = null;
   let lastErrorMsg = "تعذر الاتصال بنماذج الذكاء الاصطناعي";
 
-  for (const modelName of modelsToTry) {
+  for (const modelName of models) {
     try {
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const res = await fetch(apiUrl, {
