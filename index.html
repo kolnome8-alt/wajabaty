@@ -549,7 +549,7 @@
       display: flex; 
       justify-content: space-between;
       align-items: center; 
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px soid var(--border-color);
     }
     .drawer-title { font-size: 17px; font-weight: 900; margin: 0; }
     .btn-close-drawer {
@@ -1031,54 +1031,98 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('deleteRestTab', this)">🗑️ حذف مطعم</button>
     </div>
 
-    <!-- 📷 ماسح المنيو بالذكاء الاصطناعي -->
-    <div id="aiScanTab" class="admin-tab-content active">
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
-        اختر المطعم وارفع صورة قائمته؛ سيقوم الذكاء الاصطناعي باستخراج الوجبات وتنزيلها باسم المطعم ورقم هاتفه فوراً:
-      </p>
-      
-      <div style="background:var(--bg-card); padding:12px; border-radius:14px; border:1px solid var(--border-color); margin-bottom:10px;">
-        <label style="font-size:11px; font-weight:800; color:var(--accent-orange); display:block; margin-bottom:4px;">🔑 مفتاح الذكاء الاصطناعي (Gemini API Key):</label>
-        <input type="password" id="geminiApiKey" class="form-input" placeholder="ألصق مفتاح Gemini هنا (يُحفظ بأمان في هاتفك)" oninput="saveGeminiApiKey()">
+   async function runAiMenuScan() {
+  const apiKey = (document.getElementById("geminiApiKey")?.value || localStorage.getItem('wj_gemini_api_key') || "").trim();
+  const rest = document.getElementById("aiScanRestSelect")?.value || "";
 
-        <label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">🏪 اختر المطعم المستهدف:</label>
-        <select id="aiScanRestSelect" class="form-input"></select>
+  if (!apiKey || !currentMenuBase64) {
+    alert("تأكد من إدخال مفتاح Gemini واختيار صورة المنيو أولاً!");
+    return;
+  }
 
-        <label style="font-size:11px; font-weight:800; color:#fff; display:block; margin-bottom:4px;">📍 المنطقة:</label>
-        <select id="aiScanZoneSelect" class="form-input">
-          <option value="الكرخ">الكرخ</option>
-          <option value="الرصافة">الرصافة</option>
-        </select>
+  const btn = document.getElementById("btnRunAiScan");
+  const loading = document.getElementById("aiScanLoading");
+  const resultsBox = document.getElementById("aiScanResultsBox");
 
-        <label for="aiMenuFileInput" style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, rgba(255,42,95,0.2), rgba(255,152,0,0.2)); border:1.5px dashed var(--accent-orange); color:#fff; padding:12px; border-radius:14px; font-size:13px; font-weight:800; cursor:pointer; margin-top:8px;">
-          📷 التقاط أو اختيار صورة المنيو
-        </label>
-        <input type="file" id="aiMenuFileInput" accept="image/*" style="position:absolute; opacity:0; width:1px; height:1px; z-index:-1;" onchange="handleMenuFileSelect(this)">
-        
-        <div id="aiMenuPreviewText" style="font-size:11px; text-align:center; margin-top:5px; font-weight:700; color:var(--accent-green);"></div>
+  btn.disabled = true;
+  loading.style.display = "block";
+  resultsBox.style.display = "none";
+
+  const promptText = `أنت خبير محترف في تحليل قوائم طعام المطاعم وتطبيقات التوصيل مثل طلباتي في العراق.
+استخرج كل وجبة بدقة كـ JSON Array يحتوي على:
+- "name": اسم الوجبة.
+- "desc": مكونات وتفاصيل الوجبة الظاهرة تحتها بدقة.
+- "cat": اسم المطبخ أو القسم (مثال: وجبات التوفير، برجر، بيتزا، دجاج ومقرمش، ريزو، شاورما وصاج، عصائر...).
+- "price": السعر الأساسي بالدينار كرقم صحيح.
+- "savingPrice": سعر التوفير/الخصم إن وجد (مثل سعر pro أو العرض المخفض)، وإلا اتركه null.
+الإخراج JSON نقي فقط وبدون أي إضافات:
+[{"name": "بوكس طلبات", "desc": "ساندويش زنجر، ساندويش بركر، ساندويش تويستر", "cat": "وجبات التوفير", "price": 11250, "savingPrice": 5625}]`;
+
+  const models = ["gemini-3.8-flash", "gemini-3-flash"];
+  let textResponse = "";
+  let lastErrorMsg = "";
+
+  for (const m of models) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: "image/jpeg", data: currentMenuBase64 } }] }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) {
+        lastErrorMsg = data.error.message;
+        continue;
+      }
+      textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (textResponse.trim()) {
+        lastErrorMsg = "";
+        break;
+      }
+    } catch (e) {
+      lastErrorMsg = e.message;
+    }
+  }
+
+  loading.style.display = "none";
+  btn.disabled = false;
+
+  if (!textResponse) {
+    alert("فشل الاستخراج. السبب من سيرفرات جوجل:\n" + (lastErrorMsg || "لم يتم التعرف على الصورة."));
+    return;
+  }
+
+  try {
+    const cleanJson = textResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson);
+    const itemsArray = Array.isArray(parsed) ? parsed : [];
+
+    tempAiExtractedMeals = itemsArray.map((m, idx) => ({
+      tempId: idx,
+      name: m.name || "وجبة",
+      desc: m.desc || "",
+      cat: m.cat || "وجبات عامة",
+      price: Number(m.price) || 3000,
+      savingPrice: m.savingPrice ? Number(m.savingPrice) : null
+    }));
+
+    document.getElementById("aiExtractedCount").innerText = tempAiExtractedMeals.length;
+    document.getElementById("aiExtractedList").innerHTML = tempAiExtractedMeals.map((m) => `
+      <div style="background:var(--bg-card); padding:8px; border-radius:10px; margin-bottom:6px; font-size:11px;">
+        <strong>${m.name}</strong> (${m.cat}) - <span style="color:var(--accent-green);">${money(m.price)}</span>
+        ${m.savingPrice ? `<span style="color:#e1bee7; margin-right:6px;">[توفير: ${money(m.savingPrice)}]</span>` : ''}
+        <div style="color:var(--text-muted); font-size:10px;">${m.desc}</div>
       </div>
-
-      <button type="button" class="btn-discount" id="btnRunAiScan" style="width:100%; padding:13px; font-weight:900; background:linear-gradient(135deg, #00e676, #00b0ff); color:#111; margin-bottom:12px;" onclick="runAiMenuScan()">
-        ⚡ استخراج الوجبات من المنيو بالذكاء الاصطناعي
-      </button>
-
-      <div id="aiScanLoading" style="display:none; text-align:center; padding:15px; color:var(--accent-orange); font-size:12px; font-weight:800;">
-        ⏳ جاري قراءة صورة المنيو واستخراج الوجبات والأسعار بدقة... انتظر لحظات
-      </div>
-
-      <div id="aiScanResultsBox" style="display:none; border:1px solid var(--border-color); border-radius:14px; padding:10px; background:var(--bg-main); margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:12px; font-weight:900; color:#fff;">الوجبات المستخرجة (<span id="aiExtractedCount">0</span>):</span>
-          <button type="button" onclick="clearAiResults()" style="background:none; border:none; color:var(--primary); font-size:11px; font-weight:800; cursor:pointer;">مسح</button>
-        </div>
-        <div id="aiExtractedList" style="max-height:260px; overflow-y:auto; margin-bottom:10px;"></div>
-        <button type="button" class="btn-discount" style="width:100%; padding:12px; font-weight:900; background:var(--accent-green); color:#111;" onclick="saveAllAiMealsToCloud()">
-          🚀 حفظ كل الوجبات المستخرجة بالسحابة فوراً
-        </button>
-      </div>
-    </div>
-
-    <!-- 💳 إدارة الاشتراكات الشهرية للمطاعم -->
+    `).join('');
+    resultsBox.style.display = "block";
+    showToast(`✨ تم استخراج ${tempAiExtractedMeals.length} وجبة بنجاح!`);
+  } catch (e) {
+    alert("خطأ في قراءة بيانات الوجبات المستخرجة");
+  }
+}
+ <!-- 💳 إدارة الاشتراكات الشهرية للمطاعم -->
     <div id="subsAdminTab" class="admin-tab-content">
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">إدارة الاشتراكات الشهرية للمطاعم، وتحديد أرباحك وتواريخ الانتهاء:</p>
       
